@@ -1,3 +1,31 @@
+version: "3.8"
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  redis:
+    image: redis:7.2-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
   api:
     build:
       context: ../../apps/api
@@ -5,11 +33,10 @@
     env_file:
       - "../../.env"
     volumes:
-      # Código del backend y librerías compartidas
       - ../../apps/api:/app
       - ../../packages:/packages
       - ../../models:/models
-      # Cache de modelos HuggingFace compartida con el host (Windows)
+      # Cache de modelos HuggingFace compartida con Windows
       - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
     depends_on:
       - qdrant
@@ -18,3 +45,24 @@
     ports:
       - "8000:8000"
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile
+    env_file:
+      - "../../.env"
+    volumes:
+      - ../../apps/api:/app
+      - ../../packages:/packages
+      - ../../models:/models
+      - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
+    depends_on:
+      - redis
+      - qdrant
+    command: rq worker ingestion_queue --url ${REDIS_URL}
+
+volumes:
+  qdrant_data:
+  redis_data:
+  ollama_data:
