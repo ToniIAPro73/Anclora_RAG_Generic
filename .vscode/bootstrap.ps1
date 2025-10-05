@@ -65,7 +65,7 @@ Write-Host "[Anclora-RAG] Python: $((Get-Command python).Source)" -ForegroundCol
 # Rutas importantes
 $RepoRoot     = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $CommitScript = Join-Path $RepoRoot "auto_commit_interactive.ps1"
-$LogPath      = Join-Path $RepoRoot "autocommit.log"
+$LogPath      = Join-Path $RepoRoot "logs\autocommit.log"
 
 # --- Al ENTRAR: auto-commit si hay ≥1 cambios (sin preguntar)
 try {

@@ -43,7 +43,7 @@ function Initialize-Log {
     $script:LogFileResolved = if ($LogPath -and -not [string]::IsNullOrWhiteSpace($LogPath)) {
       $LogPath
     } else {
-      Join-Path $repoRoot "autocommit.log"
+      Join-Path $repoRoot "logs\autocommit.log"
     }
   }
 
