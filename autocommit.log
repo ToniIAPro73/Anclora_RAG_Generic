@@ -13,3 +13,13 @@
 [2025-10-05 17:05:15] [enter] Frontend lint OK
 [2025-10-05 17:05:15] [enter] Frontend tests OK
 [2025-10-05 17:05:15] [enter] Cambios detectados (pre-add) → total:3 tracked:3 untracked:0
+[2025-10-05 17:05:16] [enter] Commit creado → feat(misc,web): +2 ~3 -0 R0 — bootstrap.ps1, package-lock.json, package.json, auto_commit_interactive.ps1, autocommit.log
+[2025-10-05 17:05:18] [enter] Push OK.
+[2025-10-05 21:49:59] [enter] START: script lanzado (source=enter)
+[2025-10-05 21:49:59] [enter] Backend checks iniciados
+[2025-10-05 21:50:00] [enter] Backend pytest exit 5 (no tests) → OK
+[2025-10-05 21:50:00] [enter] Frontend checks iniciados
+[2025-10-05 21:50:00] [enter] Instalando dependencias frontend con npm...
+[2025-10-05 21:50:01] [enter] Frontend lint OK
+[2025-10-05 21:50:01] [enter] Frontend tests OK
+[2025-10-05 21:50:01] [enter] Cambios detectados (pre-add) → total:1 tracked:1 untracked:0
