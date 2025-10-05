@@ -4,14 +4,52 @@
     - git add . → commit (mensaje auto) → push
     - Cuenta tracked y untracked por separado
     - Si hay >5 cambios y NO se pasa -ForceYes, pregunta antes de continuar
+    - Log a autocommit.log con origen (enter/timer/exit/manual) y mensaje de commit
+    - Rotación simple del log: si ≥ 1 MB, se limpia y reinicia
 #>
 
 param(
-  [switch]$ForceYes  # fuerza el commit sin preguntar aunque haya >5 cambios
+  [switch]$ForceYes,                # fuerza commit sin preguntar aunque haya >5 cambios
+  [ValidateSet('enter','timer','exit','manual')]
+  [string]$Source = 'manual',       # origen de la ejecución (para el log)
+  [string]$LogPath                  # ruta opcional del log
 )
 
 $ErrorActionPreference = "Stop"
-Write-Host "`n⚓ [Anclora-RAG] Auto-commit interactivo" -ForegroundColor Cyan
+Write-Host "`n⚓ [Anclora-RAG] Auto-commit interactivo (source=$Source)" -ForegroundColor Cyan
+
+# --- Config rotación de log ---
+$MaxLogBytes = 1MB  # 1 * 1024 * 1024
+
+# 0) Utilidad de logging con rotación
+function Initialize-Log {
+  if (-not $script:LogFileResolved) {
+    $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+    $script:LogFileResolved = if ($LogPath) { $LogPath } else { Join-Path $repoRoot "autocommit.log" }
+  }
+  $logDir = Split-Path -Parent $script:LogFileResolved
+  if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+
+  if (Test-Path $script:LogFileResolved) {
+    try {
+      $size = (Get-Item $script:LogFileResolved).Length
+      if ($size -ge $MaxLogBytes) {
+        # Rotación simple: limpiar y reescribir cabecera
+        Set-Content -Path $script:LogFileResolved -Value ""
+        Add-Content -Path $script:LogFileResolved -Value "[LOG RESET] $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') — log reiniciado por superar $MaxLogBytes bytes"
+      }
+    } catch { }
+  }
+}
+
+function Write-Log {
+  param([string]$Msg)
+  try {
+    Initialize-Log
+    $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    Add-Content -Path $script:LogFileResolved -Value "[$ts] [$Source] $Msg"
+  } catch { }
+}
 
 # 1) Raíz del repo = carpeta del script
 $repoPath = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -19,12 +57,19 @@ Set-Location $repoPath
 
 # 2) Obtener status en formato estable (incluye untracked '??')
 $raw = git -c core.quotepath=off status --porcelain 2>$null
-if ($null -eq $raw) { Write-Host "❔ No es repo git o sin cambios." -ForegroundColor Yellow; exit 0 }
 $text  = ($raw -is [Array]) ? ($raw -join "`n") : [string]$raw
-$lines = ($text -split "`r?`n") | Where-Object { $_.Trim() -ne "" }
-if ($lines.Count -eq 0) { Write-Host "✅ No hay cambios que commitear." -ForegroundColor Green; exit 0 }
+$lines = @()
+if ($null -ne $text) {
+  $lines = ($text -split "`r?`n") | Where-Object { $_.Trim() -ne "" }
+}
 
-# 3) Clasificación tracked / untracked y por tipo
+if ($lines.Count -eq 0) {
+  Write-Host "✅ No hay cambios que commitear." -ForegroundColor Green
+  Write-Log   "No hay cambios que commitear."
+  exit 0
+}
+
+# 3) Clasificación tracked/untracked y por tipo
 $added=$modified=$deleted=$renamed=$unmerged=0
 $untracked=0; $tracked=0
 $files=@()
@@ -35,26 +80,29 @@ foreach ($l in $lines) {
   $files += ($l -replace '^\s*[A-Z\?\s]{1,2}\s+','')
 
   $xy = $l.Substring(0,[Math]::Min(2,$l.Length)).Trim()
-  if ($xy -match 'R') { $renamed++;  continue }
-  if ($xy -match 'D') { $deleted++;  continue }
+  if ($xy -match 'R') { $renamed++ ; continue }
+  if ($xy -match 'D') { $deleted++ ; continue }
   if ($xy -match 'U') { $unmerged++; continue }
-  if ($xy -match 'A') { $added++;    continue }
-  if ($xy -match 'M') { $modified++; continue }
+  if ($xy -match 'A') { $added++   ; continue }
+  if ($xy -match 'M') { $modified++;continue }
 }
 
-$total = $tracked + $untracked
-Write-Host ("📋 Cambios → total:{0}  tracked:{1}  untracked:{2}" -f $total,$tracked,$untracked) -ForegroundColor Yellow
+$total   = $tracked + $untracked
+$summary = "total:$total tracked:$tracked untracked:$untracked (+$added ~${modified} -$deleted R${renamed} U${unmerged})"
+Write-Host ("📋 Cambios → {0}" -f $summary) -ForegroundColor Yellow
+Write-Log  ("Cambios detectados → {0}" -f $summary)
 
-# 4) Umbral / confirmación
+# 4) Umbral / confirmación (solo si no se fuerza)
 if ($total -gt 5 -and -not $ForceYes) {
   $resp = Read-Host "Se detectaron $total cambios (>5). ¿Continuar con commit/push? (s/n)"
   if ($resp -notin @('s','S','y','Y','si','sí','SI','Sí','YES','yes')) {
     Write-Host "🛑 Operación cancelada." -ForegroundColor Red
+    Write-Log  "Usuario canceló (>$total cambios)."
     exit 0
   }
 }
 
-# 5) Mensaje de commit rico y claro
+# 5) Mensaje de commit claro
 $scopes = ($files | ForEach-Object {
   $first = ($_ -split '[\\/]')[0]; if ([string]::IsNullOrWhiteSpace($first)) {'root'} else {$first}
 } | Select-Object -Unique | Select-Object -First 3) -join ','
@@ -76,15 +124,23 @@ git add .
 
 try {
   Write-Host "✅ git commit -m ..." -ForegroundColor Green
-  git commit -m $commitMsg
+  git commit -m $commitMsg | Out-Null
   Write-Host "📝 $commitMsg" -ForegroundColor DarkGray
+  Write-Log  ("Commit creado → {0}" -f $commitMsg)
 } catch {
   Write-Host "⚠️  No se pudo crear el commit (quizá no hay diferencias tras el add)." -ForegroundColor Yellow
+  Write-Log  "Commit fallido: no había diferencias tras el add."
   git status
   exit 0
 }
 
-Write-Host "🚀 git push" -ForegroundColor Green
-git push
+try {
+  Write-Host "🚀 git push" -ForegroundColor Green
+  git push | Out-Null
+  Write-Log  "Push OK."
+} catch {
+  Write-Log  ("Push ERROR: {0}" -f $_.Exception.Message)
+  throw
+}
 
 Write-Host "`n🎯 Listo." -ForegroundColor Green
