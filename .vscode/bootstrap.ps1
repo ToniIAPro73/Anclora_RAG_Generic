@@ -87,28 +87,28 @@ if (-not (Get-EventSubscriber -SourceIdentifier "AncloraAutoCommitTimer" -ErrorA
   $global:AncloraAutoCommitTimer.AutoReset = $true
 
   Register-ObjectEvent -InputObject $global:AncloraAutoCommitTimer `
-    -EventName Elapsed `
-    -SourceIdentifier "AncloraAutoCommitTimer" `
-    -MessageData @{ Repo=$RepoRoot; Log=$LogPath } `
-    -Action {
-      try {
-        $repo = $event.MessageData.Repo
-        $log  = $event.MessageData.Log
+  -EventName Elapsed `
+  -SourceIdentifier "AncloraAutoCommitTimer" `
+  -MessageData @{ Repo=$RepoRoot; Log=$LogPath } `
+  -Action {
+    try {
+      $repo = $event.MessageData.Repo
+      $log  = $event.MessageData.Log
 
-        $raw = git -C $repo -c core.quotepath=off status --porcelain 2>$null
-        $txt = ($raw -is [Array]) ? ($raw -join "`n") : [string]$raw
-        $count = (($txt -split "`r?`n") | Where-Object { $_.Trim() -ne "" }).Length
+      $raw = git -C $repo -c core.quotepath=off status --porcelain 2>$null
+      $txt = ($raw -is [Array]) ? ($raw -join "`n") : [string]$raw
+      $count = (($txt -split "`r?`n") | Where-Object { $_.Trim() -ne "" }).Length
 
-        if ($count -gt 5) {
-          Write-Host "[Anclora-RAG] Timer 30m: $count cambios → auto-commit (con confirmación)..." -ForegroundColor Cyan
-          & (Join-Path $repo "auto_commit_interactive.ps1") -Source timer -LogPath $log
-        } else {
-          Write-Host "[Anclora-RAG] Timer 30m: $count cambios (≤5) → sin acción." -ForegroundColor DarkGray
-        }
-      } catch {
-        Write-Host "[Anclora-RAG] Timer error: $($_.Exception.Message)" -ForegroundColor DarkYellow
+      if ($count -gt 5) {
+        Write-Host "[Anclora-RAG] Timer 30m: $count cambios → auto-commit (sin checks)..." -ForegroundColor Cyan
+        & (Join-Path $repo "auto_commit_interactive.ps1") -Source timer -LogPath $log -SkipChecks
+      } else {
+        Write-Host "[Anclora-RAG] Timer 30m: $count cambios (≤5) → sin acción." -ForegroundColor DarkGray
       }
-    } | Out-Null
+    } catch {
+      Write-Host "[Anclora-RAG] Timer error: $($_.Exception.Message)" -ForegroundColor DarkYellow
+    }
+  } | Out-Null
 
   $global:AncloraAutoCommitTimer.Start()
   Write-Host "[Anclora-RAG] Timer de auto-commit (30m) activado." -ForegroundColor Green

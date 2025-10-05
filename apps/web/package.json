@@ -1,0 +1,9 @@
+{
+  "name": "anclora-web",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "lint": "echo \"(placeholder)\"",
+    "test": "echo \"(no tests)\" && exit 0"
+  }
+}

@@ -1,0 +1,15 @@
+[2025-10-05 16:41:57] [enter] START: script lanzado (source=enter)
+[2025-10-05 16:41:57] [enter] Backend checks iniciados
+[2025-10-05 16:41:59] [enter] Backend tests FAILED: pytest falló con código 5
+[2025-10-05 16:41:59] [enter] Frontend checks iniciados
+[2025-10-05 16:41:59] [enter] Instalando dependencias frontend con npm...
+[2025-10-05 16:41:59] [enter] Frontend checks FAILED: Instalación deps falló (npm)
+[2025-10-05 16:41:59] [enter] Checks fallidos → commit cancelado.
+[2025-10-05 17:05:13] [enter] START: script lanzado (source=enter)
+[2025-10-05 17:05:13] [enter] Backend checks iniciados
+[2025-10-05 17:05:14] [enter] Backend pytest exit 5 (no tests) → OK
+[2025-10-05 17:05:14] [enter] Frontend checks iniciados
+[2025-10-05 17:05:14] [enter] Instalando dependencias frontend con npm...
+[2025-10-05 17:05:15] [enter] Frontend lint OK
+[2025-10-05 17:05:15] [enter] Frontend tests OK
+[2025-10-05 17:05:15] [enter] Cambios detectados (pre-add) → total:3 tracked:3 untracked:0
