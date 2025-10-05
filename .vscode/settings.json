@@ -1,0 +1,18 @@
+{
+  "terminal.integrated.cwd": "${workspaceFolder}/apps/api",
+  "terminal.integrated.profiles.windows": {
+    "Anclora Backend PS": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "args": [
+        "-NoLogo",
+        "-NoExit",
+        "-Command",
+        ". '${workspaceFolder}/.vscode/bootstrap.ps1'"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Anclora Backend PS",
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/api/venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": false
+}
