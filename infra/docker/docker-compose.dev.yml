@@ -1,0 +1,20 @@
+  api:
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile
+    env_file:
+      - "../../.env"
+    volumes:
+      # Código del backend y librerías compartidas
+      - ../../apps/api:/app
+      - ../../packages:/packages
+      - ../../models:/models
+      # Cache de modelos HuggingFace compartida con el host (Windows)
+      - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
+    depends_on:
+      - qdrant
+      - redis
+      - ollama
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
