@@ -383,31 +383,44 @@ foreach ($line in $staged | Select-Object -First 12) { $detail += $line }
 if ($staged.Count -gt 12) { $detail += "... ($($staged.Count - 12) más)" }
 $body = ($linesBody + $detail) -join "`n"
 
-# 6) Commit + Push
+# 6) Commit + Push con códigos de salida (0 OK / 1 error)
+$commitOk = $false
+$pushOk   = $false
+
 try {
   Write-Host "✅ git commit -m (subject + body)..." -ForegroundColor Green
   git commit -m $subject -m $body | Out-Null
+  $commitOk = $true
   Write-Host "📝 $subject" -ForegroundColor DarkGray
   Write-Log  ("Commit creado → {0}" -f $subject)
 } catch {
-  Write-Host "⚠️  No se pudo crear el commit (quizá no hay diferencias tras el add)." -ForegroundColor Yellow
-  Write-Log  "Commit fallido: no había diferencias tras el add."
+  Write-Host "❌ Error al crear el commit: $($_.Exception.Message)" -ForegroundColor Red
+  Write-Log  ("Commit ERROR: {0}" -f $_.Exception.Message)
   git status
-  exit 0
+  Start-Sleep -Milliseconds 300
+  exit 1
 }
 
 try {
   Write-Host "🚀 git push" -ForegroundColor Green
   git push | Out-Null
+  $pushOk = $true
   Write-Log  "Push OK."
 } catch {
+  Write-Host "❌ Error en git push: $($_.Exception.Message)" -ForegroundColor Red
   Write-Log  ("Push ERROR: {0}" -f $_.Exception.Message)
-  throw
+  Start-Sleep -Milliseconds 300
+  exit 1
 }
 
-Write-Host "`n🎯 Commit y push completados correctamente." -ForegroundColor Green
-Write-Log  "Proceso finalizado correctamente."
-
-# Cerrar proceso automáticamente (sin Ctrl+C)
-Start-Sleep -Milliseconds 500
-exit 0
+if ($commitOk -and $pushOk) {
+  Write-Host "`n🎯 Commit y push completados correctamente." -ForegroundColor Green
+  Write-Log  "Proceso finalizado correctamente."
+  Start-Sleep -Milliseconds 500
+  exit 0
+} else {
+  Write-Host "`n⚠️  Proceso finalizado con incidencias (commitOk=$commitOk, pushOk=$pushOk)." -ForegroundColor Yellow
+  Write-Log  ("Proceso finalizado con incidencias (commitOk={0}, pushOk={1})." -f $commitOk,$pushOk)
+  Start-Sleep -Milliseconds 500
+  exit 1
+}
