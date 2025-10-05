@@ -1,0 +1,15 @@
+# Archivos locales y logs automáticos
+autocommit.log
+autocommit.prev.log
+
+# Entornos virtuales y dependencias
+venv/
+**/venv/
+__pycache__/
+*.pyc
+node_modules/
+
+# Variables de entorno y configuraciones locales
+.env
+*.env
+.env.local
