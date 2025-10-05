@@ -405,4 +405,9 @@ try {
   throw
 }
 
-Write-Host "`n🎯 Listo." -ForegroundColor Green
+Write-Host "`n🎯 Commit y push completados correctamente." -ForegroundColor Green
+Write-Log  "Proceso finalizado correctamente."
+
+# Cerrar proceso automáticamente (sin Ctrl+C)
+Start-Sleep -Milliseconds 500
+exit 0
