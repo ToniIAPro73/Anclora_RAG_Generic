@@ -1,9 +1,9 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from ..rag.pipeline import index_text
-from ....packages.parsers.pdf import parse_pdf_bytes
-from ....packages.parsers.docx import parse_docx_bytes
-from ....packages.parsers.markdown import parse_markdown_bytes
-from ....packages.parsers.text import parse_text_bytes
+from ...packages.parsers.pdf import parse_pdf_bytes
+from ...packages.parsers.docx_parser import parse_docx_bytes
+from ...packages.parsers.markdown import parse_markdown_bytes
+from ...packages.parsers.text import parse_text_bytes
 
 router = APIRouter(tags=["ingest"])
 
