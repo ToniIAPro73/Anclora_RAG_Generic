@@ -1,17 +1,39 @@
 import os
 import logging
 from typing import List
-from llama_index.core import Document, VectorStoreIndex, Settings
-from llama_index.core.node_parser import SentenceSplitter
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.vector_stores.qdrant import QdrantVectorStore
+
+try:
+    # Try new import paths for llama-index >= 0.9.0
+    from llama_index.core import Document, VectorStoreIndex, Settings
+    from llama_index.core.node_parser import SentenceSplitter
+    from llama_index.embeddings.openai import OpenAIEmbedding
+except ImportError:
+    # Try old import paths for llama-index < 0.9.0
+    from llama_index import Document, VectorStoreIndex
+    from llama_index.node_parser import SentenceSplitter
+    from llama_index.embeddings import OpenAIEmbedding
+try:
+    # Try new import path for llama-index >= 0.9.0
+    from llama_index.vector_stores.qdrant import QdrantVectorStore
+except ImportError:
+    try:
+        # Try alternative import path
+        from llama_index.core.vector_stores import QdrantVectorStore
+    except ImportError:
+        # Fallback - just import QdrantClient directly
+        QdrantVectorStore = None
 from qdrant_client import QdrantClient
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
-# Initialize settings
-Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
+# Initialize settings (handle different llama-index versions)
+try:
+    # Try new Settings configuration for llama-index >= 0.9.0
+    Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
+except NameError:
+    # Settings not available, will configure when needed
+    pass
 
 def get_qdrant_client() -> QdrantClient:
     """Initialize Qdrant client with environment settings."""
@@ -42,6 +64,11 @@ def index_text(doc_id: str, text: str) -> int:
 
         # Initialize Qdrant vector store
         qdrant_client = get_qdrant_client()
+        if QdrantVectorStore is None:
+            raise HTTPException(
+                status_code=500,
+                detail="QdrantVectorStore not available. Please check llama-index installation."
+            )
         vector_store = QdrantVectorStore(
             client=qdrant_client,
             collection_name="documents"

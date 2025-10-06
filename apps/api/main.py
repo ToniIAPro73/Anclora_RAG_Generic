@@ -2,10 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-# Import routers
-from .routes.ingest import router as ingest_router
-from .routes.health import router as health_router
-from .routes.query import router as query_router
+# Import routers (handle both script and module execution)
+try:
+    # When run as module (python -m main)
+    from .routes.ingest import router as ingest_router
+    from .routes.health import router as health_router
+    from .routes.query import router as query_router
+except ImportError:
+    # When run as script (uvicorn main:app)
+    from routes.ingest import router as ingest_router
+    from routes.health import router as health_router
+    from routes.query import router as query_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
