@@ -3,16 +3,23 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 # Import routers (handle both script and module execution)
+import sys
+import os
+
+# Add the project root to Python path for imports
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 try:
-    # When run as module (python -m main)
-    from .routes.ingest import router as ingest_router
-    from .routes.health import router as health_router
-    from .routes.query import router as query_router
-except ImportError:
-    # When run as script (uvicorn main:app)
-    from routes.ingest import router as ingest_router
-    from routes.health import router as health_router
-    from routes.query import router as query_router
+    # Import routers using absolute imports
+    from apps.api.routes.ingest import router as ingest_router
+    from apps.api.routes.health import router as health_router
+    from apps.api.routes.query import router as query_router
+except ImportError as e:
+    print(f"Import error: {e}")
+    print("Please ensure you're running from the correct directory or have the proper Python path set up.")
+    raise
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
