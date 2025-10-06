@@ -6,19 +6,26 @@ import logging
 import sys
 import os
 
-# Add the project root to Python path for imports
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+# Add current directory and parent directories to Python path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)  # apps/
+project_root = os.path.dirname(parent_dir)  # project root
+
+for path in [current_dir, parent_dir, project_root]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 try:
-    # Import routers using absolute imports
-    from apps.api.routes.ingest import router as ingest_router
-    from apps.api.routes.health import router as health_router
-    from apps.api.routes.query import router as query_router
+    # Import routers using relative imports from current directory
+    from routes.ingest import router as ingest_router
+    from routes.health import router as health_router
+    from routes.query import router as query_router
 except ImportError as e:
     print(f"Import error: {e}")
-    print("Please ensure you're running from the correct directory or have the proper Python path set up.")
+    print("Available paths:", sys.path)
+    print("Current directory:", current_dir)
+    print("Parent directory:", parent_dir)
+    print("Project root:", project_root)
     raise
 
 # Configure logging
