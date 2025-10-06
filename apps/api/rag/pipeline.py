@@ -1,17 +1,19 @@
 import os
 import logging
-from typing import List
+from typing import Any, List, Optional
 
+Settings: Optional[Any] = None
 try:
     # Try new import paths for llama-index >= 0.9.0
-    from llama_index.core import Document, VectorStoreIndex, Settings
+    from llama_index.core import Document, VectorStoreIndex, Settings as CoreSettings
     from llama_index.core.node_parser import SentenceSplitter
     from llama_index.embeddings.openai import OpenAIEmbedding
+    Settings = CoreSettings
 except ImportError:
     # Try old import paths for llama-index < 0.9.0
-    from llama_index import Document, VectorStoreIndex
-    from llama_index.node_parser import SentenceSplitter
-    from llama_index.embeddings import OpenAIEmbedding
+    from llama_index import Document, VectorStoreIndex  # type: ignore[import]
+    from llama_index.node_parser import SentenceSplitter  # type: ignore[import]
+    from llama_index.embeddings import OpenAIEmbedding  # type: ignore[import]
 try:
     # Try new import path for llama-index >= 0.9.0
     from llama_index.vector_stores.qdrant import QdrantVectorStore
@@ -27,13 +29,13 @@ from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
-# Initialize settings (handle different llama-index versions)
-try:
-    # Try new Settings configuration for llama-index >= 0.9.0
-    Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
-except NameError:
-    # Settings not available, will configure when needed
-    pass
+EMBED_MODEL = OpenAIEmbedding(model="text-embedding-3-small")
+
+if Settings is not None:
+    try:
+        Settings.embed_model = EMBED_MODEL
+    except AttributeError:
+        logger.debug("LlamaIndex Settings does not expose embed_model; continuing with defaults.")
 
 def get_qdrant_client() -> QdrantClient:
     """Initialize Qdrant client with environment settings."""
@@ -92,3 +94,4 @@ def index_text(doc_id: str, text: str) -> int:
     except Exception as e:
         logger.error(f"Error indexing document {doc_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to index document: {str(e)}")
+
