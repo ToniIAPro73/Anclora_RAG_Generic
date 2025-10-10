@@ -125,3 +125,11 @@ webencodings==0.5.1
 websockets==15.0.1
 wrapt==1.17.3
 yarl==1.20.1
+llama-index-embeddings-huggingface
+llama-index-vector-stores-qdrant
+sentence-transformers
+
+# Modelos de embedding gratuitos
+llama-index-embeddings-huggingface==0.4.0
+sentence-transformers==3.3.1
+torch==2.5.1

@@ -2,55 +2,28 @@ import os
 import logging
 from typing import Any, List, Optional
 
-Settings: Optional[Any] = None
-try:
-    from llama_index.core import Document, VectorStoreIndex, Settings as CoreSettings
-    from llama_index.core.node_parser import SentenceSplitter
-    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-    Settings = CoreSettings
-except ImportError:
-    from llama_index import Document, VectorStoreIndex
-    from llama_index.node_parser import SentenceSplitter
-    from llama_index.embeddings import HuggingFaceEmbedding
-
-try:
-    from llama_index.vector_stores.qdrant import QdrantVectorStore
-except ImportError:
-    try:
-        from llama_index.core.vector_stores import QdrantVectorStore
-    except ImportError:
-        QdrantVectorStore = None
-
+from llama_index.core import Document, VectorStoreIndex, Settings
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
-# 🆓 MODELO DE EMBEDDINGS LOCAL Y GRATUITO
+# Modelo de embedding gratuito y de alto rendimiento (según arquitectura documentada)
 EMBED_MODEL = HuggingFaceEmbedding(
     model_name="nomic-ai/nomic-embed-text-v1.5",
-    cache_folder="./models"  # Cache local
+    trust_remote_code=True
 )
-
-if Settings is not None:
-    try:
-        Settings.embed_model = EMBED_MODEL
-    except AttributeError:
-        logger.debug("LlamaIndex Settings does not expose embed_model; continuing with defaults.")
-
+Settings.embed_model = EMBED_MODEL
 
 def get_qdrant_client() -> QdrantClient:
     """Initialize Qdrant client with environment settings."""
-    qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_url = os.getenv("QDRANT_URL", "http://qdrant:6333")
     qdrant_api_key = os.getenv("QDRANT_API_KEY")
     
-    if qdrant_api_key:
-        client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
-    else:
-        client = QdrantClient(url=qdrant_url)
-    
-    return client
-
+    return QdrantClient(url=qdrant_url, api_key=qdrant_api_key) if qdrant_api_key else QdrantClient(url=qdrant_url)
 
 def index_text(doc_id: str, text: str) -> int:
     """
@@ -65,13 +38,8 @@ def index_text(doc_id: str, text: str) -> int:
     """
     try:
         document = Document(text=text, id_=doc_id)
-
         qdrant_client = get_qdrant_client()
-        if QdrantVectorStore is None:
-            raise HTTPException(
-                status_code=500,
-                detail="QdrantVectorStore not available. Please check llama-index installation."
-            )
+        
         vector_store = QdrantVectorStore(
             client=qdrant_client,
             collection_name="documents"
