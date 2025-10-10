@@ -1,16 +1,17 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
+    container_name: anclora_postgres
     environment:
       POSTGRES_DB: anclora_rag
       POSTGRES_USER: anclora_user
-      POSTGRES_PASSWORD: anclora_secure_pass_2025
+      POSTGRES_PASSWORD: anclora_pass_dev
     ports:
-      - "5462:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U anclora_user"]
+      test: ["CMD-SHELL", "pg_isready -U anclora_user -d anclora_rag"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18,8 +19,8 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.7.4
     ports:
-      - "6363:6333"
-      - "6364:6334"
+      - "6333:6333"
+      - "6334:6334"
     environment:
       - QDRANT__SERVICE__GRPC_PORT=6334
     volumes:
@@ -29,14 +30,14 @@ services:
     image: redis:7.2-alpine
     command: redis-server --appendonly yes
     ports:
-      - "6389:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
 
   ollama:
     image: ollama/ollama:latest
     ports:
-      - "11464:11434"
+      - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
 
@@ -46,11 +47,13 @@ services:
       dockerfile: Dockerfile
     env_file:
       - "../../.env"
+    environment:
+      - DATABASE_URL=postgresql://anclora_user:anclora_pass_dev@postgres:5432/anclora_rag
     volumes:
       - ../../apps/api:/app
       - ../../packages:/packages
       - ../../models:/models
-      - ${env:USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
+      - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,32 +64,25 @@ services:
       ollama:
         condition: service_started
     ports:
-      - "8030:8000"
+      - "8000:8000"
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   worker:
     build:
       context: ../../apps/api
       dockerfile: Dockerfile
-    env_file:
-      - "../../.env"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://anclora_user:anclora_pass_dev@postgres:5432/anclora_rag
     volumes:
       - ../../apps/api:/app
       - ../../packages:/packages
       - ../../models:/models
-      - ${env:USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
+      - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
     depends_on:
-      redis:
-        condition: service_started
-      qdrant:
-        condition: service_started
-      postgres:
-        condition: service_healthy
+      - redis
+      - postgres
+      - qdrant
     command: rq worker ingestion_queue --url redis://redis:6379
 
 volumes:

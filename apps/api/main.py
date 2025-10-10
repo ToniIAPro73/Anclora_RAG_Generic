@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-# Import routers (handle both script and module execution)
+# Import routers
 import sys
 import os
 
@@ -16,10 +16,10 @@ for path in [current_dir, parent_dir, project_root]:
         sys.path.insert(0, path)
 
 try:
-    # Import routers using relative imports from current directory
     from routes.ingest import router as ingest_router
     from routes.health import router as health_router
     from routes.query import router as query_router
+    from routes.batch import router as batch_router
 except ImportError as e:
     print(f"Import error: {e}")
     print("Available paths:", sys.path)
@@ -49,14 +49,24 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(ingest_router)
 app.include_router(health_router)
+app.include_router(ingest_router)
 app.include_router(query_router)
+app.include_router(batch_router)
 
 @app.get("/")
 async def root():
     """Root endpoint."""
-    return {"message": "Anclora RAG API", "version": "1.0.0"}
+    return {
+        "message": "Anclora RAG API",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "ingest": "/ingest",
+            "query": "/query",
+            "batch": "/batch"
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn

@@ -4,38 +4,40 @@ from typing import Any, List, Optional
 
 Settings: Optional[Any] = None
 try:
-    # Try new import paths for llama-index >= 0.9.0
     from llama_index.core import Document, VectorStoreIndex, Settings as CoreSettings
     from llama_index.core.node_parser import SentenceSplitter
-    from llama_index.embeddings.openai import OpenAIEmbedding
+    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
     Settings = CoreSettings
 except ImportError:
-    # Try old import paths for llama-index < 0.9.0
-    from llama_index import Document, VectorStoreIndex  # type: ignore[import]
-    from llama_index.node_parser import SentenceSplitter  # type: ignore[import]
-    from llama_index.embeddings import OpenAIEmbedding  # type: ignore[import]
+    from llama_index import Document, VectorStoreIndex
+    from llama_index.node_parser import SentenceSplitter
+    from llama_index.embeddings import HuggingFaceEmbedding
+
 try:
-    # Try new import path for llama-index >= 0.9.0
     from llama_index.vector_stores.qdrant import QdrantVectorStore
 except ImportError:
     try:
-        # Try alternative import path
         from llama_index.core.vector_stores import QdrantVectorStore
     except ImportError:
-        # Fallback - just import QdrantClient directly
         QdrantVectorStore = None
+
 from qdrant_client import QdrantClient
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
-EMBED_MODEL = OpenAIEmbedding(model="text-embedding-3-small")
+# 🆓 MODELO DE EMBEDDINGS LOCAL Y GRATUITO
+EMBED_MODEL = HuggingFaceEmbedding(
+    model_name="nomic-ai/nomic-embed-text-v1.5",
+    cache_folder="./models"  # Cache local
+)
 
 if Settings is not None:
     try:
         Settings.embed_model = EMBED_MODEL
     except AttributeError:
         logger.debug("LlamaIndex Settings does not expose embed_model; continuing with defaults.")
+
 
 def get_qdrant_client() -> QdrantClient:
     """Initialize Qdrant client with environment settings."""
@@ -49,6 +51,7 @@ def get_qdrant_client() -> QdrantClient:
     
     return client
 
+
 def index_text(doc_id: str, text: str) -> int:
     """
     Index text document into the vector database.
@@ -61,10 +64,8 @@ def index_text(doc_id: str, text: str) -> int:
         Number of chunks created and indexed
     """
     try:
-        # Create a Document object
         document = Document(text=text, id_=doc_id)
 
-        # Initialize Qdrant vector store
         qdrant_client = get_qdrant_client()
         if QdrantVectorStore is None:
             raise HTTPException(
@@ -76,15 +77,11 @@ def index_text(doc_id: str, text: str) -> int:
             collection_name="documents"
         )
 
-        # Create index with the document
-        # The index will automatically chunk the text using default settings        
         index = VectorStoreIndex.from_documents(
             [document],
             vector_store=vector_store
         )
 
-        # Get the number of nodes/chunks that were created
-        # We need to refresh the vector store to get updated stats
         collection_info = qdrant_client.get_collection("documents")
         chunk_count = collection_info.points_count
 
@@ -94,4 +91,3 @@ def index_text(doc_id: str, text: str) -> int:
     except Exception as e:
         logger.error(f"Error indexing document {doc_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to index document: {str(e)}")
-
