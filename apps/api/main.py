@@ -19,7 +19,7 @@ try:
     from routes.ingest import router as ingest_router
     from routes.health import router as health_router
     from routes.query import router as query_router
-    from routes.batch import router as batch_router
+    # from routes.batch import router as batch_router  # TODO: Fix import path
 except ImportError as e:
     print(f"Import error: {e}")
     print("Available paths:", sys.path)
@@ -52,7 +52,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(ingest_router)
 app.include_router(query_router)
-app.include_router(batch_router)
+# app.include_router(batch_router)  # TODO: Fix import path
 
 @app.get("/")
 async def root():
