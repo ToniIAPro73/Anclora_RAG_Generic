@@ -1,54 +1,37 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from dotenv import load_dotenv
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from contextlib import contextmanager
+import logging
 
-load_dotenv()
+logger = logging.getLogger(__name__)
 
-# Motor de base de datos
-engine = None
-SessionLocal = None
+def get_connection_params():
+    return {
+        'host': os.getenv('POSTGRES_HOST', 'localhost'),
+        'port': int(os.getenv('POSTGRES_PORT', 5432)),
+        'database': os.getenv('POSTGRES_DB', 'anclora_rag'),
+        'user': os.getenv('POSTGRES_USER', 'anclora_user'),
+        'password': os.getenv('POSTGRES_PASSWORD', '')
+    }
 
-
-def init_db_engine():
-    """Inicializa el motor de SQLAlchemy."""
-    global engine, SessionLocal
-    
-    database_url = os.getenv(
-        "DATABASE_URL",
-        "postgresql://anclora_user:anclora_pass_dev@localhost:5432/anclora_rag"
-    )
-    
-    engine = create_engine(database_url, pool_pre_ping=True)
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db() -> Session:
-    """
-    Dependency para FastAPI que proporciona una sesión de base de datos.
-    
-    Uso:
-        @app.get("/endpoint")
-        def endpoint(db: Session = Depends(get_db)):
-            ...
-    """
-    if SessionLocal is None:
-        init_db_engine()
-    
-    db = SessionLocal()
+@contextmanager
+def get_db_connection():
+    conn = psycopg2.connect(**get_connection_params())
     try:
-        yield db
+        yield conn
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        logger.error(f'Database error: {e}')
+        raise
     finally:
-        db.close()
+        conn.close()
 
-
-def get_db_session() -> Session:
-    """
-    Obtiene una sesión de base de datos para uso directo (fuera de FastAPI).
-    
-    IMPORTANTE: Debe cerrarse manualmente con session.close()
-    """
-    if SessionLocal is None:
-        init_db_engine()
-    
-    return SessionLocal()
+def execute_query(query, params=None, fetch=False):
+    with get_db_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query, params)
+            if fetch:
+                return cur.fetchall()
+            return cur.rowcount
