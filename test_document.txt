@@ -1,0 +1,25 @@
+# Sistema Anclora RAG - Documento de Prueba
+
+Este es un documento de prueba para verificar el pipeline completo de ingesta.
+
+## Arquitectura del Sistema
+El sistema utiliza los siguientes componentes:
+- **Embeddings**: nomic-embed-text-v1.5 para generar vectores semánticos
+- **Base de Datos Vectorial**: Qdrant para almacenamiento y búsqueda
+- **Framework RAG**: LlamaIndex para orquestación del pipeline
+- **API**: FastAPI con procesamiento asíncrono
+
+## Proceso de Ingesta
+1. El usuario sube un documento a través del endpoint /ingest
+2. El documento se parsea según su tipo (PDF, DOCX, TXT, MD)
+3. El texto se fragmenta en chunks semánticos
+4. Cada chunk se convierte en un vector mediante el modelo de embedding
+5. Los vectores se almacenan en Qdrant con sus metadatos
+
+## Capacidades de Recuperación
+El sistema permite buscar información relevante mediante:
+- Búsqueda semántica por similitud de vectores
+- Filtrado por metadatos de documentos
+- Ranking de resultados por relevancia
+
+Esta es una prueba de funcionamiento del sistema completo.
