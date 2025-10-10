@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: anclora_postgres
+    environment:
+      POSTGRES_DB: anclora_rag
+      POSTGRES_USER: anclora_user
+      POSTGRES_PASSWORD: anclora_pass_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anclora_user -d anclora_rag"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   qdrant:
     image: qdrant/qdrant:v1.7.4
     ports:
@@ -30,16 +47,22 @@ services:
       dockerfile: Dockerfile
     env_file:
       - "../../.env"
+    environment:
+      - DATABASE_URL=postgresql://anclora_user:anclora_pass_dev@postgres:5432/anclora_rag
     volumes:
       - ../../apps/api:/app
       - ../../packages:/packages
       - ../../models:/models
-      # Cache de modelos HuggingFace compartida con Windows
       - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
     depends_on:
-      - qdrant
-      - redis
-      - ollama
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_started
+      ollama:
+        condition: service_started
     ports:
       - "8000:8000"
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -50,6 +73,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://anclora_user:anclora_pass_dev@postgres:5432/anclora_rag
     volumes:
       - ../../apps/api:/app
       - ../../packages:/packages
@@ -57,10 +81,12 @@ services:
       - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
     depends_on:
       - redis
+      - postgres
       - qdrant
     command: rq worker ingestion_queue --url redis://redis:6379
 
 volumes:
+  postgres_data:
   qdrant_data:
   redis_data:
   ollama_data:

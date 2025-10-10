@@ -124,3 +124,7 @@ webencodings==0.5.1
 websockets==15.0.1
 wrapt==1.17.3
 yarl==1.20.1
+
+# PostgreSQL dependencies
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
