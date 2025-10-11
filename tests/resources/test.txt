@@ -1,0 +1,1 @@
+Sistema RAG de Anclora. Usa Qdrant como base de datos vectorial y Ollama con Llama3.2 para generar respuestas inteligentes.
