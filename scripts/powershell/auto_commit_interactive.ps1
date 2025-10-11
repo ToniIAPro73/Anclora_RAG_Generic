@@ -40,10 +40,10 @@ function Initialize-Log {
       $repoRoot = (Resolve-Path ".").Path
     }
 
-    $script:LogFileResolved = if ($LogPath -and -not [string]::IsNullOrWhiteSpace($LogPath)) {
-      $LogPath
+    if ($LogPath -and -not [string]::IsNullOrWhiteSpace($LogPath)) {
+      $script:LogFileResolved = $LogPath
     } else {
-      Join-Path $repoRoot "logs\autocommit.log"
+      $script:LogFileResolved = Join-Path $repoRoot "logs\autocommit.log"
     }
   }
 
@@ -74,17 +74,30 @@ function Write-Log {
   } catch { }
 }
 
+# Permite ajustar el código de salida sin cerrar la sesión actual.
+function Set-LastExitCode {
+  param([int]$Code)
+  $global:LASTEXITCODE = $Code
+}
+
 # --- Forzar inicialización del log al inicio ---
 Initialize-Log
 Write-Log "START: script lanzado (source=$Source)"
 
-# 1) Raíz del repo = carpeta del script (con fallback)
-$repoPath = $null
-try { $repoPath = Split-Path -Parent $MyInvocation.MyCommand.Path } catch {}
-if ([string]::IsNullOrWhiteSpace($repoPath)) {
-  $repoPath = (Resolve-Path ".").Path
+$script:RepoRoot = $null
+try { $script:RepoRoot = (git rev-parse --show-toplevel 2>$null) } catch {}
+if ([string]::IsNullOrWhiteSpace($script:RepoRoot)) {
+  try {
+    $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+    $script:RepoRoot = Split-Path -Parent $scriptPath
+  } catch {}
 }
-Set-Location $repoPath
+if ([string]::IsNullOrWhiteSpace($script:RepoRoot)) {
+  $script:RepoRoot = (Resolve-Path ".").Path
+}
+
+Set-Location $script:RepoRoot
+$repoPath = $script:RepoRoot
 
 # ------------------------------------------------------------
 #  PRE-CHECKS DE CALIDAD (opcionales)
@@ -210,6 +223,7 @@ function Run-FrontendChecks {
   }
 }
 
+try {
 if (-not $SkipChecks) {
   $runBackend  = (-not $OnlyFrontend)
   $runFrontend = (-not $OnlyBackend)
@@ -223,7 +237,8 @@ if (-not $SkipChecks) {
   if (-not ($okBackend -and $okFrontend)) {
     Write-Host "`n🛑 Checks fallidos → se cancela el commit/push." -ForegroundColor Red
     Write-Log  "Checks fallidos → commit cancelado."
-    exit 1
+    Set-LastExitCode 1
+    return
   }
 } else {
   Write-Host "⏭️  Checks de calidad saltados por -SkipChecks" -ForegroundColor DarkGray
@@ -244,7 +259,8 @@ if ($null -ne $textPre) {
 if ($linesPre.Count -eq 0) {
   Write-Host "✅ No hay cambios que commitear." -ForegroundColor Green
   Write-Log   "No hay cambios que commitear."
-  exit 0
+  Set-LastExitCode 0
+  return
 }
 
 # Contabiliza tracked/untracked antes del add
@@ -260,7 +276,8 @@ if ($preTotal -gt 5 -and -not $ForceYes) {
   if ($resp -notin @('s','S','y','Y','si','sí','SI','Sí','YES','yes')) {
     Write-Host "🛑 Operación cancelada." -ForegroundColor Red
     Write-Log  "Usuario canceló (>$preTotal cambios)."
-    exit 0
+    Set-LastExitCode 0
+    return
   }
 }
 
@@ -279,7 +296,8 @@ if ($staged.Count -eq 0) {
   Write-Host "⚠️  No hay cambios staged tras 'git add .'. Nada que commitear." -ForegroundColor Yellow
   Write-Log  "Sin staged tras add."
   git status
-  exit 0
+  Set-LastExitCode 0
+  return
 }
 
 # 5.1 Parsear staged en arrays y conteos
@@ -398,7 +416,8 @@ try {
   Write-Log  ("Commit ERROR: {0}" -f $_.Exception.Message)
   git status
   Start-Sleep -Milliseconds 300
-  exit 1
+  Set-LastExitCode 1
+  return
 }
 
 try {
@@ -410,17 +429,23 @@ try {
   Write-Host "❌ Error en git push: $($_.Exception.Message)" -ForegroundColor Red
   Write-Log  ("Push ERROR: {0}" -f $_.Exception.Message)
   Start-Sleep -Milliseconds 300
-  exit 1
+  Set-LastExitCode 1
+  return
 }
 
 if ($commitOk -and $pushOk) {
   Write-Host "`n🎯 Commit y push completados correctamente." -ForegroundColor Green
   Write-Log  "Proceso finalizado correctamente."
   Start-Sleep -Milliseconds 500
-  exit 0
+  Set-LastExitCode 0
+  return
 } else {
   Write-Host "`n⚠️  Proceso finalizado con incidencias (commitOk=$commitOk, pushOk=$pushOk)." -ForegroundColor Yellow
   Write-Log  ("Proceso finalizado con incidencias (commitOk={0}, pushOk={1})." -f $commitOk,$pushOk)
   Start-Sleep -Milliseconds 500
-  exit 1
+  Set-LastExitCode 1
+  return
+}
+} finally {
+  Set-Location $script:RepoRoot
 }

@@ -64,8 +64,11 @@ Write-Host "[Anclora-RAG] Python: $((Get-Command python).Source)" -ForegroundCol
 
 # Rutas importantes
 $RepoRoot     = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$CommitScript = Join-Path $RepoRoot "auto_commit_interactive.ps1"
+$CommitScript = Join-Path $RepoRoot "scripts/powershell/auto_commit_interactive.ps1"
 $LogPath      = Join-Path $RepoRoot "logs\autocommit.log"
+$global:AncloraRepoRoot    = $RepoRoot
+$global:AncloraCommitScript = $CommitScript
+$global:AncloraLogPath      = $LogPath
 
 # --- Al ENTRAR: auto-commit si hay ≥1 cambios (sin preguntar)
 try {
@@ -80,6 +83,8 @@ try {
   Write-Info "[Anclora-RAG] Aviso al entrar: $($_.Exception.Message)" "DarkYellow"
 }
 
+Set-Location $RepoRoot
+
 # --- Timer 30 min: solo si total > 5 (con confirmación en el propio script)
 if (-not (Get-EventSubscriber -SourceIdentifier "AncloraAutoCommitTimer" -ErrorAction SilentlyContinue)) {
   $global:AncloraAutoCommitTimer = New-Object Timers.Timer
@@ -89,11 +94,12 @@ if (-not (Get-EventSubscriber -SourceIdentifier "AncloraAutoCommitTimer" -ErrorA
   Register-ObjectEvent -InputObject $global:AncloraAutoCommitTimer `
   -EventName Elapsed `
   -SourceIdentifier "AncloraAutoCommitTimer" `
-  -MessageData @{ Repo=$RepoRoot; Log=$LogPath } `
+  -MessageData @{ Repo=$RepoRoot; Log=$LogPath; Script=$CommitScript } `
   -Action {
     try {
       $repo = $event.MessageData.Repo
       $log  = $event.MessageData.Log
+      $cmd  = $event.MessageData.Script
 
       $raw = git -C $repo -c core.quotepath=off status --porcelain 2>$null
       $txt = ($raw -is [Array]) ? ($raw -join "`n") : [string]$raw
@@ -101,7 +107,7 @@ if (-not (Get-EventSubscriber -SourceIdentifier "AncloraAutoCommitTimer" -ErrorA
 
       if ($count -gt 5) {
         Write-Host "[Anclora-RAG] Timer 30m: $count cambios → auto-commit (sin checks)..." -ForegroundColor Cyan
-        & (Join-Path $repo "auto_commit_interactive.ps1") -Source timer -LogPath $log -SkipChecks
+        & $cmd -Source timer -LogPath $log -SkipChecks
       } else {
         Write-Host "[Anclora-RAG] Timer 30m: $count cambios (≤5) → sin acción." -ForegroundColor DarkGray
       }
@@ -120,8 +126,12 @@ if (-not (Get-EventSubscriber -SourceIdentifier "AncloraAutoCommitTimer" -ErrorA
 if (-not (Get-EventSubscriber -SourceIdentifier "AncloraOnExit" -ErrorAction SilentlyContinue)) {
   Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
     try {
-      $repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-      $log  = Join-Path $repo "autocommit.log"
+      $repo = $global:AncloraRepoRoot
+      if (-not $repo) { $repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path }
+      $log  = $global:AncloraLogPath
+      if (-not $log) { $log = Join-Path $repo "logs\autocommit.log" }
+      $cmd  = $global:AncloraCommitScript
+      if (-not (Test-Path $cmd)) { $cmd = Join-Path $repo "scripts/powershell/auto_commit_interactive.ps1" }
 
       # Apagar/limpiar timer si existe
       try {
@@ -138,7 +148,7 @@ if (-not (Get-EventSubscriber -SourceIdentifier "AncloraOnExit" -ErrorAction Sil
 
       if ($count -ge 1) {
         Write-Host "[Anclora-RAG] Al salir: $count cambios → auto-commit final..." -ForegroundColor Yellow
-        & (Join-Path $repo "auto_commit_interactive.ps1") -ForceYes -Source exit -LogPath $log
+        & $cmd -ForceYes -Source exit -LogPath $log
       } else {
         Write-Host "[Anclora-RAG] Al salir: sin cambios." -ForegroundColor DarkGray
       }
