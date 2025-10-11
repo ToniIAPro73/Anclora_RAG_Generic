@@ -20,14 +20,16 @@ Set-Location web
 Write-Host "`n📦 Paso 2: Inicializando Next.js con TypeScript y Tailwind..." -ForegroundColor Yellow
 npx -y create-next-app@latest . --typescript --tailwind --app --no-src-dir --eslint --no-turbopack --import-alias "@/*"
 
-# Paso 3: Instalar axios
-Write-Host "`n📦 Paso 3: Instalando axios..." -ForegroundColor Yellow
+# Paso 3: Instalar dependencias
+Write-Host "`n📦 Paso 3: Instalando dependencias..." -ForegroundColor Yellow
 npm install axios
+npm install --save-dev kill-port
 
 # Paso 3.1: Configurar puerto 3030 en package.json
-Write-Host "`n⚙️  Paso 3.1: Configurando puerto 3030..." -ForegroundColor Yellow
+Write-Host "`n⚙️  Paso 3.1: Configurando scripts de desarrollo..." -ForegroundColor Yellow
 $packageJsonPath = "package.json"
 $packageContent = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+$packageContent.scripts.predev = "kill-port 3030"
 $packageContent.scripts.dev = "next dev -p 3030"
 $packageContent | ConvertTo-Json -Depth 10 | Set-Content $packageJsonPath
 
