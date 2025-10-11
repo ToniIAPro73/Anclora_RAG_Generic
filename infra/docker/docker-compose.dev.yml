@@ -79,7 +79,7 @@ services:
       - ../../apps/api:/app
       - ../../packages:/packages
       - ../../models:/models
-      - ${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface
+      - ${USERPROFILE?err}/.cache/huggingface:/root/.cache/huggingface
     depends_on:
       redis:
         condition: service_started
@@ -88,6 +88,11 @@ services:
       postgres:
         condition: service_healthy
     command: rq worker ingestion_queue --url redis://redis:6379
+    healthcheck:
+      test: ["CMD", "rq", "info", "--url", "redis://redis:6379"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:
