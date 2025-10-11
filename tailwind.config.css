@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Tailwind CSS v4 configuration using CSS custom properties */
+/* eslint-disable-next-line css/unknownAtRules */
+@config {
+  --content: "./pages/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}", "./app/**/*.{js,ts,jsx,tsx,mdx}";
+  --theme-extend-colors-anclora-primary: #D946EF;
+  --theme-extend-colors-anclora-secondary: #06B6D4;
+  --theme-extend-colors-anclora-dark: #111827;
+  --theme-extend-colors-anclora-light: #F8F9FA;
+  --theme-extend-backgroundImage-gradient-anclora: linear-gradient(135deg, #D946EF 0%, #06B6D4 100%);
+}
