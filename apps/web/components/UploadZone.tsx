@@ -65,8 +65,8 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
     <div
       className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
         isDragging
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-300 hover:border-gray-400'
+          ? 'border-anclora-primary bg-purple-50'
+          : 'border-gray-300 hover:border-anclora-secondary'
       } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -84,13 +84,13 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
 
       {isUploading ? (
         <div className="py-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-anclora-primary mx-auto mb-2"></div>
           <p className="text-gray-600">Procesando documento...</p>
         </div>
       ) : (
         <>
           <svg
-            className="mx-auto h-12 w-12 text-gray-400 mb-4"
+            className="mx-auto h-12 w-12 text-anclora-secondary mb-4"
             stroke="currentColor"
             fill="none"
             viewBox="0 0 48 48"
@@ -110,7 +110,7 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
           </p>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-gradient-anclora text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md"
           >
             Seleccionar archivo
           </button>

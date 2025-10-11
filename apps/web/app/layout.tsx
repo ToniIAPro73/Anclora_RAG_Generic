@@ -18,12 +18,12 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <div className="min-h-screen bg-gray-50">
-          <header className="bg-white border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-4 py-4">
-              <h1 className="text-2xl font-bold text-gray-900">
+          <header className="bg-gradient-anclora text-white shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 py-6">
+              <h1 className="text-3xl font-bold">
                 🚀 Anclora RAG
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm opacity-90 mt-1">
                 Ollama + HuggingFace + Qdrant
               </p>
             </div>
