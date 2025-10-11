@@ -5,19 +5,18 @@ import os
 import logging
 
 # LlamaIndex imports (versión 0.14+)
-from llama_index.core import VectorStoreIndex, Settings, StorageContext
-from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.core import VectorStoreIndex, Settings
 from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient
+
+from rag.pipeline import EMBED_MODEL, get_qdrant_client, COLLECTION_NAME
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["query"])
 
 # Configuración
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
-QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
-COLLECTION_NAME = "documents"
+OLLAMA_URL = os.getenv("OLLAMA_URL") or os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 
 class QueryRequest(BaseModel):
     query: str
@@ -29,24 +28,19 @@ class QueryResponse(BaseModel):
     sources: List[Dict[str, Any]]
     metadata: Dict[str, Any]
 
-def get_query_engine():
+def get_query_engine(top_k: int):
     """Initialize query engine."""
     try:
-        # LLM y embeddings
-        llm = Ollama(model="llama3.2", base_url=OLLAMA_URL, request_timeout=120.0)
-        embed_model = OpenAIEmbedding(model="text-embedding-3-small")
-        
+        llm = Ollama(model=OLLAMA_MODEL, base_url=OLLAMA_URL, request_timeout=120.0)
         Settings.llm = llm
-        Settings.embed_model = embed_model
-        
-        # Qdrant
-        client = QdrantClient(url=QDRANT_URL)
+        Settings.embed_model = EMBED_MODEL
+
+        client = get_qdrant_client()
         vector_store = QdrantVectorStore(client=client, collection_name=COLLECTION_NAME)
-        
-        # Index
+
         index = VectorStoreIndex.from_vector_store(vector_store)
-        return index.as_query_engine(similarity_top_k=5)
-        
+        return index.as_query_engine(similarity_top_k=top_k)
+
     except Exception as e:
         logger.error(f"Query engine error: {e}")
         raise
@@ -61,7 +55,7 @@ async def query_post(request: QueryRequest) -> QueryResponse:
 
 async def query_documents(request: QueryRequest) -> QueryResponse:
     try:
-        engine = get_query_engine()
+        engine = get_query_engine(request.top_k or 5)
         response = engine.query(request.query)
         
         sources = []
@@ -76,7 +70,7 @@ async def query_documents(request: QueryRequest) -> QueryResponse:
             query=request.query,
             response=str(response),
             sources=sources,
-            metadata={"model": "llama3.2", "sources": len(sources)}
+            metadata={"model": OLLAMA_MODEL, "sources": len(sources)}
         )
         
     except Exception as e:
