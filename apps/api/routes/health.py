@@ -1,9 +1,8 @@
 from fastapi import APIRouter
-from typing import Dict
 
 router = APIRouter(tags=["health"])
 
 @router.get("/health")
-async def health_check() -> Dict[str, str]:
-    """Health check endpoint for the API."""
-    return {"status": "healthy", "service": "api"}
+@router.head("/health")
+async def health_check():
+    return {"status": "healthy"}
