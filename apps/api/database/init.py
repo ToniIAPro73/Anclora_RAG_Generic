@@ -4,6 +4,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 SCHEMA_SQL = '''
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Tabla de batches de ingesta
 CREATE TABLE IF NOT EXISTS ingestion_batches (
     id UUID PRIMARY KEY,
@@ -43,6 +45,41 @@ CREATE INDEX IF NOT EXISTS idx_batches_status ON ingestion_batches(status);
 CREATE INDEX IF NOT EXISTS idx_batches_user ON ingestion_batches(user_id);
 CREATE INDEX IF NOT EXISTS idx_documents_batch ON batch_documents(batch_id);
 CREATE INDEX IF NOT EXISTS idx_documents_status ON batch_documents(status);
+
+-- Tabla de usuarios de aplicación
+CREATE TABLE IF NOT EXISTS app_users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('admin','viewer')),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_app_users_email ON app_users(email);
+
+-- Cuentas sociales vinculadas
+CREATE TABLE IF NOT EXISTS user_social_accounts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL,
+    provider_account_id TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(provider, provider_account_id)
+);
+
+-- Tokens de reseteo de contraseña
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
 '''
 
 def init_database():

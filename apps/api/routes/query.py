@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 import os
@@ -10,6 +10,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 
 from rag.pipeline import EMBED_MODEL, get_qdrant_client, COLLECTION_NAME
+from apps.api.deps import require_viewer_or_admin
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["query"])
@@ -46,11 +47,17 @@ def get_query_engine(top_k: int):
         raise
 
 @router.get("/query")
-async def query_get(query: str) -> QueryResponse:
+async def query_get(
+    query: str,
+    _: None = Depends(require_viewer_or_admin),
+) -> QueryResponse:
     return await query_documents(QueryRequest(query=query))
 
 @router.post("/query")
-async def query_post(request: QueryRequest) -> QueryResponse:
+async def query_post(
+    request: QueryRequest,
+    _: None = Depends(require_viewer_or_admin),
+) -> QueryResponse:
     return await query_documents(request)
 
 async def query_documents(request: QueryRequest) -> QueryResponse:
@@ -76,3 +83,4 @@ async def query_documents(request: QueryRequest) -> QueryResponse:
     except Exception as e:
         logger.error(f"Query error: {e}")
         raise HTTPException(500, detail=str(e))
+

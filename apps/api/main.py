@@ -16,6 +16,7 @@ for path in [current_dir, parent_dir, project_root]:
         sys.path.insert(0, path)
 
 try:
+    from routes.auth import router as auth_router
     from routes.ingest import router as ingest_router
     from routes.health import router as health_router
     from routes.query import router as query_router
@@ -49,6 +50,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router)
 app.include_router(health_router)
 app.include_router(ingest_router)
 app.include_router(query_router)

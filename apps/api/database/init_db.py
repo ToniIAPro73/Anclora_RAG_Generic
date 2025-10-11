@@ -72,6 +72,43 @@ def create_tables():
         CREATE INDEX IF NOT EXISTS idx_ingestion_batches_user_id 
             ON ingestion_batches(user_id);
         """)
+
+        # SQL para usuarios
+        create_users_table = text("""
+        CREATE TABLE IF NOT EXISTS app_users (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            first_name TEXT NOT NULL,
+            last_name TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('admin','viewer')),
+            is_active BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        """)
+
+        create_social_accounts = text("""
+        CREATE TABLE IF NOT EXISTS user_social_accounts (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+            provider TEXT NOT NULL,
+            provider_account_id TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(provider, provider_account_id)
+        );
+        """)
+
+        create_reset_tokens = text("""
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+            token TEXT NOT NULL,
+            expires_at TIMESTAMPTZ NOT NULL,
+            used BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        """)
         
         print("🔧 Creando tabla 'ingestion_batches'...")
         session.execute(create_batches_table)
@@ -81,6 +118,18 @@ def create_tables():
         session.execute(create_documents_table)
         session.commit()
         
+        print("🔧 Creando tabla 'app_users'...")
+        session.execute(create_users_table)
+        session.commit()
+
+        print("🔧 Creando tabla 'user_social_accounts'...")
+        session.execute(create_social_accounts)
+        session.commit()
+
+        print("🔧 Creando tabla 'password_reset_tokens'...")
+        session.execute(create_reset_tokens)
+        session.commit()
+
         print("🔧 Creando índices...")
         session.execute(create_indexes)
         session.commit()

@@ -39,3 +39,4 @@
 - Copia `.env.example` a `.env`, completa credenciales (Qdrant, Redis, Ollama) y mantenlas fuera de control de versiones.
 - Monta caches con `${USERPROFILE}` o rutas compatibles y guarda tokens en gestores seguros.
 - Documenta nuevas variables o toggles aquí o en `README.md` y rota credenciales cuando cambie el equipo con acceso.
+- Configura `JWT_SECRET`, `JWT_ACCESS_TOKEN_EXPIRES_MINUTES` y `ADMIN_REGISTRATION_KEY` para la autenticación; las cuentas admin solo pueden registrarse aportando esa clave.
