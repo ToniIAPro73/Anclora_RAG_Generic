@@ -3,7 +3,8 @@ import os
 import types
 
 from fastapi import HTTPException
-from llama_index.core import Document, Settings, VectorStoreIndex
+from llama_index.core import Document, Settings
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
@@ -17,7 +18,9 @@ EMBED_MODEL = HuggingFaceEmbedding(
     model_name="nomic-ai/nomic-embed-text-v1.5",
     trust_remote_code=True,
 )
+NODE_PARSER = SentenceSplitter(chunk_size=512, chunk_overlap=80)
 Settings.embed_model = EMBED_MODEL
+Settings.node_parser = NODE_PARSER
 
 COLLECTION_NAME = "documents"
 EMBED_DIMENSION = 768  # Dimensión del modelo nomic-embed-text-v1.5
@@ -98,10 +101,13 @@ def index_text(doc_id: str, text: str) -> int:
             force_disable_check_same_thread=True,
         )
 
-        VectorStoreIndex.from_documents(
-            [document],
-            vector_store=vector_store,
-        )
+        nodes = NODE_PARSER.get_nodes_from_documents([document])
+        texts = [node.get_content(metadata_mode="all") for node in nodes]
+        embeddings = EMBED_MODEL.get_text_embedding_batch(texts)
+        for node, embedding in zip(nodes, embeddings):
+            node.embedding = embedding
+
+        vector_store.add(nodes)
 
         collection_info = qdrant_client.get_collection(COLLECTION_NAME)
         chunk_count = collection_info.points_count
