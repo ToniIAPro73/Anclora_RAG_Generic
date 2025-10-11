@@ -4,7 +4,7 @@ from uuid import UUID
 
 from psycopg2.extras import RealDictCursor
 
-from apps.api.database.postgres_client import get_db_connection, fetch_one
+from .postgres_client import get_db_connection, fetch_one
 
 
 def create_user(*, email: str, password_hash: str, first_name: str, last_name: str, role: str) -> dict:

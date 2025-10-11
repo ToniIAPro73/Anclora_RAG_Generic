@@ -10,7 +10,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 
 from rag.pipeline import EMBED_MODEL, get_qdrant_client, COLLECTION_NAME
-from apps.api.deps import require_viewer_or_admin
+from deps import require_viewer_or_admin
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["query"])

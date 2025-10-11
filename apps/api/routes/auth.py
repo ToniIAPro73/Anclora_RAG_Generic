@@ -5,9 +5,9 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr, Field
 
-from apps.api.deps import require_active_user
-from apps.api.models.user import TokenResponse, UserPublic, UserRole
-from apps.api.services.auth_service import AuthService
+from deps import require_active_user
+from models.user import TokenResponse, UserPublic, UserRole
+from services.auth_service import AuthService
 
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$")
 ADMIN_REGISTRATION_KEY = os.getenv("ADMIN_REGISTRATION_KEY")

@@ -16,18 +16,18 @@ _SessionLocal = None
 
 def get_connection_params():
     return {
-        'host': os.getenv('POSTGRES_HOST', 'localhost'),
-        'port': int(os.getenv('POSTGRES_PORT', 5432)),
-        'database': os.getenv('POSTGRES_DB', 'anclora_rag'),
-        'user': os.getenv('POSTGRES_USER', 'anclora_user'),
-        'password': os.getenv('POSTGRES_PASSWORD', '')
+        "host": os.getenv("POSTGRES_HOST", "localhost"),
+        "port": int(os.getenv("POSTGRES_PORT", 5432)),
+        "database": os.getenv("POSTGRES_DB", "anclora_rag"),
+        "user": os.getenv("POSTGRES_USER", "anclora_user"),
+        "password": os.getenv("POSTGRES_PASSWORD", "")
     }
 
 
 def _build_sqlalchemy_url(params: dict) -> str:
-    password = quote_plus(params['password']) if params['password'] else ''
+    password = quote_plus(params["password"]) if params["password"] else ""
     return (
-        f"postgresql+psycopg2://{params['user']}:{password}"
+        f"postgresql+psycopg2://{params['user']}:{password}" 
         f"@{params['host']}:{params['port']}/{params['database']}"
     )
 

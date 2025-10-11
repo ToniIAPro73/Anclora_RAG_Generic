@@ -3,9 +3,9 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from apps.api.models.user import UserPublic, UserRole
-from apps.api.services.auth_service import AuthService
-from apps.api.services.security import decode_token, TokenDecodeError
+from models.user import UserPublic, UserRole
+from services.auth_service import AuthService
+from services.security import decode_token, TokenDecodeError
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/sign-in", auto_error=False)
 

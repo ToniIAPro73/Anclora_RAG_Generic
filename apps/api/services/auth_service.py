@@ -4,9 +4,9 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 
-from apps.api.database import user_repository
-from apps.api.models.user import UserPublic, UserRole
-from apps.api.services.security import hash_password, verify_password, create_access_token
+from database import user_repository
+from models.user import UserPublic, UserRole
+from services.security import hash_password, verify_password, create_access_token
 
 
 def _to_public(record: dict) -> UserPublic:
