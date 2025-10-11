@@ -65,6 +65,7 @@ Write-Host "[Anclora-RAG] Python: $((Get-Command python).Source)" -ForegroundCol
 # Rutas importantes
 $RepoRoot     = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $CommitScript = Join-Path $RepoRoot "scripts/powershell/auto_commit_interactive.ps1"
+$BackupScript = Join-Path $RepoRoot "scripts/powershell/backup_repo.ps1"
 $LogPath      = Join-Path $RepoRoot "logs\autocommit.log"
 $global:AncloraRepoRoot    = $RepoRoot
 $global:AncloraCommitScript = $CommitScript
@@ -81,6 +82,14 @@ try {
   }
 } catch {
   Write-Info "[Anclora-RAG] Aviso al entrar: $($_.Exception.Message)" "DarkYellow"
+}
+
+try {
+  if (Test-Path $BackupScript) {
+    & $BackupScript -Auto | Out-Null
+  }
+} catch {
+  Write-Info "[Anclora-RAG] Auto-backup omitido: $($_.Exception.Message)" "DarkYellow"
 }
 
 Set-Location $RepoRoot

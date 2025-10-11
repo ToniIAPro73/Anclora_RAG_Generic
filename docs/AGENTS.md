@@ -33,6 +33,7 @@
 ## Agent & Ops Tips
 - Automatiza tareas en `scripts/` y limpia los logs temporales al terminar.
 - Antes de probar ingestas o consultas, reinicia la API con `docker compose ... restart api` y espera al healthcheck.
+- Crea backups con `powershell ./scripts/powershell/backup_repo.ps1` (o `-Auto` para usar el mecanismo diario); restaura con `restore_backup.ps1`.
 
 ## Security & Configuration
 - Copia `.env.example` a `.env`, completa credenciales (Qdrant, Redis, Ollama) y mantenlas fuera de control de versiones.
