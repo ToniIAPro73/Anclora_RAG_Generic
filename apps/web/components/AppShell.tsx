@@ -48,14 +48,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       ? 'tracking-[0.08em] uppercase font-semibold'
       : 'font-semibold tracking-tight';
 
+  const resolvedTitle = appTitle && appTitle.trim().length > 0 ? appTitle : 'Anclora RAG';
+  const resolvedTagline =
+    tagline && tagline.trim().length > 0
+      ? tagline
+      : language === 'es'
+      ? 'Ollama + HuggingFace + Qdrant'
+      : 'Ollama + HuggingFace + Qdrant';
+
   return (
     <>
       <header className="bg-gradient-anclora text-white shadow-lg">
         <div className="container-app space-y-4 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className={`text-3xl md:text-4xl ${headlineClass}`}>{appTitle}</h1>
-              <p className="mt-1 text-sm opacity-90 md:text-base">{tagline}</p>
+              <h1 className={`text-3xl md:text-4xl ${headlineClass}`}>{resolvedTitle}</h1>
+              <p className="mt-1 text-sm opacity-90 md:text-base">{resolvedTagline}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
+                by Anclora
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button

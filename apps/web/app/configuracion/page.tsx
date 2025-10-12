@@ -184,7 +184,12 @@ export default function ConfigurationPage() {
   }, [accent, customAccent, accentPresets]);
 
   const handlePresetSelect = (preset: AccentId) => {
+    const presetColors = accentPresets[preset];
     setAccent(preset);
+    if (presetColors) {
+      setCustomPrimary(presetColors.primary);
+      setCustomSecondary(presetColors.secondary);
+    }
     setFeedback(null);
   };
 

@@ -307,18 +307,11 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
   );
 
   const setAppTitle = useCallback((appTitle: string) => {
-    const trimmed = appTitle.trim();
-    const withBrand = trimmed.length
-      ? trimmed.toLowerCase().includes('anclora')
-        ? trimmed
-        : `${trimmed} · Anclora`
-      : DEFAULT_SETTINGS.appTitle;
-    setState((prev) => ({ ...prev, appTitle: withBrand }));
+    setState((prev) => ({ ...prev, appTitle }));
   }, []);
 
   const setTagline = useCallback((tagline: string) => {
-    const fallback = tagline.trim().length ? tagline.trim() : DEFAULT_SETTINGS.tagline;
-    setState((prev) => ({ ...prev, tagline: fallback }));
+    setState((prev) => ({ ...prev, tagline }));
   }, []);
 
   const setHeadlineStyle = useCallback((headlineStyle: HeadlineStyle) => {
