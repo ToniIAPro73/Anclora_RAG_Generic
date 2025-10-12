@@ -2,7 +2,9 @@
     [string]$Name,
     [switch]$IncludeModels,
     [switch]$Auto,
-    [switch]$DumpDocker
+    [switch]$DumpDocker,
+    [switch]$UploadToDrive,
+    [string]$DriveRemote = "gdrive-backups:"
 )
 
 $ErrorActionPreference = "Stop"
@@ -66,12 +68,21 @@ Get-ChildItem -Path $tempDir -Recurse -Directory | Sort-Object FullName -Descend
     Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
 }
 
+$metaOptions = @{
+    includeModels = $IncludeModels.IsPresent
+    dumpDocker    = $DumpDocker.IsPresent
+    uploadToDrive = $UploadToDrive.IsPresent
+}
+if ($UploadToDrive) {
+    $metaOptions.driveRemote = $DriveRemote
+}
+
 $meta = [ordered]@{
     createdAt = $now.ToString("o")
     sourceRepo = $repoRoot
     backupFile = $archiveName
     includes   = $copied
-    options    = @{ includeModels = $IncludeModels.IsPresent; dumpDocker = $DumpDocker.IsPresent }
+    options    = $metaOptions
     git        = $null
 }
 
@@ -112,36 +123,36 @@ if ($DumpDocker) {
         Write-Info "[backup] Exportando contenedores..."
 
         $pgTemp = "/tmp/anclora_postgres.sql"
-        if (Invoke-DockerComposeCommand @("exec","-T","postgres","bash","-lc","pg_dumpall -U anclora_user > $pgTemp") -eq 0) {
+        if ((Invoke-DockerComposeCommand @("exec","-T","postgres","bash","-lc","pg_dumpall -U anclora_user > $pgTemp")) -eq 0) {
             $pgFile = Join-Path $dockerDir "postgres.sql"
-            if (Copy-FromContainer "postgres" $pgTemp $pgFile -eq 0) {
+            if ((Copy-FromContainer "postgres" $pgTemp $pgFile) -eq 0) {
                 $dockerMeta.postgres = "docker/postgres.sql"
             }
             Invoke-DockerComposeCommand @("exec","-T","postgres","rm","-f",$pgTemp) | Out-Null
         }
 
         $qdTemp = "/tmp/anclora_qdrant.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","-T","qdrant","bash","-lc","tar czf $qdTemp -C / qdrant/storage") -eq 0) {
+        if ((Invoke-DockerComposeCommand @("exec","-T","qdrant","bash","-lc","tar czf $qdTemp -C / qdrant/storage")) -eq 0) {
             $qdFile = Join-Path $dockerDir "qdrant_storage.tar.gz"
-            if (Copy-FromContainer "qdrant" $qdTemp $qdFile -eq 0) {
+            if ((Copy-FromContainer "qdrant" $qdTemp $qdFile) -eq 0) {
                 $dockerMeta.qdrant = "docker/qdrant_storage.tar.gz"
             }
             Invoke-DockerComposeCommand @("exec","-T","qdrant","rm","-f",$qdTemp) | Out-Null
         }
 
         $redisTemp = "/tmp/anclora_redis.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","-T","redis","bash","-lc","tar czf $redisTemp -C / data") -eq 0) {
+        if ((Invoke-DockerComposeCommand @("exec","-T","redis","bash","-lc","tar czf $redisTemp -C / data")) -eq 0) {
             $redisFile = Join-Path $dockerDir "redis_data.tar.gz"
-            if (Copy-FromContainer "redis" $redisTemp $redisFile -eq 0) {
+            if ((Copy-FromContainer "redis" $redisTemp $redisFile) -eq 0) {
                 $dockerMeta.redis = "docker/redis_data.tar.gz"
             }
             Invoke-DockerComposeCommand @("exec","-T","redis","rm","-f",$redisTemp) | Out-Null
         }
 
         $ollamaTemp = "/tmp/anclora_ollama.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","-T","ollama","bash","-lc","tar czf $ollamaTemp -C /root .ollama") -eq 0) {
+        if ((Invoke-DockerComposeCommand @("exec","-T","ollama","bash","-lc","tar czf $ollamaTemp -C /root .ollama")) -eq 0) {
             $ollamaFile = Join-Path $dockerDir "ollama_data.tar.gz"
-            if (Copy-FromContainer "ollama" $ollamaTemp $ollamaFile -eq 0) {
+            if ((Copy-FromContainer "ollama" $ollamaTemp $ollamaFile) -eq 0) {
                 $dockerMeta.ollama = "docker/ollama_data.tar.gz"
             }
             Invoke-DockerComposeCommand @("exec","-T","ollama","rm","-f",$ollamaTemp) | Out-Null
@@ -163,6 +174,37 @@ $meta | ConvertTo-Json -Depth 6 | Set-Content -Path (Join-Path $tempDir "_meta.j
 
 Write-Info "[backup] Comprimiendo..."
 Compress-Archive -Path (Join-Path $tempDir "*") -DestinationPath $archivePath -CompressionLevel Optimal -Force
+
+if ($UploadToDrive) {
+    Write-Info "[backup] Subiendo a Google Drive ($DriveRemote)..."
+    $rcloneCmd = Get-Command rclone -ErrorAction SilentlyContinue
+    if (-not $rcloneCmd) {
+        Write-Info "[backup] Upload omitido: 'rclone' no está en el PATH." "DarkYellow"
+    } else {
+        $logDir = Join-Path $repoRoot "logs"
+        if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+        $uploadLogPath = Join-Path $logDir "backup_upload.log"
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        if ($DriveRemote -notmatch "^[^:]+:") {
+            Write-Info "[backup] Advertencia: el destino '$DriveRemote' no parece un remote válido (remote:path)." "DarkYellow"
+        }
+
+        $uploadOutput = & $rcloneCmd.Source @("copy", $archivePath, $DriveRemote) 2>&1
+        $uploadExit = $LASTEXITCODE
+
+        $logLines = @("[{0}] archivo={1} destino={2} exit={3}" -f $timestamp, $archiveName, $DriveRemote, $uploadExit)
+        if ($uploadOutput) {
+            $logLines += $uploadOutput
+        }
+        Add-Content -Path $uploadLogPath -Value $logLines
+
+        if ($uploadExit -eq 0) {
+            Write-Host "[backup] Upload completado en $DriveRemote" -ForegroundColor Green
+        } else {
+            Write-Host "[backup] Upload fallido (ver logs/backup_upload.log)" -ForegroundColor DarkYellow
+        }
+    }
+}
 
 Write-Host "[backup] Backup creado: $archivePath" -ForegroundColor Green
 

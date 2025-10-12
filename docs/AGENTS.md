@@ -1,42 +1,21 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `apps/api/` concentra la API FastAPI con rutas en `routes/`, flujo RAG en `rag/` y utilidades en `core/`.
-- `packages/` alberga librerías como `parsers/`; versiona cambios con tags semánticos.
-- `infra/docker/` guarda la orquestación local; usa `scripts/` para utilidades y `models/` para checkpoints. Los tests reflejan el árbol (`apps/api/tests/<módulo>/`, `apps/api/tests/integration/`).
 
-## Architecture Overview
-- FastAPI delega en `rag.pipeline`: trocea documentos, genera embeddings HuggingFace, almacena vectores en Qdrant y se apoya en Redis + workers RQ; Ollama suministra el LLM configurado en `.env` para `/query`.
+The monorepo is grouped under `apps/`: `apps/api` hosts the FastAPI service (routers in `routes/`, data access in `database/` and `services/`), `apps/web` contains the Next.js front end, and `apps/packages` stores shared Python tooling (e.g. `rag-core`) and parsing utilities. Infrastructure scripts live in `infra/`, while reusable automation is under `scripts/`. Test fixtures and integration assets sit in `tests/`. Keep feature-specific assets close to their owning app to preserve clear ownership.
 
-## Build, Test & Development Commands
-- `python -m venv .venv && .venv\Scripts\activate` (`source .venv/bin/activate`): crea y activa el entorno 3.11.
-- `pip install -r apps/api/requirements.txt`: instala dependencias actualizadas.
-- `cd apps/api && uvicorn main:app --reload --port 8000`: arranca la API con recarga automática.
-- `docker compose -f infra/docker/docker-compose.dev.yml up --build`: levanta API, Qdrant, Redis, Postgres y Ollama según `PUERTOS.md`.
-- `pytest apps/api -q`: ejecuta la suite de pruebas.
+## Build, Test, and Development Commands
+
+Install Python deps once per machine: `cd apps/api && pip install -r requirements.txt`. Run the API locally with `uvicorn main:app --reload --host 0.0.0.0 --port 8000`. Execute API tests via `pytest` from `apps/api`. For the web app, run `npm install` once, then `npm run dev` (port 3030), `npm run build` for production bundles, and `npm run lint` before pushing. Use `python scripts/verify_system.py` to confirm external services (Qdrant, embeddings, etc.) before demos.
 
 ## Coding Style & Naming Conventions
-- Cumple PEP 8 con indentación de 4 espacios y límite suave de 100 caracteres.
-- snake_case para módulos y funciones, PascalCase para clases, UPPER_SNAKE_CASE para constantes.
-- Tipifica las APIs públicas, toma como referencia `apps/api/rag/pipeline.py` y usa `logging.getLogger(__name__)`.
+
+Python code follows PEP 8 with 4-space indentation, descriptive type hints, and snake_case modules. FastAPI routers should expose async endpoint functions and place shared logic in `services/`. Tests live alongside the code they validate using `test_<feature>.py`. In the Next.js app, favor TypeScript, PascalCase for components, and colocate UI logic within `app/<route>/`. Tailwind utility classes should be composed via shared helpers in `apps/web/lib/`. Run the relevant linters (`pytest`, `npm run lint`) before committing.
 
 ## Testing Guidelines
-- Usa `pytest`; simula servicios externos (p. ej. `qdrant_client`) con fixtures o monkeypatch.
-- Marca pruebas asíncronas con `pytest.mark.asyncio` y nombra archivos `test_<módulo>.py` con aserciones claras.
-- Ejecuta `pytest apps/api -q` antes de cada PR; los tests que requieren Qdrant/Ollama se ejecutan con los contenedores activos.
+
+Add unit tests under `apps/api/tests` mirroring the package path (e.g. `tests/routes/test_query.py`). Mock outbound services via fixtures in `tests/resources`. Aim to cover new endpoints with async client tests and update regression checks when query semantics change. For the web app, extend lint coverage or add Playwright/React Testing Library suites within `apps/web` as features grow; document gaps when UI automation is deferred.
 
 ## Commit & Pull Request Guidelines
-- Aplica Conventional Commits (`feat(api): ...`); añade `!` cuando haya cambios incompatibles.
-- Las PRs enlazan su issue, describen el impacto, listan verificaciones (tests, scripts) y destacan cambios en infraestructura o `.env`.
-- Actualiza documentación pertinente (README, AGENTS) cuando cambien los flujos.
 
-## Agent & Ops Tips
-- Automatiza tareas en `scripts/` y limpia los logs temporales al terminar.
-- Antes de probar ingestas o consultas, reinicia la API con `docker compose ... restart api` y espera al healthcheck.
-- Crea backups con `powershell ./scripts/powershell/backup_repo.ps1` (o `-Auto` para usar el mecanismo diario); restaura con `restore_backup.ps1`.
-
-## Security & Configuration
-- Copia `.env.example` a `.env`, completa credenciales (Qdrant, Redis, Ollama) y mantenlas fuera de control de versiones.
-- Monta caches con `${USERPROFILE}` o rutas compatibles y guarda tokens en gestores seguros.
-- Documenta nuevas variables o toggles aquí o en `README.md` y rota credenciales cuando cambie el equipo con acceso.
-- Configura `JWT_SECRET`, `JWT_ACCESS_TOKEN_EXPIRES_MINUTES` y `ADMIN_REGISTRATION_KEY` para la autenticación; las cuentas admin solo pueden registrarse aportando esa clave.
+Follow Conventional Commits (`type(scope): message`), using `!` for breaking changes as seen in recent history. Group related file updates together and keep scopes narrow (`fix(api-auth): ...`). Pull requests must include: purpose summary, testing notes (command outputs or screenshots), and links to tracking issues or tickets. Request review from owners of affected apps, and include before/after visuals for UI changes hosted under `apps/web`.
