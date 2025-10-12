@@ -15,6 +15,8 @@ type ThemeMode = 'light' | 'dark' | 'system';
 type AccentId = 'aurora' | 'marina' | 'solstice';
 type AccentSelection = AccentId | 'custom';
 type HeadlineStyle = 'rounded' | 'tech';
+type BodyFont = 'sans' | 'serif' | 'mono';
+type DensityMode = 'comfortable' | 'compact';
 
 interface UISettingsState {
   language: LanguageCode;
@@ -24,6 +26,8 @@ interface UISettingsState {
   appTitle: string;
   tagline: string;
   headlineStyle: HeadlineStyle;
+  bodyFont: BodyFont;
+  density: DensityMode;
 }
 
 interface AccentPreset {
@@ -48,6 +52,8 @@ interface UISettingsContext extends UISettingsState {
   setAppTitle: (title: string) => void;
   setTagline: (tagline: string) => void;
   setHeadlineStyle: (style: HeadlineStyle) => void;
+  setBodyFont: (font: BodyFont) => void;
+  setDensity: (density: DensityMode) => void;
   accentPresets: Record<AccentId, AccentPreset & { label: string }>;
 }
 
@@ -81,6 +87,8 @@ const DEFAULT_SETTINGS: UISettingsState = {
   appTitle: 'Anclora RAG',
   tagline: 'Ollama + HuggingFace + Qdrant',
   headlineStyle: 'rounded',
+  bodyFont: 'sans',
+  density: 'comfortable',
 };
 
 const UISettingsContext = createContext<UISettingsContext | null>(null);
@@ -317,6 +325,35 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, headlineStyle }));
   }, []);
 
+  const setBodyFont = useCallback((bodyFont: BodyFont) => {
+    setState((prev) => ({ ...prev, bodyFont }));
+  }, []);
+
+  const setDensity = useCallback((density: DensityMode) => {
+    setState((prev) => ({ ...prev, density }));
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    const root = document.documentElement;
+    const FONT_MAP: Record<BodyFont, string> = {
+      sans: '"Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+      serif: '"Source Serif Pro", "Georgia", "Times New Roman", serif',
+      mono: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
+    };
+    root.style.setProperty('--font-body', FONT_MAP[state.bodyFont]);
+  }, [state.bodyFont, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    document.body.dataset.density = state.density;
+  }, [state.density, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    document.documentElement.lang = state.language;
+  }, [state.language, isHydrated]);
+
   const value = useMemo<UISettingsContext>(
     () => ({
       ...state,
@@ -327,6 +364,8 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
       setAppTitle,
       setTagline,
       setHeadlineStyle,
+      setBodyFont,
+      setDensity,
       accentPresets: ACCENT_PRESETS,
     }),
     [
@@ -338,6 +377,8 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
       setAppTitle,
       setTagline,
       setHeadlineStyle,
+      setBodyFont,
+      setDensity,
     ],
   );
 
@@ -358,5 +399,7 @@ export type {
   AccentId,
   AccentSelection,
   HeadlineStyle,
+  BodyFont,
+  DensityMode,
   AccentValidationIssue,
 };

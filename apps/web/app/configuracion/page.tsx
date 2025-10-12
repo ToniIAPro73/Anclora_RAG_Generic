@@ -1,26 +1,25 @@
 'use client';
 
-import { FormEvent, useMemo, useState, useEffect } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   useUISettings,
   AccentId,
   AccentValidationIssue,
+  BodyFont,
+  DensityMode,
 } from '@/components/ui-settings-context';
 
-const ERROR_MESSAGES: Record<
-  'es' | 'en',
-  Record<AccentValidationIssue, string>
-> = {
+const ERROR_MESSAGES: Record<'es' | 'en', Record<AccentValidationIssue, string>> = {
   es: {
-    invalid_format: 'El formato de color no es válido. Usa códigos hexadecimales como #112233.',
+    invalid_format: 'El formato de color no es válido. Utiliza códigos hexadecimales como #112233.',
     primary_light_contrast:
-      'El color primario no tiene contraste suficiente sobre fondos claros.',
+      'El color primario no tiene suficiente contraste sobre fondos claros.',
     primary_dark_contrast:
-      'El color primario no tiene contraste suficiente sobre fondos oscuros.',
+      'El color primario no tiene suficiente contraste sobre fondos oscuros.',
     secondary_light_contrast:
-      'El color secundario no tiene contraste suficiente sobre fondos claros.',
+      'El color secundario no tiene suficiente contraste sobre fondos claros.',
     secondary_dark_contrast:
-      'El color secundario no tiene contraste suficiente sobre fondos oscuros.',
+      'El color secundario no tiene suficiente contraste sobre fondos oscuros.',
     primary_secondary_contrast:
       'Los colores primario y secundario son demasiado similares. Aumenta el contraste entre ellos.',
   },
@@ -41,7 +40,7 @@ const ERROR_MESSAGES: Record<
 
 const HEADLINE_OPTIONS = [
   {
-    id: 'rounded',
+    id: 'rounded' as const,
     label: { es: 'Tipografía redondeada', en: 'Rounded typography' },
     description: {
       es: 'Títulos suaves, ideales para experiencias amistosas y cercanas.',
@@ -49,7 +48,7 @@ const HEADLINE_OPTIONS = [
     },
   },
   {
-    id: 'tech',
+    id: 'tech' as const,
     label: { es: 'Estilo tecnológico', en: 'Tech uppercase' },
     description: {
       es: 'Títulos en mayúsculas con tracking amplio, perfectos para dashboards técnicos.',
@@ -57,6 +56,47 @@ const HEADLINE_OPTIONS = [
     },
   },
 ] as const;
+
+const FONT_OPTIONS: Array<{ id: BodyFont; label: { es: string; en: string }; sample: string }> = [
+  {
+    id: 'sans',
+    label: { es: 'Sans (moderna)', en: 'Sans (modern)' },
+    sample: 'Ag',
+  },
+  {
+    id: 'serif',
+    label: { es: 'Serif (editorial)', en: 'Serif (editorial)' },
+    sample: 'Ag',
+  },
+  {
+    id: 'mono',
+    label: { es: 'Mono (código)', en: 'Mono (code)' },
+    sample: '{}',
+  },
+];
+
+const DENSITY_OPTIONS: Array<{
+  id: DensityMode;
+  label: { es: string; en: string };
+  helper: { es: string; en: string };
+}> = [
+  {
+    id: 'comfortable',
+    label: { es: 'Cómodo', en: 'Comfortable' },
+    helper: {
+      es: 'Espaciado amplio para sesiones prolongadas.',
+      en: 'Generous spacing for long work sessions.',
+    },
+  },
+  {
+    id: 'compact',
+    label: { es: 'Compacto', en: 'Compact' },
+    helper: {
+      es: 'Reduce márgenes y paddings para pantallas pequeñas.',
+      en: 'Tighter layout that fits smaller displays.',
+    },
+  },
+];
 
 export default function ConfigurationPage() {
   const {
@@ -72,20 +112,27 @@ export default function ConfigurationPage() {
     setTagline,
     headlineStyle,
     setHeadlineStyle,
+    bodyFont,
+    setBodyFont,
+    density,
+    setDensity,
   } = useUISettings();
+
   const text = useMemo(
     () =>
       language === 'es'
         ? {
-            heroTitle: 'Configuración del Dashboard',
+            heroTitle: 'Configuración del dashboard',
             heroSubtitle:
-              'Personaliza el branding de tu espacio Anclora manteniendo legibilidad, accesibilidad y coherencia visual.',
+              'Personaliza tu espacio Anclora preservando la accesibilidad, la legibilidad y la coherencia visual.',
             identityTitle: 'Identidad visual',
             identityHelper:
-              'Ajusta el título y la descripción visible del dashboard. Siempre incluiremos una referencia a Anclora para preservar la marca.',
+              'Ajusta el título y la descripción visibles en la cabecera. Siempre añadimos una referencia a Anclora para mantener la marca.',
             accentTitle: 'Tema cromático',
             accentHelper:
-              'Selecciona un tema validado o define tus propios colores. Comprobamos el contraste automáticamente para garantizar la accesibilidad.',
+              'Elige un tema validado o define tus propios colores. Comprobamos automáticamente el contraste para garantizar la accesibilidad.',
+            typographyTitle: 'Tipografía y estilo',
+            layoutTitle: 'Distribución y espaciado',
             headlineTitle: 'Estilo de encabezados',
             feedbackTitle: 'Estado de la configuración',
             customLabel: 'Colores personalizados',
@@ -98,13 +145,15 @@ export default function ConfigurationPage() {
         : {
             heroTitle: 'Dashboard configuration',
             heroSubtitle:
-              'Customize the branding of your Anclora workspace while preserving legibility, accessibility and visual coherence.',
+              'Customize your Anclora workspace while preserving accessibility, legibility, and visual coherence.',
             identityTitle: 'Visual identity',
             identityHelper:
-              'Adjust the dashboard title and description. We always keep a reference to Anclora to preserve the brand.',
+              'Adjust the title and tagline shown in the header. We always keep a reference to Anclora to preserve the brand.',
             accentTitle: 'Color theme',
             accentHelper:
-              'Pick a validated theme or define your own colors. We automatically check contrast to ensure accessibility.',
+              'Pick a validated theme or define your own palette. We automatically check contrast to ensure accessibility.',
+            typographyTitle: 'Typography & style',
+            layoutTitle: 'Layout & spacing',
             headlineTitle: 'Headline style',
             feedbackTitle: 'Configuration status',
             customLabel: 'Custom colors',
@@ -118,9 +167,7 @@ export default function ConfigurationPage() {
   );
 
   const [customPrimary, setCustomPrimary] = useState(customAccent?.primary ?? '#2563EB');
-  const [customSecondary, setCustomSecondary] = useState(
-    customAccent?.secondary ?? '#38BDF8',
-  );
+  const [customSecondary, setCustomSecondary] = useState(customAccent?.secondary ?? '#38BDF8');
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -151,8 +198,9 @@ export default function ConfigurationPage() {
       setFeedback(null);
       return;
     }
-    const messages = issues.map((issue) => ERROR_MESSAGES[language][issue]);
-    setFeedback([text.invalidConfig, ...messages].join('\n'));
+    const messages = [text.invalidConfig, ...issues.map((issue) => ERROR_MESSAGES[language][issue])];
+    setFeedback(messages.join('\n'));
+    // fallback to default accent colors
     setCustomPrimary('#D946EF');
     setCustomSecondary('#06B6D4');
   };
@@ -165,9 +213,9 @@ export default function ConfigurationPage() {
   };
 
   return (
-    <div className="container-app py-6 space-y-6">
+    <div className="container-app space-y-6 py-6">
       <section className="card relative overflow-hidden bg-white p-6 shadow-xl">
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-anclora-primary/10 via-transparent to-anclora-secondary/10" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-anclora-primary/10 via-transparent to-anclora-secondary/10" />
         <div className="relative space-y-3">
           <h1 className="text-3xl font-semibold text-gray-900">{text.heroTitle}</h1>
           <p className="text-gray-600">{text.heroSubtitle}</p>
@@ -226,12 +274,12 @@ export default function ConfigurationPage() {
               <button
                 key={preset}
                 onClick={() => handlePresetSelect(preset)}
+                type="button"
                 className={`rounded-xl border p-4 text-left shadow-sm transition-colors ${
                   isActive
                     ? 'border-anclora-primary ring-2 ring-anclora-primary'
                     : 'border-gray-200 hover:border-anclora-secondary'
                 }`}
-                type="button"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-900">{colors.label}</span>
@@ -265,7 +313,7 @@ export default function ConfigurationPage() {
                   {language === 'es' ? 'Primario' : 'Primary'}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {language === 'es' ? 'For buttons & highlights' : 'Para botones y destacados'}
+                  {language === 'es' ? 'Botones y elementos destacados.' : 'Buttons and highlights.'}
                 </p>
               </div>
               <input
@@ -281,7 +329,7 @@ export default function ConfigurationPage() {
                   {language === 'es' ? 'Secundario' : 'Secondary'}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {language === 'es' ? 'Para acentos y trazos' : 'For accents and outlines'}
+                  {language === 'es' ? 'Acentos y elementos auxiliares.' : 'Accents and outlines.'}
                 </p>
               </div>
               <input
@@ -299,7 +347,7 @@ export default function ConfigurationPage() {
             <button
               type="button"
               onClick={handleReset}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-anclora-secondary"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-anclora-secondary"
             >
               {text.reset}
             </button>
@@ -308,9 +356,84 @@ export default function ConfigurationPage() {
       </section>
 
       <section className="card bg-white p-6 shadow-md">
-        <h2 className="card-header border-b border-gray-100 pb-4 text-gray-900">
-          {text.headlineTitle}
-        </h2>
+        <div className="flex flex-col gap-3 border-b border-gray-100 pb-4">
+          <h2 className="card-header text-gray-900">{text.typographyTitle}</h2>
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {FONT_OPTIONS.map((option) => {
+            const isActive = bodyFont === option.id;
+            return (
+              <button
+                key={option.id}
+                onClick={() => setBodyFont(option.id)}
+                type="button"
+                className={`flex items-center justify-between rounded-xl border p-4 transition-colors ${
+                  isActive
+                    ? 'border-anclora-primary ring-2 ring-anclora-primary'
+                    : 'border-gray-200 hover:border-anclora-secondary'
+                }`}
+              >
+                <div>
+                  <p className="font-semibold text-gray-900">{option.label[language]}</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {language === 'es'
+                      ? option.id === 'mono'
+                        ? 'Ideal para mantener bloques de código alineados.'
+                        : option.id === 'serif'
+                        ? 'Aporta un tono editorial y formal.'
+                        : 'Equilibrio entre legibilidad y modernidad.'
+                      : option.id === 'mono'
+                      ? 'Keeps code blocks aligned and readable.'
+                      : option.id === 'serif'
+                      ? 'Adds an editorial, formal tone.'
+                      : 'Balanced choice for everyday dashboards.'}
+                  </p>
+                </div>
+                <span
+                  className="text-2xl font-semibold text-gray-700"
+                  style={{
+                    fontFamily:
+                      option.id === 'mono'
+                        ? '"JetBrains Mono", monospace'
+                        : option.id === 'serif'
+                        ? '"Source Serif Pro", serif'
+                        : 'inherit',
+                  }}
+                >
+                  {option.sample}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-4">
+          <h3 className="text-sm font-semibold text-gray-700">{text.layoutTitle}</h3>
+          <div className="grid gap-3 md:grid-cols-2">
+            {DENSITY_OPTIONS.map((option) => {
+              const isActive = density === option.id;
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => setDensity(option.id)}
+                  type="button"
+                  className={`text-left rounded-xl border p-4 transition-colors ${
+                    isActive
+                      ? 'border-anclora-primary ring-2 ring-anclora-primary'
+                      : 'border-gray-200 hover:border-anclora-secondary'
+                  }`}
+                >
+                  <p className="font-semibold text-gray-900">{option.label[language]}</p>
+                  <p className="mt-1 text-sm text-gray-500">{option.helper[language]}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="card bg-white p-6 shadow-md">
+        <h2 className="card-header text-gray-900">{text.headlineTitle}</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {HEADLINE_OPTIONS.map((option) => {
             const isActive = headlineStyle === option.id;
@@ -318,12 +441,12 @@ export default function ConfigurationPage() {
               <button
                 key={option.id}
                 onClick={() => setHeadlineStyle(option.id)}
+                type="button"
                 className={`text-left rounded-xl border p-4 transition-colors ${
                   isActive
                     ? 'border-anclora-primary ring-2 ring-anclora-primary'
                     : 'border-gray-200 hover:border-anclora-secondary'
                 }`}
-                type="button"
               >
                 <p className="font-semibold text-gray-900">{option.label[language]}</p>
                 <p className="mt-2 text-sm text-gray-500">{option.description[language]}</p>
@@ -337,9 +460,7 @@ export default function ConfigurationPage() {
         <h2 className="card-header text-gray-900">{text.feedbackTitle}</h2>
         <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
           <p>
-            {language === 'es'
-              ? 'Estado actual del tema:'
-              : 'Current theme status:'}{' '}
+            {language === 'es' ? 'Estado actual del tema:' : 'Current theme status:'}{' '}
             <span className="font-semibold text-anclora-primary">
               {accent === 'custom'
                 ? language === 'es'
@@ -349,17 +470,41 @@ export default function ConfigurationPage() {
             </span>
           </p>
           <p className="mt-2">
-            {language === 'es'
-              ? 'Título visible:'
-              : 'Visible title:'}{' '}
+            {language === 'es' ? 'Título visible:' : 'Visible title:'}{' '}
             <span className="font-semibold text-gray-900">{appTitle}</span>
           </p>
           <p className="mt-2">
             {language === 'es' ? 'Lema actual:' : 'Tagline:'}{' '}
             <span className="font-semibold text-gray-900">{tagline}</span>
           </p>
+          <p className="mt-2">
+            {language === 'es' ? 'Fuente seleccionada:' : 'Selected font:'}{' '}
+            <span className="font-semibold text-gray-900">
+              {language === 'es'
+                ? bodyFont === 'mono'
+                  ? 'Monoespaciada'
+                  : bodyFont === 'serif'
+                  ? 'Serif'
+                  : 'Sans'
+                : bodyFont === 'mono'
+                ? 'Mono'
+                : bodyFont.charAt(0).toUpperCase() + bodyFont.slice(1)}
+            </span>
+          </p>
+          <p className="mt-2">
+            {language === 'es' ? 'Distribución:' : 'Layout density:'}{' '}
+            <span className="font-semibold text-gray-900">
+              {language === 'es'
+                ? density === 'compact'
+                  ? 'Compacta'
+                  : 'Cómoda'
+                : density === 'compact'
+                ? 'Compact'
+                : 'Comfortable'}
+            </span>
+          </p>
           {feedback && (
-            <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900 whitespace-pre-line">
+            <div className="mt-4 whitespace-pre-line rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900">
               {feedback}
             </div>
           )}
