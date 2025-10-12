@@ -11,7 +11,23 @@ interface ChatMessage {
   }>;
 }
 
-export default function Chat() {
+type LanguageCode = 'es' | 'en';
+
+interface ChatProps {
+  language: LanguageCode;
+}
+
+const PLACEHOLDER_TEXT: Record<LanguageCode, string> = {
+  es: 'Escribe tu pregunta...',
+  en: 'Type your question...',
+};
+
+const EMPTY_STATE_TEXT: Record<LanguageCode, string> = {
+  es: 'Sube un documento y comienza a hacer preguntas',
+  en: 'Upload a document and start asking questions',
+};
+
+export default function Chat({ language }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +55,7 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      const result = await queryDocuments(userMessage.content);
+      const result = await queryDocuments(userMessage.content, 3, language);
       
       const assistantMessage: ChatMessage = {
         role: 'assistant',
@@ -64,7 +80,7 @@ export default function Chat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-500">
-            <p>Sube un documento y comienza a hacer preguntas</p>
+            <p>{EMPTY_STATE_TEXT[language]}</p>
           </div>
         ) : (
           <>
@@ -73,6 +89,7 @@ export default function Chat() {
                 key={idx}
                 role={msg.role}
                 content={msg.content}
+                language={language}
                 sources={msg.sources}
               />
             ))}
@@ -98,7 +115,7 @@ export default function Chat() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Escribe tu pregunta..."
+            placeholder={PLACEHOLDER_TEXT[language]}
             className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-anclora-primary"
             disabled={isLoading}
           />
@@ -107,7 +124,7 @@ export default function Chat() {
             disabled={isLoading || !input.trim()}
             className="bg-gradient-anclora text-white px-6 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-md"
           >
-            Enviar
+            {language === 'es' ? 'Enviar' : 'Send'}
           </button>
         </form>
       </div>

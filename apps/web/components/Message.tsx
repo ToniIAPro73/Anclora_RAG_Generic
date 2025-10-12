@@ -1,13 +1,21 @@
+type LanguageCode = 'es' | 'en';
+
 interface MessageProps {
   role: 'user' | 'assistant';
   content: string;
+  language: LanguageCode;
   sources?: Array<{
     text: string;
     score: number;
   }>;
 }
 
-export default function Message({ role, content, sources }: MessageProps) {
+const SOURCES_LABEL: Record<LanguageCode, string> = {
+  es: 'Fuentes:',
+  en: 'Sources:',
+};
+
+export default function Message({ role, content, sources, language }: MessageProps) {
   const isUser = role === 'user';
 
   return (
@@ -23,7 +31,9 @@ export default function Message({ role, content, sources }: MessageProps) {
         
         {sources && sources.length > 0 && (
           <div className="mt-3 pt-3 border-t border-gray-200">
-            <p className="text-xs font-semibold mb-2 opacity-75">Fuentes:</p>
+            <p className="text-xs font-semibold mb-2 opacity-75">
+              {SOURCES_LABEL[language]}
+            </p>
             {sources.map((source, idx) => (
               <div key={idx} className="text-xs opacity-70 mb-1">
                 <span className="font-mono bg-anclora-secondary/20 px-1 rounded">

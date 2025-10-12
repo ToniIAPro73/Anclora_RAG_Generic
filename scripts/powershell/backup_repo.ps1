@@ -4,7 +4,7 @@
     [switch]$Auto,
     [switch]$DumpDocker,
     [switch]$UploadToDrive,
-    [string]$DriveRemote = "gdrive-backups:"
+    [string]$DriveRemote = 'gdrive-backups:"Desarrollo/gdrive-backups/Anclora-RAG-Generic"'
 )
 
 $ErrorActionPreference = "Stop"
@@ -106,10 +106,28 @@ function Invoke-DockerComposeCommand {
 
 function Copy-FromContainer {
     param([string]$Service,[string]$ContainerPath,[string]$Destination)
-    $command = @("compose","-f",$script:composeFile,"cp",$Service + ":" + $ContainerPath,$Destination)
-    $output = & docker @command 2>&1
-    $exitCode = $LASTEXITCODE
-    if ($output) { foreach ($line in $output) { [void]$dockerErrors.Add($line) } }
+    $destinationDir = Split-Path $Destination -Parent
+    $destinationName = Split-Path $Destination -Leaf
+    if (-not (Test-Path $destinationDir)) {
+        New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+    }
+
+    Push-Location $destinationDir
+    try {
+        $command = @(
+            "compose","-f",$script:composeFile,"cp",
+            $Service + ":" + $ContainerPath,
+            "./$destinationName"
+        )
+        $output = & docker @command 2>&1
+        $exitCode = $LASTEXITCODE
+        if ($output) {
+            foreach ($line in $output) { [void]$dockerErrors.Add($line) }
+        }
+    } finally {
+        Pop-Location
+    }
+
     return $exitCode
 }
 
