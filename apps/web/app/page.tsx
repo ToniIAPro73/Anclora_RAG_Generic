@@ -67,8 +67,8 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid h-[calc(100vh-220px)] grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="panel panel-primary flex flex-col justify-between bg-white">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+        <section className="panel panel-primary flex flex-col bg-white">
           <div className="space-y-3">
             <h2 className="card-header text-gray-900">
               <span className="text-2xl" role="img" aria-hidden>

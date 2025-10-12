@@ -195,6 +195,23 @@ export default function ConfigurationPage() {
 
   const handleCustomSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const normalizedPrimary = customPrimary.trim().toLowerCase();
+    const normalizedSecondary = customSecondary.trim().toLowerCase();
+
+    const presetMatch = (Object.keys(accentPresets) as AccentId[]).find((key) => {
+      const preset = accentPresets[key];
+      return (
+        preset.primary.toLowerCase() === normalizedPrimary &&
+        preset.secondary.toLowerCase() === normalizedSecondary
+      );
+    });
+
+    if (presetMatch && accent !== 'custom') {
+      setAccent(presetMatch);
+      setFeedback(null);
+      return;
+    }
+
     const issues = setCustomAccent({
       primary: customPrimary,
       secondary: customSecondary,
