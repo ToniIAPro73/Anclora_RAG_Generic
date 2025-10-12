@@ -137,6 +137,7 @@ tmp/
 temp/
 .tmp/
 *.tmp
+tmp_backup/
 
 # ==============================================================================
 # Database and cache files
@@ -197,6 +198,15 @@ coverage.xml
 *.bak
 *.backup
 *~
+backups/
+
+# Root-level image assets
+/*.png
+/*.jpg
+/*.jpeg
+/*.svg
+/*.gif
+/*.webp
 
 # Application specific
 uploads/
