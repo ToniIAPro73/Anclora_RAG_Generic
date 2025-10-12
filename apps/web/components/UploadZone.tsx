@@ -1,5 +1,6 @@
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { ingestDocument } from '@/lib/api';
+import { useUISettings } from './ui-settings-context';
 
 interface UploadZoneProps {
   onUploadSuccess: (fileName: string, chunks: number) => void;
@@ -7,6 +8,7 @@ interface UploadZoneProps {
 }
 
 export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZoneProps) {
+  const { language } = useUISettings();
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -103,16 +105,18 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
             />
           </svg>
           <p className="text-gray-700 font-medium mb-2">
-            Arrastra un documento o haz clic para seleccionar
+            {language === 'es'
+              ? 'Arrastra un documento o haz clic para seleccionar'
+              : 'Drag & drop a document or click to select'}
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            Soporta: PDF, TXT, DOCX, MD
+            {language === 'es' ? 'Soporta: PDF, TXT, DOCX, MD' : 'Supported: PDF, TXT, DOCX, MD'}
           </p>
           <button
             onClick={() => fileInputRef.current?.click()}
             className="bg-gradient-anclora text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md"
           >
-            Seleccionar archivo
+            {language === 'es' ? 'Seleccionar archivo' : 'Choose file'}
           </button>
         </>
       )}

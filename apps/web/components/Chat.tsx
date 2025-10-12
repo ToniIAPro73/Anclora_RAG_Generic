@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { queryDocuments } from '@/lib/api';
 import Message from './Message';
+import { useUISettings } from './ui-settings-context';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -11,23 +12,18 @@ interface ChatMessage {
   }>;
 }
 
-type LanguageCode = 'es' | 'en';
-
-interface ChatProps {
-  language: LanguageCode;
-}
-
-const PLACEHOLDER_TEXT: Record<LanguageCode, string> = {
+const PLACEHOLDER_TEXT = {
   es: 'Escribe tu pregunta...',
   en: 'Type your question...',
-};
+} as const;
 
-const EMPTY_STATE_TEXT: Record<LanguageCode, string> = {
+const EMPTY_STATE_TEXT = {
   es: 'Sube un documento y comienza a hacer preguntas',
   en: 'Upload a document and start asking questions',
-};
+} as const;
 
-export default function Chat({ language }: ChatProps) {
+export default function Chat() {
+  const { language } = useUISettings();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

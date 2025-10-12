@@ -34,15 +34,15 @@ const LanguageModal: FC<LanguageModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-gray-100">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">{headline}</h2>
+      <div className="w-full max-w-md rounded-xl border border-gray-100 bg-white p-6 shadow-2xl">
+        <h2 className="mb-6 text-xl font-semibold text-gray-900">{headline}</h2>
 
         <div className="space-y-3">
           {(Object.keys(LANGUAGE_LABEL) as LanguageCode[]).map((lang) => (
             <button
               key={lang}
               onClick={() => onSelect(lang)}
-              className={`w-full flex items-center justify-between rounded-lg border px-4 py-3 transition-colors ${
+              className={`flex w-full items-center justify-between rounded-lg border px-4 py-3 transition-colors ${
                 selected === lang
                   ? 'border-anclora-primary bg-anclora-primary/10 text-anclora-primary'
                   : 'border-gray-200 hover:border-anclora-secondary hover:bg-gray-50'
@@ -50,7 +50,7 @@ const LanguageModal: FC<LanguageModalProps> = ({
             >
               <span className="font-medium">{LANGUAGE_LABEL[lang]}</span>
               <span
-                className={`w-5 h-5 rounded-full border-2 ${
+                className={`h-5 w-5 rounded-full border-2 ${
                   selected === lang
                     ? 'border-anclora-primary bg-anclora-primary'
                     : 'border-gray-300'
@@ -65,7 +65,7 @@ const LanguageModal: FC<LanguageModalProps> = ({
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-lg bg-gradient-anclora text-white shadow-md hover:opacity-90 transition-opacity"
+            className="rounded-lg bg-gradient-anclora px-5 py-2 text-white shadow-md transition-opacity hover:opacity-90"
           >
             {closeLabel}
           </button>

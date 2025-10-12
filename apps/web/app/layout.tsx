@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { Providers } from '@/components/Providers';
+import AppShell from '@/components/AppShell';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,20 +18,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50">
-          <header className="bg-gradient-anclora text-white shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 py-6">
-              <h1 className="text-3xl font-bold">
-                🚀 Anclora RAG
-              </h1>
-              <p className="text-sm opacity-90 mt-1">
-                Ollama + HuggingFace + Qdrant
-              </p>
-            </div>
-          </header>
-          <main>{children}</main>
-        </div>
+      <body
+        className={`${inter.className} bg-[var(--background)] text-[var(--foreground)] transition-colors`}
+      >
+        <Providers>
+          <div className="min-h-screen">
+            <AppShell>{children}</AppShell>
+          </div>
+        </Providers>
       </body>
     </html>
   );

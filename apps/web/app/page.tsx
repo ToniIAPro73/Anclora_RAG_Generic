@@ -3,14 +3,7 @@
 import { useState } from 'react';
 import UploadZone from '@/components/UploadZone';
 import Chat from '@/components/Chat';
-import LanguageModal from '@/components/LanguageModal';
-
-type LanguageCode = 'es' | 'en';
-
-const LANGUAGE_LABEL: Record<LanguageCode, string> = {
-  es: 'Español',
-  en: 'English',
-};
+import { useUISettings } from '@/components/ui-settings-context';
 
 const COPY = {
   uploadTitle: {
@@ -31,19 +24,14 @@ const COPY = {
     es: (error: string) => `⚠️ Error: ${error}`,
     en: (error: string) => `⚠️ Error: ${error}`,
   },
-  uploadEmoji: {
-    es: '📄',
-    en: '📄',
-  },
-  chatEmoji: {
-    es: '💬',
-    en: '💬',
+  helper: {
+    es: 'Carga archivos PDF, DOCX, TXT o Markdown para enriquecer tu espacio de conocimiento.',
+    en: 'Upload PDF, DOCX, TXT or Markdown files to enrich your knowledge workspace.',
   },
 };
 
 export default function Home() {
-  const [language, setLanguage] = useState<LanguageCode>('es');
-  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(true);
+  const { language } = useUISettings();
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -66,64 +54,57 @@ export default function Home() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-      <div className="flex justify-end">
-        <button
-          onClick={() => setIsLanguageModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white shadow-sm hover:border-anclora-secondary transition-colors"
-        >
-          <span className="text-sm text-gray-500">
-            {language === 'es' ? 'Idioma' : 'Language'}
-          </span>
-          <span className="font-semibold text-gray-900">
-            {LANGUAGE_LABEL[language]}
-          </span>
-        </button>
-      </div>
-
+    <div className="container-app py-6 space-y-6">
       {notification && (
         <div
-          className={`mb-4 p-4 rounded-lg shadow-lg ${
+          className={`rounded-xl border-2 p-4 shadow-lg ${
             notification.type === 'success'
-              ? 'bg-green-50 text-green-800 border-2 border-green-300'
-              : 'bg-red-50 text-red-800 border-2 border-red-300'
+              ? 'border-green-300 bg-green-50 text-green-800'
+              : 'border-red-300 bg-red-50 text-red-800'
           }`}
         >
           {notification.message}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-180px)]">
-        <div className="bg-white rounded-lg shadow-lg p-6 border-t-4 border-anclora-primary">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 flex items-center gap-2">
-            <span className="text-2xl">{COPY.uploadEmoji[language]}</span>{' '}
-            {COPY.uploadTitle[language]}
-          </h2>
-          <UploadZone
-            onUploadSuccess={handleUploadSuccess}
-            onUploadError={handleUploadError}
-          />
-        </div>
+      <div className="grid h-[calc(100vh-220px)] grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="panel panel-primary flex flex-col justify-between bg-white">
+          <div className="space-y-3">
+            <h2 className="card-header text-gray-900">
+              <span className="text-2xl" role="img" aria-hidden>
+                📤
+              </span>
+              {COPY.uploadTitle[language]}
+            </h2>
+            <p className="text-sm text-gray-500">{COPY.helper[language]}</p>
+          </div>
+          <div className="mt-4 flex-1">
+            <UploadZone
+              onUploadSuccess={handleUploadSuccess}
+              onUploadError={handleUploadError}
+            />
+          </div>
+        </section>
 
-        <div className="bg-white rounded-lg shadow-lg flex flex-col border-t-4 border-anclora-secondary">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <span className="text-2xl">{COPY.chatEmoji[language]}</span>{' '}
+        <section className="panel panel-secondary flex flex-col bg-white">
+          <div className="border-b border-gray-100 px-6 pb-4">
+            <h2 className="card-header text-gray-900">
+              <span className="text-2xl" role="img" aria-hidden>
+                💬
+              </span>
               {COPY.chatTitle[language]}
             </h2>
+            <p className="mt-2 text-sm text-gray-500">
+              {language === 'es'
+                ? 'Formula preguntas en tu idioma. Cambia a otra lengua en cualquier momento desde el selector superior.'
+                : 'Ask questions in your preferred language. Switch languages at any time from the top selector.'}
+            </p>
           </div>
           <div className="flex-1 min-h-0">
-            <Chat language={language} />
+            <Chat />
           </div>
-        </div>
+        </section>
       </div>
-
-      <LanguageModal
-        isOpen={isLanguageModalOpen}
-        selected={language}
-        onSelect={(lang) => setLanguage(lang)}
-        onClose={() => setIsLanguageModalOpen(false)}
-      />
     </div>
   );
 }

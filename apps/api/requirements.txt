@@ -133,3 +133,6 @@ einops==0.8.0
 passlib[bcrypt]==1.7.4
 python-jose==3.3.0
 email-validator==2.2.0
+psycopg2-binary==2.9.9 \
+    --hash=sha256:977646e05232579d2e7b9c59e21dbe5261f403a88417f6a6512e70d3f8a046be \
+    --hash=sha256:b76bedd166805480ab069612119ea636f5ab8f8771e640ae103e05a4aae3e417

@@ -5,12 +5,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --anclora-primary: #d946ef;
+  --anclora-secondary: #06b6d4;
+  --anclora-ring: #f0abfc;
+  --anclora-gradient: linear-gradient(135deg, #d946ef 0%, #06b6d4 100%);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,6 +23,38 @@ body {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+.bg-anclora-primary {
+  background-color: var(--anclora-primary) !important;
+}
+
+.bg-anclora-secondary {
+  background-color: var(--anclora-secondary) !important;
+}
+
+.text-anclora-primary {
+  color: var(--anclora-primary) !important;
+}
+
+.text-anclora-secondary {
+  color: var(--anclora-secondary) !important;
+}
+
+.border-anclora-primary {
+  border-color: var(--anclora-primary) !important;
+}
+
+.border-anclora-secondary {
+  border-color: var(--anclora-secondary) !important;
+}
+
+.ring-anclora-primary {
+  --tw-ring-color: var(--anclora-ring) !important;
+}
+
+.bg-gradient-anclora {
+  background-image: var(--anclora-gradient) !important;
 }
 
 /* Utility helpers */
