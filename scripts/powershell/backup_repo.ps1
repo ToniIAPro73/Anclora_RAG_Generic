@@ -7,7 +7,7 @@
 
 $ErrorActionPreference = "Stop"
 
-function Write-Info($message) { Write-Host $message -ForegroundColor DarkGray }
+function Write-Info($message, $color = "DarkGray") { Write-Host $message -ForegroundColor $color }
 
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
 $backupsRoot = Join-Path $repoRoot "backups"
@@ -16,11 +16,11 @@ if (-not (Test-Path $backupsRoot)) { New-Item -ItemType Directory -Path $backups
 $now = Get-Date
 
 if ($Auto) {
-    $latest = Get-ChildItem -Path $backupsRoot -Filter "*.zip" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if ($latest) {
-        $hours = ($now - $latest.LastWriteTime).TotalHours
+    $lastZip = Get-ChildItem -Path $backupsRoot -Filter "*.zip" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($lastZip) {
+        $hours = ($now - $lastZip.LastWriteTime).TotalHours
         if ($hours -lt 24) {
-            Write-Info "[backup] Omitido (auto): último backup hace $([math]::Round($hours,2)) horas."
+            Write-Info "[backup] Omitido (auto): último backup hace $([math]::Round($hours,2)) h."
             return
         }
     }
@@ -58,8 +58,7 @@ foreach ($entry in $include) {
 }
 
 $excludeDirs = @("node_modules","venv",".venv","__pycache__",".mypy_cache",".pytest_cache","logs","backups",".git")
-Get-ChildItem -Path $tempDir -Recurse -Directory | Sort-Object FullName -Descending | Where-Object { $excludeDirs -contains $_.Name } | ForEach-Object {
-    Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue }
+Get-ChildItem -Path $tempDir -Recurse -Directory | Sort-Object FullName -Descending | Where-Object { $excludeDirs -contains $_.Name } | ForEach-Object { Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue }
 
 $meta = [ordered]@{
     createdAt = $now.ToString("o")
@@ -77,70 +76,77 @@ try {
 } catch { }
 
 $dockerMeta = @{}
+$dockerErrors = @()
+
+function Invoke-DockerComposeCommand {
+    param([string[]]$Args,[array]$ErrorAccumulator)
+    $command = @("compose","-f",$script:composeFile) + $Args
+    $output = & docker @command 2>&1
+    $exitCode = $LASTEXITCODE
+    if ($output) { $output | ForEach-Object { $ErrorAccumulator.Add($_) } }
+    return $exitCode
+}
+
+function Copy-FromContainer {
+    param([string]$Service,[string]$ContainerPath,[string]$Destination,[array]$ErrorAccumulator)
+    $command = @("compose","-f",$script:composeFile,"cp",$Service + ":" + $ContainerPath,$Destination)
+    $output = & docker @command 2>&1
+    $exitCode = $LASTEXITCODE
+    if ($output) { $output | ForEach-Object { $ErrorAccumulator.Add($_) } }
+    return $exitCode
+}
 
 if ($DumpDocker) {
     $composeFile = Join-Path $repoRoot "infra/docker/docker-compose.dev.yml"
     if (Test-Path $composeFile) {
+        $script:composeFile = $composeFile
         $dockerDir = Join-Path $tempDir "docker"
         New-Item -ItemType Directory -Path $dockerDir | Out-Null
-        $stderrPath = Join-Path $dockerDir "docker_dump.log"
-
-        function Invoke-DockerComposeCommand {
-    param([string[]]$Args)
-    $command = @("compose","-f",$composeFile) + $Args
-    $output = & docker @command 2>&1
-    if ($output) { $output | Out-File -Append -FilePath $stderrPath }
-    return $LASTEXITCODE
-}
-
-
-        function Copy-FromContainer {
-    param([string]$Service,[string]$ContainerPath,[string]$Destination)
-    $command = @("compose","-f",$composeFile,"cp",$Service + ":" + $ContainerPath,$Destination)
-    $output = & docker @command 2>&1
-    if ($output) { $output | Out-File -Append -FilePath $stderrPath }
-    return $LASTEXITCODE
-}
-
 
         Write-Info "[backup] Exportando contenedores..."
 
         $pgTemp = "/tmp/anclora_postgres.sql"
-        if (Invoke-DockerComposeCommand @("exec","postgres","bash","-lc", "pg_dumpall -U anclora_user > $pgTemp") -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","postgres","bash","-lc","pg_dumpall -U anclora_user > $pgTemp") $dockerErrors -eq 0) {
             $pgFile = Join-Path $dockerDir "postgres.sql"
-            if (Copy-FromContainer "postgres" $pgTemp $pgFile -eq 0) {
-                Invoke-DockerComposeCommand @("exec","postgres","rm","-f",$pgTemp) | Out-Null
+            if (Copy-FromContainer "postgres" $pgTemp $pgFile $dockerErrors -eq 0) {
                 $dockerMeta.postgres = "docker/postgres.sql"
             }
+            Invoke-DockerComposeCommand @("exec","-T","postgres","rm","-f",$pgTemp) $dockerErrors | Out-Null
         }
 
         $qdTemp = "/tmp/anclora_qdrant.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","qdrant","bash","-lc","tar czf $qdTemp -C / qdrant/storage") -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","qdrant","bash","-lc","tar czf $qdTemp -C / qdrant/storage") $dockerErrors -eq 0) {
             $qdFile = Join-Path $dockerDir "qdrant_storage.tar.gz"
-            if (Copy-FromContainer "qdrant" $qdTemp $qdFile -eq 0) {
-                Invoke-DockerComposeCommand @("exec","qdrant","rm","-f",$qdTemp) | Out-Null
+            if (Copy-FromContainer "qdrant" $qdTemp $qdFile $dockerErrors -eq 0) {
                 $dockerMeta.qdrant = "docker/qdrant_storage.tar.gz"
             }
+            Invoke-DockerComposeCommand @("exec","-T","qdrant","rm","-f",$qdTemp) $dockerErrors | Out-Null
         }
 
         $redisTemp = "/tmp/anclora_redis.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","redis","bash","-lc","tar czf $redisTemp -C / data") -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","redis","bash","-lc","tar czf $redisTemp -C / data") $dockerErrors -eq 0) {
             $redisFile = Join-Path $dockerDir "redis_data.tar.gz"
-            if (Copy-FromContainer "redis" $redisTemp $redisFile -eq 0) {
-                Invoke-DockerComposeCommand @("exec","redis","rm","-f",$redisTemp) | Out-Null
+            if (Copy-FromContainer "redis" $redisTemp $redisFile $dockerErrors -eq 0) {
                 $dockerMeta.redis = "docker/redis_data.tar.gz"
             }
+            Invoke-DockerComposeCommand @("exec","-T","redis","rm","-f",$redisTemp) $dockerErrors | Out-Null
         }
 
         $ollamaTemp = "/tmp/anclora_ollama.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","ollama","bash","-lc","tar czf $ollamaTemp -C /root .ollama") -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","ollama","bash","-lc","tar czf $ollamaTemp -C /root .ollama") $dockerErrors -eq 0) {
             $ollamaFile = Join-Path $dockerDir "ollama_data.tar.gz"
-            if (Copy-FromContainer "ollama" $ollamaTemp $ollamaFile -eq 0) {
-                Invoke-DockerComposeCommand @("exec","ollama","rm","-f",$ollamaTemp) | Out-Null
+            if (Copy-FromContainer "ollama" $ollamaTemp $ollamaFile $dockerErrors -eq 0) {
                 $dockerMeta.ollama = "docker/ollama_data.tar.gz"
             }
+            Invoke-DockerComposeCommand @("exec","-T","ollama","rm","-f",$ollamaTemp) $dockerErrors | Out-Null
         }
     }
+}
+
+if ($dockerErrors.Count -gt 0) {
+    $logPath = Join-Path $tempDir "docker_errors.log"
+    $dockerErrors | Set-Content -Path $logPath -Encoding UTF8
+    $meta.docker_errors = "docker_errors.log"
 }
 
 if ($dockerMeta.Keys.Count -gt 0) {
@@ -155,5 +161,3 @@ Compress-Archive -Path (Join-Path $tempDir "*") -DestinationPath $archivePath -C
 Write-Host "[backup] Backup creado: $archivePath" -ForegroundColor Green
 
 Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-
-
