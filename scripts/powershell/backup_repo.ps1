@@ -7,11 +7,15 @@
 
 $ErrorActionPreference = "Stop"
 
-function Write-Info($message, $color = "DarkGray") { Write-Host $message -ForegroundColor $color }
+function Write-Info($message, $color = "DarkGray") {
+    Write-Host $message -ForegroundColor $color
+}
 
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
 $backupsRoot = Join-Path $repoRoot "backups"
-if (-not (Test-Path $backupsRoot)) { New-Item -ItemType Directory -Path $backupsRoot | Out-Null }
+if (-not (Test-Path $backupsRoot)) {
+    New-Item -ItemType Directory -Path $backupsRoot | Out-Null
+}
 
 $now = Get-Date
 
@@ -57,8 +61,10 @@ foreach ($entry in $include) {
     }
 }
 
-$excludeDirs = @("node_modules","venv",".venv","__pycache__",".mypy_cache",".pytest_cache","logs","backups",".git")
-Get-ChildItem -Path $tempDir -Recurse -Directory | Sort-Object FullName -Descending | Where-Object { $excludeDirs -contains $_.Name } | ForEach-Object { Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue }
+$excludeDirs = @("node_modules","venv",".venv","__pycache__",".mypy_cache",".pytest_cache","logs","backups",".git",".next")
+Get-ChildItem -Path $tempDir -Recurse -Directory | Sort-Object FullName -Descending | Where-Object { $excludeDirs -contains $_.Name } | ForEach-Object {
+    Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 $meta = [ordered]@{
     createdAt = $now.ToString("o")
@@ -76,23 +82,23 @@ try {
 } catch { }
 
 $dockerMeta = @{}
-$dockerErrors = @()
+$dockerErrors = New-Object System.Collections.ArrayList
 
 function Invoke-DockerComposeCommand {
-    param([string[]]$Args,[array]$ErrorAccumulator)
+    param([string[]]$Args)
     $command = @("compose","-f",$script:composeFile) + $Args
     $output = & docker @command 2>&1
     $exitCode = $LASTEXITCODE
-    if ($output) { $output | ForEach-Object { $ErrorAccumulator.Add($_) } }
+    if ($output) { foreach ($line in $output) { [void]$dockerErrors.Add($line) } }
     return $exitCode
 }
 
 function Copy-FromContainer {
-    param([string]$Service,[string]$ContainerPath,[string]$Destination,[array]$ErrorAccumulator)
+    param([string]$Service,[string]$ContainerPath,[string]$Destination)
     $command = @("compose","-f",$script:composeFile,"cp",$Service + ":" + $ContainerPath,$Destination)
     $output = & docker @command 2>&1
     $exitCode = $LASTEXITCODE
-    if ($output) { $output | ForEach-Object { $ErrorAccumulator.Add($_) } }
+    if ($output) { foreach ($line in $output) { [void]$dockerErrors.Add($line) } }
     return $exitCode
 }
 
@@ -106,39 +112,39 @@ if ($DumpDocker) {
         Write-Info "[backup] Exportando contenedores..."
 
         $pgTemp = "/tmp/anclora_postgres.sql"
-        if (Invoke-DockerComposeCommand @("exec","-T","postgres","bash","-lc","pg_dumpall -U anclora_user > $pgTemp") $dockerErrors -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","postgres","bash","-lc","pg_dumpall -U anclora_user > $pgTemp") -eq 0) {
             $pgFile = Join-Path $dockerDir "postgres.sql"
-            if (Copy-FromContainer "postgres" $pgTemp $pgFile $dockerErrors -eq 0) {
+            if (Copy-FromContainer "postgres" $pgTemp $pgFile -eq 0) {
                 $dockerMeta.postgres = "docker/postgres.sql"
             }
-            Invoke-DockerComposeCommand @("exec","-T","postgres","rm","-f",$pgTemp) $dockerErrors | Out-Null
+            Invoke-DockerComposeCommand @("exec","-T","postgres","rm","-f",$pgTemp) | Out-Null
         }
 
         $qdTemp = "/tmp/anclora_qdrant.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","-T","qdrant","bash","-lc","tar czf $qdTemp -C / qdrant/storage") $dockerErrors -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","qdrant","bash","-lc","tar czf $qdTemp -C / qdrant/storage") -eq 0) {
             $qdFile = Join-Path $dockerDir "qdrant_storage.tar.gz"
-            if (Copy-FromContainer "qdrant" $qdTemp $qdFile $dockerErrors -eq 0) {
+            if (Copy-FromContainer "qdrant" $qdTemp $qdFile -eq 0) {
                 $dockerMeta.qdrant = "docker/qdrant_storage.tar.gz"
             }
-            Invoke-DockerComposeCommand @("exec","-T","qdrant","rm","-f",$qdTemp) $dockerErrors | Out-Null
+            Invoke-DockerComposeCommand @("exec","-T","qdrant","rm","-f",$qdTemp) | Out-Null
         }
 
         $redisTemp = "/tmp/anclora_redis.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","-T","redis","bash","-lc","tar czf $redisTemp -C / data") $dockerErrors -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","redis","bash","-lc","tar czf $redisTemp -C / data") -eq 0) {
             $redisFile = Join-Path $dockerDir "redis_data.tar.gz"
-            if (Copy-FromContainer "redis" $redisTemp $redisFile $dockerErrors -eq 0) {
+            if (Copy-FromContainer "redis" $redisTemp $redisFile -eq 0) {
                 $dockerMeta.redis = "docker/redis_data.tar.gz"
             }
-            Invoke-DockerComposeCommand @("exec","-T","redis","rm","-f",$redisTemp) $dockerErrors | Out-Null
+            Invoke-DockerComposeCommand @("exec","-T","redis","rm","-f",$redisTemp) | Out-Null
         }
 
         $ollamaTemp = "/tmp/anclora_ollama.tar.gz"
-        if (Invoke-DockerComposeCommand @("exec","-T","ollama","bash","-lc","tar czf $ollamaTemp -C /root .ollama") $dockerErrors -eq 0) {
+        if (Invoke-DockerComposeCommand @("exec","-T","ollama","bash","-lc","tar czf $ollamaTemp -C /root .ollama") -eq 0) {
             $ollamaFile = Join-Path $dockerDir "ollama_data.tar.gz"
-            if (Copy-FromContainer "ollama" $ollamaTemp $ollamaFile $dockerErrors -eq 0) {
+            if (Copy-FromContainer "ollama" $ollamaTemp $ollamaFile -eq 0) {
                 $dockerMeta.ollama = "docker/ollama_data.tar.gz"
             }
-            Invoke-DockerComposeCommand @("exec","-T","ollama","rm","-f",$ollamaTemp) $dockerErrors | Out-Null
+            Invoke-DockerComposeCommand @("exec","-T","ollama","rm","-f",$ollamaTemp) | Out-Null
         }
     }
 }
