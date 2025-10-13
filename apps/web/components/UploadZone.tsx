@@ -1,6 +1,6 @@
-import { useState, useRef, DragEvent, ChangeEvent } from 'react';
-import { ingestDocument } from '@/lib/api';
-import { useUISettings } from './ui-settings-context';
+import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { ingestDocument } from "@/lib/api";
+import { useUISettings } from "./ui-settings-context";
 
 interface UploadZoneProps {
   onUploadSuccess: (fileName: string, chunks: number) => void;
@@ -58,7 +58,7 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -67,9 +67,9 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
     <div
       className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
         isDragging
-          ? 'border-anclora-primary bg-purple-50 dark:border-anclora-primary/80 dark:bg-slate-900/70'
-          : 'border-gray-300 hover:border-anclora-secondary dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-anclora-secondary/70'
-      } ${isUploading ? 'pointer-events-none opacity-50' : ''} dark:text-slate-200`}
+          ? "border-anclora-primary bg-purple-50 dark:border-anclora-primary/80 dark:bg-slate-900/70"
+          : "border-gray-300 hover:border-anclora-secondary dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-anclora-secondary/70"
+      } ${isUploading ? "pointer-events-none opacity-50" : ""} dark:text-slate-200`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -86,13 +86,13 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
 
       {isUploading ? (
         <div className="py-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-anclora-primary mx-auto mb-2"></div>
+          <div className="mx-auto mb-2 h-10 w-10 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
           <p className="text-gray-600 dark:text-slate-300">Procesando documento...</p>
         </div>
       ) : (
         <>
           <svg
-            className="mx-auto h-12 w-12 text-anclora-secondary mb-4"
+            className="mx-auto mb-4 h-12 w-12 text-anclora-secondary"
             stroke="currentColor"
             fill="none"
             viewBox="0 0 48 48"
@@ -104,19 +104,19 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
               strokeLinejoin="round"
             />
           </svg>
-          <p className="text-gray-700 font-medium dark:text-slate-100 mb-2">
-            {language === 'es'
-              ? 'Arrastra un documento o haz clic para seleccionar'
-              : 'Drag & drop a document or click to select'}
+          <p className="mb-2 font-medium text-gray-700 dark:text-slate-100">
+            {language === "es"
+              ? "Arrastra un documento o haz clic para seleccionar"
+              : "Drag & drop a document or click to select"}
           </p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">
-            {language === 'es' ? 'Soporta: PDF, TXT, DOCX, MD' : 'Supported: PDF, TXT, DOCX, MD'}
+          <p className="mb-4 text-sm text-gray-500 dark:text-slate-400">
+            {language === "es" ? "Soporta: PDF, TXT, DOCX, MD" : "Supported: PDF, TXT, DOCX, MD"}
           </p>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-gradient-anclora text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md"
+            className="rounded-lg bg-gradient-anclora px-6 py-2 text-white shadow-md transition-opacity hover:opacity-90"
           >
-            {language === 'es' ? 'Seleccionar archivo' : 'Choose file'}
+            {language === "es" ? "Seleccionar archivo" : "Choose file"}
           </button>
         </>
       )}

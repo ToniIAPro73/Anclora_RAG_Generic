@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect, FormEvent } from 'react';
-import { queryDocuments } from '@/lib/api';
-import Message from './Message';
-import { useUISettings } from './ui-settings-context';
+import { useState, useRef, useEffect, FormEvent } from "react";
+import { queryDocuments } from "@/lib/api";
+import Message from "./Message";
+import { useUISettings } from "./ui-settings-context";
 
 interface ChatMessage {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   sources?: Array<{
     text: string;
@@ -13,24 +13,24 @@ interface ChatMessage {
 }
 
 const PLACEHOLDER_TEXT = {
-  es: 'Escribe tu pregunta...',
-  en: 'Type your question...',
+  es: "Escribe tu pregunta...",
+  en: "Type your question...",
 } as const;
 
 const EMPTY_STATE_TEXT = {
-  es: 'Sube un documento y comienza a hacer preguntas',
-  en: 'Upload a document and start asking questions',
+  es: "Sube un documento y comienza a hacer preguntas",
+  en: "Upload a document and start asking questions",
 } as const;
 
 export default function Chat() {
   const { language } = useUISettings();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -42,19 +42,19 @@ export default function Chat() {
     if (!input.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
-      role: 'user',
+      role: "user",
       content: input.trim(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
+    setInput("");
     setIsLoading(true);
 
     try {
       const result = await queryDocuments(userMessage.content, 3, language);
 
       const assistantMessage: ChatMessage = {
-        role: 'assistant',
+        role: "assistant",
         content: result.response,
         sources: result.sources,
       };
@@ -62,7 +62,7 @@ export default function Chat() {
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: any) {
       const errorMessage: ChatMessage = {
-        role: 'assistant',
+        role: "assistant",
         content: `Error: ${error.response?.data?.detail || error.message}`,
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -120,7 +120,7 @@ export default function Chat() {
             disabled={isLoading || !input.trim()}
             className="rounded-lg bg-gradient-anclora px-6 py-2 text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {language === 'es' ? 'Enviar' : 'Send'}
+            {language === "es" ? "Enviar" : "Send"}
           </button>
         </form>
       </div>

@@ -1,7 +1,7 @@
-type LanguageCode = 'es' | 'en';
+type LanguageCode = "es" | "en";
 
 interface MessageProps {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   language: LanguageCode;
   sources?: Array<{
@@ -11,20 +11,18 @@ interface MessageProps {
 }
 
 const SOURCES_LABEL: Record<LanguageCode, string> = {
-  es: 'Fuentes:',
-  en: 'Sources:',
+  es: "Fuentes:",
+  en: "Sources:",
 };
 
 export default function Message({ role, content, sources, language }: MessageProps) {
-  const isUser = role === 'user';
+  const isUser = role === "user";
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
       <div
-        className={`max-w-[70%] rounded-lg p-4 shadow-md ${
-          isUser
-            ? 'bg-gradient-anclora text-white'
-            : 'bg-white text-gray-900 border border-gray-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100'
+        className={`max-w-[70%] rounded-lg border border-gray-200 bg-white p-4 text-gray-900 shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 ${
+          isUser ? "bg-gradient-anclora text-white" : ""
         }`}
       >
         <p className="whitespace-pre-wrap">{content}</p>
@@ -36,7 +34,7 @@ export default function Message({ role, content, sources, language }: MessagePro
               <div key={idx} className="mb-1 text-xs opacity-70 dark:text-slate-300/80">
                 <span className="rounded bg-anclora-secondary/20 px-1 font-mono">
                   {(source.score * 100).toFixed(1)}%
-                </span>{' '}
+                </span>{" "}
                 {source.text.substring(0, 100)}...
               </div>
             ))}
