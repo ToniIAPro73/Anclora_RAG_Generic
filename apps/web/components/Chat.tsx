@@ -23,11 +23,24 @@ const EMPTY_STATE_TEXT = {
 } as const;
 
 export default function Chat() {
-  const { language } = useUISettings();
+  const { language, theme } = useUISettings();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const updateTheme = () => {
+      if (typeof document !== 'undefined') {
+        setIsDark(document.documentElement.classList.contains('dark'));
+      }
+    };
+    updateTheme();
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    media.addEventListener('change', updateTheme);
+    return () => media.removeEventListener('change', updateTheme);
+  }, [theme]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,7 +88,7 @@ export default function Chat() {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className={`flex items-center justify-center h-full ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
             <p>{EMPTY_STATE_TEXT[language]}</p>
           </div>
         ) : (
@@ -91,7 +104,11 @@ export default function Chat() {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-md">
+                <div
+                  className={`rounded-lg p-4 border shadow-md ${
+                    isDark ? 'bg-slate-900/80 border-slate-700' : 'bg-white border-gray-200'
+                  }`}
+                >
                   <div className="flex space-x-2">
                     <div className="w-2 h-2 bg-anclora-primary rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-anclora-secondary rounded-full animate-bounce delay-100"></div>
@@ -105,14 +122,22 @@ export default function Chat() {
         )}
       </div>
 
-      <div className="border-t bg-white p-4 mt-auto">
+      <div
+        className={`border-t p-4 mt-auto ${
+          isDark ? 'border-slate-700 bg-transparent' : 'border-gray-200 bg-white'
+        }`}
+      >
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={PLACEHOLDER_TEXT[language]}
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-anclora-primary"
+            className={`flex-1 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 ${
+              isDark
+                ? 'bg-slate-800 border border-slate-600 text-slate-100 placeholder-slate-400 focus:border-anclora-secondary focus:ring-anclora-secondary/60'
+                : 'border border-gray-300 bg-white text-gray-900 focus:border-anclora-primary focus:ring-anclora-primary'
+            }`}
             disabled={isLoading}
           />
           <button
