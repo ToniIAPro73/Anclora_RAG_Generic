@@ -67,9 +67,9 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
     <div
       className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
         isDragging
-          ? 'border-anclora-primary bg-purple-50'
-          : 'border-gray-300 hover:border-anclora-secondary'
-      } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          ? 'border-anclora-primary bg-purple-50 dark:border-anclora-primary/80 dark:bg-slate-900/70'
+          : 'border-gray-300 hover:border-anclora-secondary dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-anclora-secondary/70'
+      } ${isUploading ? 'pointer-events-none opacity-50' : ''} dark:text-slate-200`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -87,7 +87,7 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
       {isUploading ? (
         <div className="py-4">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-anclora-primary mx-auto mb-2"></div>
-          <p className="text-gray-600">Procesando documento...</p>
+          <p className="text-gray-600 dark:text-slate-300">Procesando documento...</p>
         </div>
       ) : (
         <>
@@ -104,12 +104,12 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
               strokeLinejoin="round"
             />
           </svg>
-          <p className="text-gray-700 font-medium mb-2">
+          <p className="text-gray-700 font-medium dark:text-slate-100 mb-2">
             {language === 'es'
               ? 'Arrastra un documento o haz clic para seleccionar'
               : 'Drag & drop a document or click to select'}
           </p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">
             {language === 'es' ? 'Soporta: PDF, TXT, DOCX, MD' : 'Supported: PDF, TXT, DOCX, MD'}
           </p>
           <button
