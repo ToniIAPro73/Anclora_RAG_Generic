@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import UploadZone from '@/components/UploadZone';
@@ -16,13 +16,13 @@ const COPY = {
   },
   success: {
     es: (file: string, chunks: number) =>
-      `✅ ${file} indexado con ${chunks} fragmentos`,
+      `Ã¢Å“â€¦ ${file} indexado con ${chunks} fragmentos`,
     en: (file: string, chunks: number) =>
-      `✅ ${file} indexed with ${chunks} chunks`,
+      `Ã¢Å“â€¦ ${file} indexed with ${chunks} chunks`,
   },
   error: {
-    es: (error: string) => `⚠️ Error: ${error}`,
-    en: (error: string) => `⚠️ Error: ${error}`,
+    es: (error: string) => `Ã¢Å¡Â Ã¯Â¸Â Error: ${error}`,
+    en: (error: string) => `Ã¢Å¡Â Ã¯Â¸Â Error: ${error}`,
   },
   helper: {
     es: 'Carga archivos PDF, DOCX, TXT o Markdown para enriquecer tu espacio de conocimiento.',
@@ -67,7 +67,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:min-h-[calc(100vh-220px)] lg:auto-rows-fr">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:min-h-[calc(100vh-280px)]">
         <section className="panel panel-primary flex flex-col bg-white lg:h-full">
           <div className="space-y-3">
             <h2 className="card-header text-gray-900">
