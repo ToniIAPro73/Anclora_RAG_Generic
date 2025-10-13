@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+﻿from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 import sys
 import os
 
@@ -19,6 +19,7 @@ CT = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": parse_docx_bytes,
     "text/markdown": parse_markdown_bytes,
     "text/plain": parse_text_bytes,
+    "application/octet-stream": parse_markdown_bytes,
 }
 
 @router.post("/ingest")

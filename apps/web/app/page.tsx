@@ -67,8 +67,8 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-        <section className="panel panel-primary flex flex-col bg-white">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:min-h-[calc(100vh-220px)] lg:auto-rows-fr">
+        <section className="panel panel-primary flex flex-col bg-white lg:h-full">
           <div className="space-y-3">
             <h2 className="card-header text-gray-900">
               <span className="text-2xl" role="img" aria-hidden>
@@ -78,7 +78,7 @@ export default function Home() {
             </h2>
             <p className="text-sm text-gray-500">{COPY.helper[language]}</p>
           </div>
-          <div className="mt-4 flex-1">
+          <div className="mt-4 flex-1 flex flex-col">
             <UploadZone
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}
@@ -86,7 +86,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="panel panel-secondary flex flex-col bg-white">
+        <section className="panel panel-secondary flex flex-col bg-white lg:h-full">
           <div className="border-b border-gray-100 px-6 pb-4">
             <h2 className="card-header text-gray-900">
               <span className="text-2xl" role="img" aria-hidden>
@@ -100,7 +100,7 @@ export default function Home() {
                 : 'Ask questions in your preferred language. Switch languages at any time from the top selector.'}
             </p>
           </div>
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 flex flex-col">
             <Chat />
           </div>
         </section>

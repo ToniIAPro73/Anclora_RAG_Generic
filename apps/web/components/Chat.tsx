@@ -105,7 +105,7 @@ export default function Chat() {
         )}
       </div>
 
-      <div className="border-t bg-white p-4">
+      <div className="border-t bg-white p-4 mt-auto">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"

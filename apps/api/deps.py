@@ -17,7 +17,7 @@ def _dev_user() -> UserPublic:
     now = datetime.utcnow()
     return UserPublic(
         id=uuid4(),
-        email="dev@anclora.local",
+        email="dev@anclora.dev",
         first_name="Anclora",
         last_name="Dev",
         role=UserRole.ADMIN,
