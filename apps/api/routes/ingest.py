@@ -1,39 +1,70 @@
-﻿from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+﻿@'
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 import sys
 import os
+from pathlib import Path
+import tempfile
+from redis import Redis
+from rq import Queue
 
-# Add the project root to Python path for absolute imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
-from rag.pipeline import index_text
 from deps import require_admin
-from packages.parsers.pdf import parse_pdf_bytes
-from packages.parsers.docx_parser import parse_docx_bytes
-from packages.parsers.markdown import parse_markdown_bytes
-from packages.parsers.text import parse_text_bytes
 
 router = APIRouter(tags=["ingest"])
 
+# Content type to parser mapping
 CT = {
-    "application/pdf": parse_pdf_bytes,
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": parse_docx_bytes,
-    "text/markdown": parse_markdown_bytes,
-    "text/plain": parse_text_bytes,
-    "application/octet-stream": parse_markdown_bytes,
+    "application/pdf": "pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+    "text/markdown": "markdown",
+    "text/plain": "text",
+    "application/octet-stream": "markdown",
 }
+
+def get_redis_queue() -> Queue:
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    redis_conn = Redis.from_url(redis_url)
+    return Queue("ingestion_queue", connection=redis_conn)
 
 @router.post("/ingest")
 async def ingest(
     file: UploadFile = File(...),
     _: None = Depends(require_admin),
 ):
-    parser = CT.get(file.content_type)
-    if not parser:
+    """Ingesta asíncrona de documento individual."""
+    parser_type = CT.get(file.content_type)
+    if not parser_type:
         raise HTTPException(400, f"Unsupported file type: {file.content_type}")
-    raw = await file.read()
-    text = parser(raw)
-    if not text.strip():
-        raise HTTPException(400, "Empty content after parsing")
-    n = index_text(doc_id=file.filename, text=text)
-    return {"file": file.filename, "chunks": n}
-
+    
+    # Guardar archivo temporalmente
+    temp_dir = Path(tempfile.gettempdir()) / "anclora_ingestion"
+    temp_dir.mkdir(exist_ok=True)
+    
+    file_path = temp_dir / file.filename
+    content = await file.read()
+    
+    if not content:
+        raise HTTPException(400, "Empty file")
+    
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Encolar procesamiento
+    queue = get_redis_queue()
+    from workers.ingestion_worker import process_single_document
+    
+    job = queue.enqueue(
+        process_single_document,
+        file_path=str(file_path),
+        filename=file.filename,
+        content_type=file.content_type,
+        job_timeout='30m'
+    )
+    
+    return {
+        "message": f"Documento '{file.filename}' encolado para procesamiento",
+        "job_id": job.id,
+        "status": "queued"
+    }
+'@ | Set-Content routes/ingest.py -Encoding UTF8
