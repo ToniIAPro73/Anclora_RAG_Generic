@@ -12,9 +12,9 @@ from redis import Redis
 from rq import Queue
 from sqlalchemy.orm import Session
 
-from apps.api.database.postgres_client import get_db
-from apps.api.database.batch_manager import BatchManager
-from apps.api.workers.ingestion_worker import process_document_task
+from database.postgres_client import get_db
+from database.batch_manager import BatchManager
+from workers.ingestion_worker import process_document_task
 
 
 router = APIRouter(prefix="/batch", tags=["batch"])

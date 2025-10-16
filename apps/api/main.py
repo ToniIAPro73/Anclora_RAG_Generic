@@ -1,4 +1,4 @@
-routersfrom fastapi import FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
@@ -20,7 +20,7 @@ try:
     from routes.ingest import router as ingest_router
     from routes.health import router as health_router
     from routes.query import router as query_router
-    from routes.batch import router as batch_router
+    # from routes.batch import router as batch_router  # Temporarily disabled
 except ImportError as e:
     print(f"Import error: {e}")
     print("Available paths:", sys.path)
@@ -54,7 +54,8 @@ app.include_router(auth_router)
 app.include_router(health_router)
 app.include_router(ingest_router)
 app.include_router(query_router)
-app.include_router(batch_router)
+# Temporarily disabled batch router due to import errors
+# app.include_router(batch_router)
 
 @app.get("/")
 async def root():

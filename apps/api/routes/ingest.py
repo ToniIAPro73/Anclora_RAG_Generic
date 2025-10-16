@@ -1,4 +1,3 @@
-﻿@'
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 import sys
 import os
@@ -67,4 +66,3 @@ async def ingest(
         "job_id": job.id,
         "status": "queued"
     }
-'@ | Set-Content routes/ingest.py -Encoding UTF8

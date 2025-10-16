@@ -1,0 +1,385 @@
+[
+  {
+    "id": "TC001",
+    "title": "Document Upload - PDF file successful ingestion",
+    "description": "Verify that uploading a valid PDF file through the drag-and-drop interface is successfully processed, parsed, chunked, embedded, and stored with accurate chunk counts returned.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the main dashboard upload area"
+      },
+      {
+        "type": "action",
+        "description": "Drag-and-drop a well-formed PDF document for upload"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that upload progress is displayed and reaches 100%"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the system returns a response with a chunk count matching the expected segments of the document"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the document is indexed and retrievable for querying"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Document Upload - DOCX file ingestion with accented filename normalization",
+    "description": "Ensure DOCX files uploaded with accented or non-ASCII characters in the filename are normalized correctly on both UI and backend, and processed without error.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Upload a DOCX file with accented characters in the filename"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the UI normalizes the filename display removing special characters"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify backend stores the file with normalized filename"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the document is parsed, chunked, embedded, and vector stored successfully"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Document Upload - Unsupported file type rejection",
+    "description": "Verify the system rejects unsupported document types (e.g., .exe, .jpg) at upload and provides appropriate error feedback to the user.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to upload an unsupported file type such as .exe or .jpg"
+      },
+      {
+        "type": "assertion",
+        "description": "Check upload is rejected with an error message indicating unsupported file type"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no processing or ingestion occurs for rejected files"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Interactive Chat - English query with AI-generated answer and source citation",
+    "description": "Test English natural language query input through the chat returns an AI-generated answer referencing relevant indexed source documents.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enter a natural language question in English into the chat interface"
+      },
+      {
+        "type": "action",
+        "description": "Submit the query to initiate backend vector retrieval and LLM response"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the response contains a meaningful AI-generated answer relevant to indexed documents"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the response includes citations referencing source documents with metadata"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Interactive Chat - Spanish query with AI-generated answer and source citation",
+    "description": "Verify that submitting a natural language query in Spanish returns an AI-generated response with relevant sourced citations correctly localized.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set UI language preference to Spanish"
+      },
+      {
+        "type": "action",
+        "description": "Enter a query in Spanish in the chat interface"
+      },
+      {
+        "type": "action",
+        "description": "Submit query to backend"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that the AI-generated response is coherent and contextually relevant in Spanish"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify displayed sources and metadata are consistent with indexed documents"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "UI Settings - Theme toggling persists between sessions",
+    "description": "Verify that switching between light and dark themes updates the UI dynamically and persists the choice using localStorage for future visits without page reload.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to settings page"
+      },
+      {
+        "type": "action",
+        "description": "Toggle theme from light to dark"
+      },
+      {
+        "type": "assertion",
+        "description": "Check UI theme changes immediately with no page reload"
+      },
+      {
+        "type": "action",
+        "description": "Close and re-open the application"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected dark theme is applied on load based on stored preference"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "UI Settings - Language selection persists and localizes interface",
+    "description": "Ensure that switching the language setting to either Spanish or English updates the UI text dynamically and persists across sessions with localStorage.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Change UI language setting from English to Spanish"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify UI text is translated to Spanish immediately without page reload"
+      },
+      {
+        "type": "action",
+        "description": "Refresh or reopen the app"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the UI loads using the persisted Spanish language preference"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Authentication - OAuth2/JWT secure access enforcement",
+    "description": "Verify that API endpoints require valid JWT tokens for access in production mode and reject unauthorized requests.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to access protected API endpoints without an authorization token"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify API returns 401 Unauthorized response"
+      },
+      {
+        "type": "action",
+        "description": "Use an invalid or expired JWT token to access API"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify API returns 401 Unauthorized response"
+      },
+      {
+        "type": "action",
+        "description": "Use a valid JWT token to access API endpoints"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm API request is processed successfully"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Authentication - Development mode bypass with AUTH_BYPASS=true",
+    "description": "Verify that setting AUTH_BYPASS=true allows unrestricted API access without authentication tokens to facilitate local development testing.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set environment variable AUTH_BYPASS=true in local development"
+      },
+      {
+        "type": "action",
+        "description": "Access protected API endpoints without tokens"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm requests are permitted and return expected data"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Health Check Endpoint - Operational status and metadata",
+    "description": "Verify that the /health endpoint returns HTTP status 200 OK with service metadata confirming operational status, suitable for monitoring integration.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Send GET request to /health endpoint"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm HTTP 200 OK response is returned"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify response payload contains expected service metadata such as version and uptime"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Drag-and-Drop Upload - Progress and success feedback",
+    "description": "Verify that the drag-and-drop upload component shows accurate progress updates and displays success or failure messages after upload completion.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform drag-and-drop upload of a supported document"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm progress bar reflects actual upload progress"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify display of success message upon successful processing"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to upload an unsupported or corrupted file"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify appropriate failure message is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "API Performance - Endpoint response time and error handling",
+    "description": "Ensure all API endpoints respond within expected timeframes under normal load and properly handle errors with informative error messages.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Send valid requests to core API endpoints (/ingest, /query, /health)"
+      },
+      {
+        "type": "assertion",
+        "description": "Measure and confirm response times meet defined performance criteria"
+      },
+      {
+        "type": "action",
+        "description": "Send malformed or invalid requests to these endpoints"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify API returns appropriate HTTP error codes and user-readable error messages"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Batch Processing Framework Presence and Documentation",
+    "description": "Verify that the batch processing framework endpoints and UI elements exist and are documented despite backend asynchronous ingestion not yet implemented.",
+    "category": "functional",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the advanced ingestion UI page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify batch and GitHub import features are displayed with documentation notes"
+      },
+      {
+        "type": "action",
+        "description": "Check that API routes /batch/* exist and respond with placeholder or documented messages"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm backend endpoints respond appropriately indicating pending implementation"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Query Handling - Empty and excessively long input edge cases",
+    "description": "Verify that the system handles empty queries gracefully with error feedback, and processes very long queries by truncation or error without system failure.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Submit an empty query string in the chat interface"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify system returns a validation error indicating query cannot be empty"
+      },
+      {
+        "type": "action",
+        "description": "Submit an excessively long query string exceeding expected token limits"
+      },
+      {
+        "type": "assertion",
+        "description": "Check the system truncates input appropriately or returns an error without crashing"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "RAG Pipeline - Chunking and embedding with token overlap",
+    "description": "Verify the document chunking logic splits documents into chunks of 512 tokens with 80 token overlap and embeddings are stored correctly for vector retrieval.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Upload a large document exceeding 512 tokens"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm document is chunked into multiple segments of ~512 tokens with 80 tokens overlapping between chunks"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify each chunk is embedded and stored in Qdrant vector database"
+      }
+    ]
+  }
+]

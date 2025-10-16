@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "project": "Anclora RAG Generic",
+    "date": "2025-10-15",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "Anclora RAG Generic is a multilingual Retrieval-Augmented Generation system combining document ingestion, vector indexing, and natural language querying to deliver AI-powered knowledge access via a web interface.",
+  "core_goals": [
+    "Centralize organizational knowledge by ingesting diverse document formats into a unified searchable index",
+    "Enable natural language queries with AI-generated responses referencing source documents",
+    "Support multilingual interactions in Spanish and English with persistent customizable UI settings",
+    "Ensure secure access through OAuth2/JWT authentication mechanisms with local development bypass",
+    "Provide a scalable, reliable architecture using FastAPI backend, Next.js frontend, and robust vector search with Qdrant"
+  ],
+  "key_features": [
+    "Document ingestion pipeline supporting PDF, DOCX, TXT, and Markdown with chunking, embedding, and vector storage in Qdrant",
+    "Interactive chat interface for conversational querying of indexed documents with contextual AI-generated answers and source citations",
+    "Drag-and-drop document upload interface with file name normalization and upload progress feedback",
+    "UI configuration settings including theme toggling (light/dark), language selection (Spanish/English), typography, and UI density adjustments persisting across sessions",
+    "Health check endpoint and API monitoring for system reliability",
+    "OAuth2/JWT authentication with development mode bypass for easy local testing",
+    "Batch processing capabilities planned for asynchronous multi-document ingestion",
+    "Multilingual support throughout querying and UI interaction with persistent language settings"
+  ],
+  "user_flow_summary": [
+    "User accesses the main dashboard to upload documents via drag-and-drop; upon upload, documents are parsed, chunked, embedded, and stored in the vector database",
+    "User enters natural language queries in the chat interface; queries are sent to backend for vector similarity retrieval and AI response generation with source metadata",
+    "User views chat conversation history with answers and referenced document sources",
+    "User configures UI preferences including theme, language, typography, and density on the settings page; changes persist using local storage",
+    "System authenticates API requests via OAuth2/JWT, with bypass enabled for local development",
+    "Health endpoint provides operational status for monitoring",
+    "Advanced ingestion documentation is available via dedicated UI for batch and GitHub import features (backend pending implementation)"
+  ],
+  "validation_criteria": [
+    "Document uploads accept and correctly process PDF, DOCX, TXT, and Markdown files with accurate chunk counts returned",
+    "AI-generated responses to queries include relevant sourced document references and support Spanish and English languages",
+    "UI settings persist and dynamically apply without page reload; language choice is maintained across sessions",
+    "Authentication enforces secure access in production and supports bypass in development",
+    "Health check endpoint returns 200 OK and service metadata confirming operational status",
+    "API endpoints respond within expected timeframes with acceptable error handling and notifications on failures",
+    "Drag-and-drop upload shows progress and success/failure feedback accurately",
+    "Batch processing framework exists and is documented, with plans for future asynchronous ingestion implementation",
+    "System handles file name normalization including accented characters both in UI and backend processing"
+  ],
+  "code_summary": {
+    "project_name": "Anclora RAG Generic",
+    "description": "A RAG (Retrieval-Augmented Generation) system with FastAPI backend and Next.js frontend for document processing, indexing, and intelligent querying",
+    "architecture": "Monorepo with separate frontend (Next.js 15) and backend (FastAPI) applications",
+    "tech_stacks": {
+      "frontend": {
+        "framework": "Next.js 15.5.4",
+        "runtime": "React 19.1.0",
+        "language": "TypeScript 5",
+        "styling": "Tailwind CSS 3.4.14",
+        "http_client": "axios 1.12.2",
+        "dev_port": 3030
+      },
+      "backend": {
+        "framework": "FastAPI 0.118.0",
+        "language": "Python 3.x",
+        "server": "Uvicorn 0.37.0",
+        "rag_framework": "LlamaIndex 0.14.4",
+        "vector_store": "Qdrant 1.15.1",
+        "llm": "Ollama (llama3.2:1b default)",
+        "embeddings": "HuggingFace nomic-embed-text-v1.5 (768 dimensions)",
+        "document_parsing": [
+          "pdfplumber 0.11.0",
+          "python-docx 1.1.2",
+          "unstructured 0.18.15"
+        ],
+        "database": "PostgreSQL with SQLAlchemy 2.0.43",
+        "cache": "Redis 6.4.0",
+        "task_queue": "RQ 2.6.0",
+        "testing": [
+          "pytest 8.4.2",
+          "pytest-asyncio 1.2.0"
+        ],
+        "dev_port": 8030,
+        "production_port": 8000
+      },
+      "infrastructure": {
+        "containerization": "Docker Compose",
+        "services": [
+          "postgres:16-alpine (port 5462)",
+          "qdrant:v1.7.4 (port 6363)",
+          "redis:7.2-alpine (port 6389)",
+          "ollama:latest (port 11464)"
+        ]
+      }
+    },
+    "features": {
+      "frontend": [
+        {
+          "name": "Document Upload",
+          "description": "Drag-and-drop interface for uploading PDF, DOCX, TXT, and Markdown files",
+          "location": "apps/web/app/page.tsx, apps/web/components/UploadZone.tsx"
+        },
+        {
+          "name": "Interactive Chat",
+          "description": "Chat interface for querying indexed documents with natural language",
+          "location": "apps/web/components/Chat.tsx"
+        },
+        {
+          "name": "UI Settings",
+          "description": "Configurable theme (light/dark), language (ES/EN), typography, and density settings",
+          "location": "apps/web/app/configuracion/page.tsx, apps/web/components/ui-settings-context.tsx"
+        },
+        {
+          "name": "Advanced Ingestion UI",
+          "description": "Documentation view for advanced ingestion features (backend not implemented)",
+          "location": "apps/web/app/ingesta-avanzada/page.tsx"
+        },
+        {
+          "name": "Multilingual Support",
+          "description": "Spanish and English language support with localStorage persistence",
+          "location": "apps/web/components/ui-settings-context.tsx"
+        }
+      ],
+      "backend": [
+        {
+          "name": "Document Ingestion",
+          "description": "Upload and process documents (PDF, DOCX, TXT, MD) into vector embeddings",
+          "endpoint": "POST /ingest",
+          "location": "apps/api/routes/ingest.py"
+        },
+        {
+          "name": "RAG Query",
+          "description": "Query indexed documents with natural language and receive AI-generated answers with sources",
+          "endpoint": "POST /query",
+          "location": "apps/api/routes/query.py"
+        },
+        {
+          "name": "Health Check",
+          "description": "Service health monitoring endpoint",
+          "endpoint": "GET /health",
+          "location": "apps/api/routes/health.py"
+        },
+        {
+          "name": "Batch Operations",
+          "description": "Batch processing endpoints (planned feature)",
+          "endpoint": "/batch/*",
+          "location": "apps/api/routes/batch.py"
+        },
+        {
+          "name": "Authentication",
+          "description": "OAuth2/JWT authentication (currently bypassed for local dev with AUTH_BYPASS=true)",
+          "endpoint": "/auth/*",
+          "location": "apps/api/routes/auth.py"
+        },
+        {
+          "name": "RAG Pipeline",
+          "description": "Core RAG logic with SentenceSplitter (512 tokens, 80 overlap), vector storage in Qdrant",
+          "location": "apps/api/rag/pipeline.py"
+        },
+        {
+          "name": "Background Workers",
+          "description": "RQ-based task queue for async ingestion (declared but not yet utilized)",
+          "location": "apps/api/workers/"
+        }
+      ]
+    },
+    "key_components": {
+      "frontend": [
+        "apps/web/app/page.tsx - Main dashboard with upload and chat",
+        "apps/web/app/configuracion/page.tsx - Settings page",
+        "apps/web/components/UploadZone.tsx - File upload component",
+        "apps/web/components/Chat.tsx - Chat interface",
+        "apps/web/components/ui-settings-context.tsx - Global UI state management"
+      ],
+      "backend": [
+        "apps/api/main.py - FastAPI application entry point",
+        "apps/api/routes/ - API route handlers",
+        "apps/api/rag/pipeline.py - RAG pipeline core logic",
+        "apps/api/models/ - Database and data models",
+        "apps/api/services/ - Business logic layer",
+        "apps/api/clients/ - External service clients (Qdrant, Ollama)",
+        "packages/parsers/ - Document parsing modules"
+      ]
+    },
+    "testing_notes": {
+      "current_state": "Pytest framework set up but minimal test coverage",
+      "auth_bypass": "AUTH_BYPASS=true enables unrestricted access for local testing",
+      "known_limitations": [
+        "Ingestion is currently synchronous (blocks API during uploads)",
+        "No caching - LLM and index recreated per request",
+        "Advanced ingestion features (batch, GitHub import) UI exists but backend not implemented"
+      ]
+    }
+  }
+}
