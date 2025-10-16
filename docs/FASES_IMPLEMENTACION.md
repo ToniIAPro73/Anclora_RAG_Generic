@@ -1,6 +1,7 @@
 # Plan de Fases e Infraestructura Recomendada
 
 ## 1. Desarrollo (local / equipo reducido)
+
 - **Objetivo**: iteración rápida sobre funcionalidades, UX y pipeline RAG.
 - **Arquitectura recomendada**:
   - `docker-compose` con Postgres, Redis, Qdrant, Ollama y FastAPI worker (como en este repositorio).
@@ -10,6 +11,7 @@
   - Integración con GitHub Actions mínima (lint + tests unitarios) para evitar regresiones tempranas.
 
 ## 2. Pruebas / Staging
+
 - **Objetivo**: validar integración extremo a extremo, seguridad básica y rendimiento.
 - **Arquitectura recomendada**:
   - Despliegue en contenedores sobre un orquestador ligero (AWS ECS/Fargate o Azure Container Apps).
@@ -20,6 +22,7 @@
   - Observabilidad básica (Prometheus + Grafana o AWS CloudWatch dashboards).
 
 ## 3. Implantación en Pymes
+
 - **Objetivo**: ofrecer un entorno fiable y mantenible con costes ajustados y soporte limitado.
 - **Arquitectura recomendada**:
   - Kubernetes gestionado (AKS/EKS/GKE) con autoescalado moderado; despliegues mediante Helm/Argo CD.
@@ -31,6 +34,7 @@
   - Autenticación: SSO (Azure AD/Okta), roles diferenciados, rotación de secretos (AWS Secrets Manager).
 
 ## 4. Implantación en Grandes Empresas
+
 - **Objetivo**: alta disponibilidad, escalado global, cumplimiento normativo y seguridad avanzada.
 - **Arquitectura recomendada**:
   - Kubernetes multi-región (EKS/GKE Autopilot) con nodos GPU dedicados, HPA y políticas de resiliencia (PodDisruptionBudgets, zonal failover).
@@ -45,5 +49,6 @@
   - Automatización: Terraform / Pulumi para infra, GitOps (Argo CD), blue/green o canary deployments.
 
 ### Notas generales
+
 - A medida que se avanza de fase, migrar configuraciones (`.env`) a gestores de secretos y mantener paridad de entornos.
 - Las recomendaciones contemplan modelos de código abierto por defecto; la sustitución por APIs cerradas debe evaluarse según compliance y coste.

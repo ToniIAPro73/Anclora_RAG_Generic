@@ -18,7 +18,7 @@ Implementar un sistema robusto de ingesta multi-formato que permita procesar doc
 
 ### 1.3 Arquitectura de Alto Nivel
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                    FRONTEND                         │
 │  ┌──────────┐  ┌──────────┐  ┌────────────────┐   │
@@ -72,6 +72,7 @@ Implementar un sistema robusto de ingesta multi-formato que permita procesar doc
 ### 2.1 Batch Manager
 
 **Responsabilidades:**
+
 - Crear y gestionar lotes de ingesta
 - Validar tamaño total del lote
 - Asignar identificadores únicos
@@ -239,6 +240,7 @@ class BatchManager:
 ### 2.2 File Validator
 
 **Criterios de Validación:**
+
 1. Extensión en lista permitida
 2. Tamaño individual < MAX_FILE_SIZE
 3. Tamaño total del batch < MAX_BATCH_SIZE
@@ -381,7 +383,7 @@ class FileValidator:
 
 **Estrategia de Parseo:**
 
-```
+```text
 Document → Parser Router → Specialized Parser → Structured Output
 ```
 
@@ -1422,6 +1424,7 @@ async def parse_pdf(file_path: Path):
 ### 4.2 Dashboard Grafana
 
 **Paneles Sugeridos:**
+
 1. **Throughput**: Documentos procesados por minuto
 2. **Queue Health**: Tamaño de colas y latencia
 3. **Error Rate**: Tasa de fallos por tipo de parser
@@ -1514,15 +1517,18 @@ class TestIngestionPipeline:
 
 ### 6.1 Problemas Comunes
 
-**Error: "No se pudo parsear PDF"**
+#### Error: "No se pudo parsear PDF"
+
 - **Causa**: PDF corrupto o protegido por contraseña
 - **Solución**: Validar integridad del archivo, intentar con `qpdf --decrypt`
 
-**Error: "Timeout en embedding"**
+#### Error: "Timeout en embedding"
+
 - **Causa**: Chunk demasiado grande o GPU sobrecargada
 - **Solución**: Reducir tamaño de chunk, escalar workers
 
-**Error: "Out of memory en parsing"**
+#### Error: "Out of memory en parsing"
+
 - **Causa**: Documento muy grande (>100MB)
 - **Solución**: Implementar streaming parsing, aumentar RAM del worker
 
@@ -1555,18 +1561,21 @@ logger.error(f"Error en parseo: {str(e)}", exc_info=True)
 ## 7. Roadmap de Mejoras
 
 ### Fase 1 (Actual)
+
 - [x] Parseo multi-formato básico
 - [x] Chunking semántico
 - [x] Sistema de colas
 - [ ] Tests de integración
 
 ### Fase 2
+
 - [ ] Parseo incremental (solo documentos nuevos/modificados)
 - [ ] Deduplicación avanzada con MinHash LSH
 - [ ] Extracción de entidades (NER)
 - [ ] Soporte para imágenes (OCR + image embeddings)
 
 ### Fase 3
+
 - [ ] Parsing distribuido (múltiples workers en paralelo)
 - [ ] Versionado de documentos
 - [ ] Pipeline de re-indexación automática
