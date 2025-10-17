@@ -72,6 +72,12 @@ async def sign_in(payload: SignInRequest):
     return TokenResponse(access_token=token, user=user)
 
 
+@router.post("/login", response_model=TokenResponse)
+async def login(payload: SignInRequest):
+    """Alias for sign-in endpoint to maintain compatibility with tests."""
+    return await sign_in(payload)
+
+
 @router.get("/me", response_model=MeResponse)
 async def get_me(current_user: UserPublic = Depends(require_active_user)):
     return current_user
