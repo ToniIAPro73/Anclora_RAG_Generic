@@ -4,29 +4,34 @@
 ---
 
 ## 1️⃣ Document Metadata
+
 - **Project Name:** Anclora RAG Generic
 - **Date:** 2025-10-16
 - **Prepared by:** TestSprite AI Team
 - **Test Type:** Backend API Integration Testing
 - **Total Tests Executed:** 7
 - **Pass Rate:** 42.86%
-- **API Base URL:** http://localhost:8030
+- **API Base URL:** <http://localhost:8030>
 
 ---
 
 ## 2️⃣ Requirement Validation Summary
 
 ### Requirement: Document Ingestion API
+
 **Description:** POST /ingest endpoint for processing and indexing documents
 
 #### Test TC001
+
 - **Test Name:** document ingestion endpoint accepts supported file formats
 - **Test Code:** [TC001_document_ingestion_endpoint_accepts_supported_file_formats.py](./TC001_document_ingestion_endpoint_accepts_supported_file_formats.py)
 - **Test Error:**
-```
+
+```text
 AssertionError: Ingestion failed for sample.pdf with status code 500
 ```
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/55380673-fc6b-4b33-aaf0-df58163a4692
+
+- **Test Visualization and Result:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/55380673-fc6b-4b33-aaf0-df58163a4692>
 - **Status:** ❌ Failed
 - **Severity:** CRITICAL
 - **Analysis / Findings:** **Critical backend failure**. The `/ingest` endpoint returns HTTP 500 (Internal Server Error) when attempting to upload PDF files. This is a core functionality failure. Possible causes:
@@ -48,13 +53,16 @@ AssertionError: Ingestion failed for sample.pdf with status code 500
 ---
 
 #### Test TC005
+
 - **Test Name:** drag and drop upload interface shows progress and feedback
 - **Test Code:** [TC005_drag_and_drop_upload_interface_shows_progress_and_feedback.py](./TC005_drag_and_drop_upload_interface_shows_progress_and_feedback.py)
 - **Test Error:**
-```
+
+```text
 AssertionError: Expected 200 OK but got 500
 ```
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/02f9a6e8-9779-4ed4-9098-dfd01a4352c7
+
+- **Test Visualization and Result:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/02f9a6e8-9779-4ed4-9098-dfd01a4352c7>
 - **Status:** ❌ Failed
 - **Severity:** CRITICAL
 - **Analysis / Findings:** Same root cause as TC001. The upload interface cannot function because the backend `/ingest` endpoint is failing with HTTP 500. This confirms the issue is in the backend API, not the frontend.
@@ -62,16 +70,20 @@ AssertionError: Expected 200 OK but got 500
 ---
 
 ### Requirement: RAG Query API
+
 **Description:** POST /query endpoint for querying indexed documents with AI-generated responses
 
 #### Test TC002
+
 - **Test Name:** rag query endpoint returns ai generated answers with sources
 - **Test Code:** [TC002_rag_query_endpoint_returns_ai_generated_answers_with_sources.py](./TC002_rag_query_endpoint_returns_ai_generated_answers_with_sources.py)
 - **Test Error:**
-```
+
+```text
 AssertionError: Response JSON missing 'answer' field
 ```
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/3e4b7f46-d48e-4add-902b-05f6e4dda70d
+
+- **Test Visualization and Result:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/3e4b7f46-d48e-4add-902b-05f6e4dda70d>
 - **Status:** ❌ Failed
 - **Severity:** HIGH
 - **Analysis / Findings:** **API contract violation**. The `/query` endpoint is not returning the expected response format. The response is missing the `answer` field that clients expect. Possible causes:
@@ -81,6 +93,7 @@ AssertionError: Response JSON missing 'answer' field
   4. Error being returned as JSON without proper formatting
 
   **Expected Response Format:**
+
   ```json
   {
     "answer": "AI-generated response",
@@ -99,12 +112,14 @@ AssertionError: Response JSON missing 'answer' field
 ---
 
 ### Requirement: Health Monitoring
+
 **Description:** GET /health endpoint for service health checks
 
 #### Test TC003
+
 - **Test Name:** health check endpoint returns operational status
 - **Test Code:** [TC003_health_check_endpoint_returns_operational_status.py](./TC003_health_check_endpoint_returns_operational_status.py)
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/56b4e490-7f1b-4525-9a36-2f8dad221fb7
+- **Test Visualization and Result:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/56b4e490-7f1b-4525-9a36-2f8dad221fb7>
 - **Status:** ✅ Passed
 - **Severity:** LOW
 - **Analysis / Findings:** Health check endpoint works correctly and returns `{"status": "healthy"}`. This confirms the FastAPI application is running and accessible. The endpoint is properly implemented at `apps/api/routes/health.py`.
@@ -112,16 +127,20 @@ AssertionError: Response JSON missing 'answer' field
 ---
 
 ### Requirement: Authentication & Security
+
 **Description:** OAuth2/JWT authentication with development bypass mode
 
 #### Test TC004
+
 - **Test Name:** authentication endpoints enforce secure access and support bypass
 - **Test Code:** [TC004_authentication_endpoints_enforce_secure_access_and_support_bypass.py](./TC004_authentication_endpoints_enforce_secure_access_and_support_bypass.py)
 - **Test Error:**
-```
+
+```text
 AssertionError: Unexpected status code 404 from /auth/login with POST
 ```
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/beed9499-b7e4-4fb3-8efa-0901ca0d9f17
+
+- **Test Visualization and Result:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/beed9499-b7e4-4fb3-8efa-0901ca0d9f17>
 - **Status:** ❌ Failed
 - **Severity:** MEDIUM
 - **Analysis / Findings:** **Authentication endpoints not implemented**. The `/auth/login` endpoint returns HTTP 404 (Not Found), indicating the route does not exist. According to the documentation, authentication is bypassed in development mode with `AUTH_BYPASS=true`, but the auth endpoints should still exist (even if they return mock responses).
@@ -137,12 +156,14 @@ AssertionError: Unexpected status code 404 from /auth/login with POST
 ---
 
 ### Requirement: UI Settings Persistence
+
 **Description:** Frontend settings persist via localStorage
 
 #### Test TC006
+
 - **Test Name:** ui settings persist and apply dynamically without reload
 - **Test Code:** [TC006_ui_settings_persist_and_apply_dynamically_without_reload.py](./TC006_ui_settings_persist_and_apply_dynamically_without_reload.py)
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/17fa9766-3ae8-4e48-b66f-8fd9e5beed4b
+- **Test Visualization and Result:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/17fa9766-3ae8-4e48-b66f-8fd9e5beed4b>
 - **Status:** ✅ Passed
 - **Severity:** LOW
 - **Analysis / Findings:** UI settings (theme, language, etc.) persist correctly via localStorage and apply dynamically. This is a frontend feature that does not require backend support.
@@ -150,12 +171,14 @@ AssertionError: Unexpected status code 404 from /auth/login with POST
 ---
 
 ### Requirement: Batch Processing Framework
+
 **Description:** Batch ingestion endpoints for processing multiple documents
 
 #### Test TC007
+
 - **Test Name:** batch processing endpoints exist and respond appropriately
 - **Test Code:** [TC007_batch_processing_endpoints_exist_and_respond_appropriately.py](./TC007_batch_processing_endpoints_exist_and_respond_appropriately.py)
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/2d778126-5bba-4abd-b6b4-c4ce3a0e4ad1
+- **Test Visualization and Result:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/2d778126-5bba-4abd-b6b4-c4ce3a0e4ad1>
 - **Status:** ✅ Passed
 - **Severity:** LOW
 - **Analysis / Findings:** **Expected behavior**. The test verifies that batch endpoints either don't exist or return appropriate responses. Since `/batch` endpoints were temporarily disabled due to import errors during testing setup, the test correctly identifies their absence. This is documented as a planned feature, not a bug.
@@ -262,20 +285,23 @@ During testing setup, multiple import errors were discovered:
 ## 5️⃣ Test Environment Details
 
 ### Services Status During Testing
-- **Frontend (Next.js):** ✅ Running on http://localhost:3030
-- **Backend API (FastAPI):** ✅ Running on http://localhost:8030 (after fixes)
+
+- **Frontend (Next.js):** ✅ Running on <http://localhost:3030>
+- **Backend API (FastAPI):** ✅ Running on <http://localhost:8030> (after fixes)
 - **Postgres:** ✅ Running on port 5462
 - **Qdrant:** ✅ Running on port 6363
 - **Redis:** ✅ Running on port 6389
 - **Ollama:** ✅ Running on port 11464
 
 ### Configuration
+
 - `AUTH_BYPASS=true` (development mode)
 - Embedding Model: nomic-embed-text-v1.5 (768 dimensions)
 - LLM: Ollama llama3.2:1b
 - Vector Store: Qdrant collection "documents"
 
 ### Issues Fixed During Testing
+
 1. ✅ Syntax error in `main.py:1`
 2. ✅ PowerShell delimiters in `ingest.py`
 3. ✅ Import errors in `batch.py` (workaround: disabled temporarily)
@@ -285,18 +311,23 @@ During testing setup, multiple import errors were discovered:
 ## 6️⃣ Recommendations for Next Steps
 
 ### Immediate (Critical Path)
+
 1. **Fix ingestion endpoint** - Implement or fix `workers.ingestion_worker.process_single_document`
 2. **Fix query response format** - Ensure `/query` returns `{"answer": "...", "sources": [...]}`
 3. **Add error handling** - Comprehensive try/catch blocks with detailed error messages
 4. **Implement integration tests** - Pytest tests for `/ingest` and `/query` end-to-end
 
 ### Short-term (High Priority)
+
 5. **Implement auth endpoints** - `/auth/login`, `/auth/register` with mock responses for dev mode
 6. **Fix import structure** - Resolve absolute vs relative import issues in `batch.py` and dependencies
 7. **Add API documentation** - OpenAPI/Swagger docs for all endpoints
 8. **Implement logging** - Structured logging with correlation IDs for request tracing
 
 ### Medium-term
+
+These are longer-term improvements to enhance system capabilities and operational excellence:
+
 9. **Complete batch processing** - Implement database models and RQ worker integration
 10. **Add monitoring** - Prometheus metrics, health checks for dependencies
 11. **Performance optimization** - Cache LLM instances, implement connection pooling
@@ -307,7 +338,8 @@ During testing setup, multiple import errors were discovered:
 ## 7️⃣ Test Artifacts
 
 All test code, videos, and detailed results are available at:
-- Base URL: https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/
+
+- Base URL: <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/>
 - Test codes stored in: `testsprite_tests/tmp/`
 
 ---
