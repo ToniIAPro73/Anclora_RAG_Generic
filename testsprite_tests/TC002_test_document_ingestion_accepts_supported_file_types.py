@@ -2,64 +2,60 @@ import requests
 import io
 
 BASE_URL = "http://localhost:8030"
-TIMEOUT = 30
 INGEST_ENDPOINT = f"{BASE_URL}/ingest"
-HEADERS = {
-    # Assuming dev mode auth bypass or no auth is needed based on PRD.
-    # If auth needed, add Authorization header here.
+TIMEOUT = 30
+
+# Sample minimal content for each supported file type
+file_contents = {
+    "pdf": (
+        "sample.pdf",
+        b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+        b"2 0 obj\n<< /Type /Pages /Count 1 /Kids [3 0 R] >>\nendobj\n3 0 obj\n"
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>\nendobj\n"
+        b"4 0 obj\n<< /Length 44 >>\nstream\nBT /F1 24 Tf 100 700 Td (Hello PDF) Tj ET\nendstream\n"
+        b"endobj\nxref\n0 5\n0000000000 65535 f \n0000000010 00000 n \n0000000079 00000 n \n"
+        b"0000000178 00000 n \n0000000293 00000 n \ntrailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n372\n%%EOF\n",
+        "application/pdf",
+    ),
+    "docx": (
+        "sample.docx",
+        b"PK\x03\x04\x14\x00\x06\x00\x08\x00\x00\x00!\x00\xbb"
+        b"\x8b\xceW\x00\x00\x00\x00\x00\x00\x00\x00\x13\x00\x13\x00"
+        b"word/document.xml",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ),
+    "txt": ("sample.txt", b"Hello, this is a plain text file for ingestion test.", "text/plain"),
+    "md": ("sample.md", b"# Sample Markdown\nThis is a test markdown file.", "text/markdown"),
 }
 
+
 def test_document_ingestion_accepts_supported_file_types():
-    supported_files = {
-        "sample.pdf": b"%PDF-1.4\n%EOF\n",  # minimal valid PDF header/footer
-        "sample.docx": (
-            b"PK\x03\x04"  # DOCX is a zip, minimal signature
-            b"\x14\x00\x06\x00"
-            b"\x00\x00\x00\x00\x00\x00\x00\x00"
-        ),
-        "sample.txt": b"Hello, this is a plain text file for testing ingestion.",
-        "sample.md": b"# Markdown Title\n\nThis is a sample markdown file."
-    }
-    
-    created_doc_ids = []
+    headers = {}
+    for suffix, (filename, file_bytes, content_type) in file_contents.items():
+        files = {"file": (filename, io.BytesIO(file_bytes), content_type)}
+        try:
+            response = requests.post(INGEST_ENDPOINT, files=files, headers=headers, timeout=TIMEOUT)
+        except requests.RequestException as e:
+            assert False, f"Request failed for .{suffix} file: {e}"
 
-    try:
-        for filename, filecontent in supported_files.items():
-            files = {
-                "file": (filename, io.BytesIO(filecontent), "application/octet-stream")
-            }
-            response = requests.post(
-                INGEST_ENDPOINT,
-                headers=HEADERS,
-                files=files,
-                timeout=TIMEOUT
-            )
-            assert response.status_code == 200, f"Failed on {filename} with status {response.status_code}"
-            resp_json = response.json()
-            assert isinstance(resp_json, dict), f"Response not JSON object for {filename}"
-            
-            chunk_count = resp_json.get("chunk_count")
-            if chunk_count is None:
-                chunk_count = resp_json.get("chunks")
-            assert chunk_count is not None, f"chunk_count not in response for {filename}"
-            assert isinstance(chunk_count, int), f"chunk_count not int for {filename}"
-            assert chunk_count > 0, f"chunk_count should be > 0 for {filename}"
+        assert response.status_code == 200, f"Failed ingestion for .{suffix} file: Status code {response.status_code}"
+        try:
+            json_response = response.json()
+        except ValueError:
+            assert False, f"Response is not valid JSON for .{suffix} file"
 
-            doc_id = resp_json.get("document_id") or resp_json.get("id")
-            if doc_id:
-                created_doc_ids.append(doc_id)
+        chunk_count = None
+        if "chunk_count" in json_response:
+            chunk_count = json_response["chunk_count"]
+        elif "chunks" in json_response:
+            chunk_count = json_response["chunks"]
+        elif "chunkCount" in json_response:
+            chunk_count = json_response["chunkCount"]
+        else:
+            assert False, f"No chunk count info in response for .{suffix} file: {json_response}"
 
-    finally:
-        for doc_id in created_doc_ids:
-            try:
-                del_resp = requests.delete(
-                    f"{BASE_URL}/documents/{doc_id}",
-                    headers=HEADERS,
-                    timeout=TIMEOUT
-                )
-                assert del_resp.status_code in (200, 204, 404), f"Failed to delete document {doc_id}"
-            except Exception:
-                pass
+        assert isinstance(chunk_count, int), f"Chunk count is not an integer for .{suffix} file: {chunk_count}"
+        assert chunk_count > 0, f"Chunk count should be greater than zero for .{suffix} file, got {chunk_count}"
 
 
 test_document_ingestion_accepts_supported_file_types()

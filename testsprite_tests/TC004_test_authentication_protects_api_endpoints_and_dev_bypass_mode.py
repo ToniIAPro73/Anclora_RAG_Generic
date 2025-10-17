@@ -6,103 +6,104 @@ TIMEOUT = 30
 
 def test_authentication_protects_api_endpoints_and_dev_bypass_mode():
     """
-    Ensure that authentication protects all API endpoints and that the development bypass mode functions correctly
-    without compromising security in production.
+    Ensure all API endpoints require authentication and the dev bypass mode works without compromising production security.
+    We will test endpoints:
+    - /health (GET)
+    - /ingest (POST)
+    - /query (POST)
+    
+    We test:
+    1. Requests without auth fail with 401 or 403 for protected endpoints (/ingest, /query).
+    2. Requests with invalid auth fail for protected endpoints.
+    3. Dev bypass mode header allows access only in dev.
     """
 
-    # List of endpoints with HTTP methods to test authentication enforcement
     endpoints = [
-        ("/health", "GET"),
-        ("/ingest", "POST"),
-        ("/query", "POST"),
-        ("/auth/token", "POST"),  # Typically auth endpoint should be accessible without token
+        {"method": "GET", "url": f"{BASE_URL}/health"},
+        {"method": "POST", "url": f"{BASE_URL}/ingest"},
+        {"method": "POST", "url": f"{BASE_URL}/query"},
     ]
 
-    headers_no_auth = {}
-    # Crafted dummy payloads for POST endpoints to check auth:
-    payloads = {
-        "/ingest": {},  # empty for auth protection test; multipart file upload can't be empty, so skip payload here
-        "/query": {"question": "Test question"},
-        "/auth/token": {"username": "user", "password": "pass"},
+    # Sample payloads for POST endpoints
+    query_payload = {
+        "question": "What is the company policy?"
     }
 
-    # 1) Check that all endpoints except auth token require authentication
+    # Minimal dummy file for /ingest testing
+    dummy_file = {'file': ('dummy.txt', b'Test content')}
 
-    for path, method in endpoints:
-        url = BASE_URL + path
+    dev_bypass_header = {"X-Dev-Bypass-Auth": "true"}
+    invalid_token_header = {"Authorization": "Bearer invalidtoken123"}
+
+    # 1. Test endpoints without any auth - expect 401 or 403 only for protected endpoints
+    for ep in endpoints:
+        if ep["url"].endswith("/health"):
+            # Skip auth test for health endpoint as it may allow unauthenticated access
+            continue
         try:
-            if method == "GET":
-                resp = requests.get(url, headers=headers_no_auth, timeout=TIMEOUT)
-            elif method == "POST":
-                if path == "/ingest":
-                    # For /ingest, simulate missing auth with no file, expecting 401 or 403 or 422 due to missing file
-                    resp = requests.post(url, headers=headers_no_auth, timeout=TIMEOUT)
+            if ep["method"] == "GET":
+                resp = requests.get(ep["url"], timeout=TIMEOUT)
+            elif ep["method"] == "POST":
+                if ep["url"].endswith("/ingest"):
+                    # Use dummy file instead of empty
+                    resp = requests.post(ep["url"], files=dummy_file, timeout=TIMEOUT)
                 else:
-                    resp = requests.post(url, json=payloads.get(path, {}), headers=headers_no_auth, timeout=TIMEOUT)
+                    resp = requests.post(ep["url"], json=query_payload, timeout=TIMEOUT)
             else:
                 continue
 
-        except RequestException as e:
-            assert False, f"Request to {path} failed unexpectedly: {e}"
-
-        # /auth/token should allow without auth (200 or 400 for bad login), /health usually accessible
-        # others should block (401/403), /ingest can return 422 due to missing payload
-        if path == "/auth/token":
-            assert resp.status_code in (200, 400, 401, 403), (
-                f"/auth/token endpoint should be accessible but returned status {resp.status_code}"
-            )
-        elif path == "/health":
-            assert resp.status_code in (200, 401, 403), (
-                f"Endpoint /health returned unexpected status {resp.status_code}"
-            )
-        elif path == "/ingest":
-            assert resp.status_code in (401, 403, 422), (
-                f"Endpoint {path} should require authentication but returned status {resp.status_code}"
-            )
-        else:
             assert resp.status_code in (401, 403), (
-                f"Endpoint {path} should require authentication but returned status {resp.status_code}"
+                f"Endpoint {ep['url']} without auth should be 401 or 403 but got {resp.status_code}"
             )
+        except RequestException as e:
+            assert False, f"Request to {ep['url']} without auth failed with exception: {e}"
 
-    # 2) Test Dev Bypass Mode works correctly (simulate dev mode bypass)
-
-    dev_bypass_header = {"X-Dev-Bypass": "true"}
-
-    for path, method in endpoints:
-        url = BASE_URL + path
+    # 2. Test endpoints with invalid auth token - expect 401 or 403 only for protected endpoints
+    for ep in endpoints:
+        if ep["url"].endswith("/health"):
+            # Skip invalid auth test for health endpoint
+            continue
+        headers = invalid_token_header
         try:
-            if method == "GET":
-                resp = requests.get(url, headers=dev_bypass_header, timeout=TIMEOUT)
-            elif method == "POST":
-                if path == "/ingest":
-                    resp = requests.post(url, headers=dev_bypass_header, timeout=TIMEOUT)
+            if ep["method"] == "GET":
+                resp = requests.get(ep["url"], headers=headers, timeout=TIMEOUT)
+            elif ep["method"] == "POST":
+                if ep["url"].endswith("/ingest"):
+                    resp = requests.post(ep["url"], headers=headers, files=dummy_file, timeout=TIMEOUT)
                 else:
-                    resp = requests.post(url, json=payloads.get(path, {}), headers=dev_bypass_header, timeout=TIMEOUT)
+                    resp = requests.post(ep["url"], headers=headers, json=query_payload, timeout=TIMEOUT)
             else:
                 continue
+
+            assert resp.status_code in (401, 403), (
+                f"Endpoint {ep['url']} with invalid auth should be 401 or 403 but got {resp.status_code}"
+            )
         except RequestException as e:
-            assert False, f"Request to {path} with dev bypass failed unexpectedly: {e}"
+            assert False, f"Request to {ep['url']} with invalid auth failed: {e}"
 
-        # For /auth/token, bypass header probably irrelevant, expect normal behavior (allowed).
-        # For other endpoints, bypass should allow access without auth in dev mode, expect not 401/403.
-        if path == "/auth/token":
-            assert resp.status_code in (200, 400, 401, 403), (
-                f"/auth/token with dev bypass returned unexpected status {resp.status_code}"
-            )
-        elif path == "/health":
-            assert resp.status_code in (200, 401, 403), (
-                f"Dev bypass mode returned unexpected status for {path}: {resp.status_code}"
-            )
-        elif path == "/ingest":
-            assert resp.status_code in (200, 422) or resp.status_code < 400 and resp.status_code not in (401, 403), (
-                f"Dev bypass mode did not grant access to {path}; status code: {resp.status_code}"
-            )
-        else:
-            assert resp.status_code < 400 or resp.status_code not in (401, 403), (
-                f"Dev bypass mode did not grant access to {path}; status code: {resp.status_code}"
-            )
+    # 3. Test dev bypass mode header without standard auth
+    # It should allow access in dev mode (status 200 or 202 typically);
+    # we assume the dev bypass header "X-Dev-Bypass-Auth" controls this.
+    for ep in endpoints:
+        headers = dev_bypass_header
+        try:
+            if ep["method"] == "GET":
+                resp = requests.get(ep["url"], headers=headers, timeout=TIMEOUT)
+            elif ep["method"] == "POST":
+                if ep["url"].endswith("/ingest"):
+                    resp = requests.post(ep["url"], headers=headers, files=dummy_file, timeout=TIMEOUT)
+                else:
+                    resp = requests.post(ep["url"], headers=headers, json=query_payload, timeout=TIMEOUT)
+            else:
+                continue
 
-    # 3) Verify that in production mode without dev bypass, no access is granted without auth (repeat step 1)
-    # Already tested in step 1, no further action needed here.
+            # In dev bypass mode, access should be allowed (e.g. 200-299)
+            # but to ensure security, do not allow full access in production (would be environment specific)
+            assert 200 <= resp.status_code < 300, (
+                f"Endpoint {ep['url']} with dev bypass header expected 2xx but got {resp.status_code}"
+            )
+        except RequestException as e:
+            assert False, f"Request to {ep['url']} with dev bypass header failed: {e}"
+
 
 test_authentication_protects_api_endpoints_and_dev_bypass_mode()

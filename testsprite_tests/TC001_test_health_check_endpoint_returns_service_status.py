@@ -9,25 +9,18 @@ def test_health_check_endpoint_returns_service_status():
     try:
         response = requests.get(endpoint, headers=headers, timeout=30)
         response.raise_for_status()
-    except requests.RequestException as e:
-        assert False, f"HTTP request to /health endpoint failed: {e}"
-
-    assert response.headers.get("Content-Type", "").startswith("application/json"), "Response is not JSON"
-
-    try:
         data = response.json()
-    except ValueError:
-        assert False, "Response body is not valid JSON"
 
-    # Verify that service status and version keys exist and have valid types
-    assert "status" in data, "'status' key not found in response"
-    assert isinstance(data["status"], str), "'status' should be a string"
+        # Assert the presence of essential keys in response JSON
+        assert isinstance(data, dict), "Response is not a JSON object"
+        assert "status" in data, "Response JSON missing 'status' key"
+        assert "version" in data, "Response JSON missing 'version' key"
 
-    assert "version" in data, "'version' key not found in response"
-    assert isinstance(data["version"], str), "'version' should be a string"
-
-    # Additional sanity checks (e.g., status is one of expected values)
-    expected_status_values = {"ok", "running", "healthy", "up"}
-    assert data["status"].lower() in expected_status_values, f"Unexpected status value: {data['status']}"
+        # Assert the status field indicates service is healthy (assuming 'ok' means healthy)
+        assert data["status"].lower() in ["ok", "healthy", "up", "running"], f"Unexpected service status: {data['status']}"
+        # Assert version is a non-empty string
+        assert isinstance(data["version"], str) and data["version"].strip() != "", "Version is empty or not a string"
+    except requests.exceptions.RequestException as e:
+        assert False, f"HTTP request failed: {e}"
 
 test_health_check_endpoint_returns_service_status()

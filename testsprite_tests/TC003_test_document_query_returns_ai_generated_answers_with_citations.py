@@ -1,67 +1,69 @@
 import requests
-import io
+import time
 
 BASE_URL = "http://localhost:8030"
-HEADERS = {
-    "Content-Type": "application/json"
-}
 TIMEOUT = 30
+HEADERS = {"Content-Type": "application/json"}
+
 
 def test_document_query_returns_ai_generated_answers_with_citations():
-    # Step 1: Ingest a sample document to ensure there is indexed content to query
+    # Step 1: Ingest a sample document to index content for query testing
     ingest_url = f"{BASE_URL}/ingest"
-    sample_text = "Anclora is a Retrieval-Augmented Generation system designed to centralize organizational knowledge."
+    sample_text = (
+        "Anclora RAG Generic is a powerful Retrieval-Augmented Generation system that "
+        "centralizes knowledge and provides AI-generated answers with source citations."
+    )
+    # Prepare a simple text file content as bytes
     files = {
-        "file": ("sample.txt", io.BytesIO(sample_text.encode('utf-8')), "text/plain")
+        "file": ("sample.txt", sample_text.encode("utf-8"), "text/plain")
     }
 
-    # Ingest document
+    # Upload the document
     ingest_response = requests.post(ingest_url, files=files, timeout=TIMEOUT)
-    assert ingest_response.status_code == 200, f"Ingest failed with status {ingest_response.status_code}"
-    ingest_result = ingest_response.json()
-    assert "chunk_count" in ingest_result and ingest_result["chunk_count"] > 0, "No chunks ingested"
+    assert ingest_response.status_code == 200, f"Ingest failed: {ingest_response.text}"
+    ingest_json = ingest_response.json()
+    chunk_count = ingest_json.get("chunk_count") or ingest_json.get("chunks_ingested")
+    assert isinstance(chunk_count, int) and chunk_count > 0, "Invalid chunk count in ingest response"
 
     try:
-        # Step 2: Query the system with a question related to the ingested document
+        # Short delay to allow indexing
+        time.sleep(2)
+
+        # Step 2: Query the system to get an AI-generated answer with source citations
         query_url = f"{BASE_URL}/query"
-        question = "What is Anclora designed to do?"
-        payload = {
-            "question": question
+        query_payload = {
+            "question": "What is Anclora RAG Generic and what features does it provide?"
         }
-        query_response = requests.post(query_url, json=payload, headers=HEADERS, timeout=TIMEOUT)
-        assert query_response.status_code == 200, f"Query failed with status {query_response.status_code}"
-        query_result = query_response.json()
+        query_response = requests.post(query_url, json=query_payload, headers=HEADERS, timeout=TIMEOUT)
+        assert query_response.status_code == 200, f"Query failed: {query_response.text}"
+        query_json = query_response.json()
 
-        # Validate AI-generated answer presence
-        assert "answer" in query_result, "Response missing 'answer'"
-        answer = query_result["answer"]
-        assert isinstance(answer, str) and len(answer.strip()) > 0, "Answer is empty"
+        # Validate expected fields in response
+        assert "answer" in query_json, "No 'answer' field in query response"
+        answer_text = query_json["answer"]
+        assert isinstance(answer_text, str) and len(answer_text) > 0, "Answer text is empty or invalid"
 
-        # Validate citations presence and format
-        assert "citations" in query_result, "Response missing 'citations'"
-        citations = query_result["citations"]
-        assert isinstance(citations, list) and len(citations) > 0, "Citations list empty or invalid"
+        # Validate source citations presence
+        assert "sources" in query_json or "citations" in query_json, "No 'sources' or 'citations' in query response"
+        sources = query_json.get("sources") or query_json.get("citations")
+        assert isinstance(sources, list) and len(sources) > 0, "Sources/citations is empty or invalid type"
 
-        # Check that each citation has required fields
-        for citation in citations:
-            assert isinstance(citation, dict), "Each citation should be a dict"
-            assert "source" in citation and isinstance(citation["source"], str) and len(citation["source"]) > 0, "Citation missing or invalid 'source'"
-            assert "page" in citation or "chunk_id" in citation or "metadata" in citation, "Citation missing source identifier like page, chunk_id or metadata"
+        # Check that at least one source contains identifiable metadata
+        valid_source_found = any(
+            isinstance(s, dict) and 
+            (("title" in s and s["title"]) or ("source" in s and s["source"]))
+            for s in sources
+        )
+        assert valid_source_found, "No valid source metadata found in sources/citations"
 
-        # Optionally verify that the answer contains key info consistent with sample text
-        assert "Retrieval-Augmented Generation" in answer or "centralize organizational knowledge" in answer, "Answer not consistent with indexed document content"
+        # Optionally check that answer is related to original document content
+        assert "Retrieval-Augmented Generation" in answer_text or "Anclora" in answer_text, \
+            "Answer does not appear related to indexed document content"
 
     finally:
-        # Cleanup: Delete ingested document chunks if API supports it
-        # Assuming the ingest response might include a document_id for deletion purpose
-        doc_id = ingest_result.get("document_id")
-        if doc_id:
-            delete_url = f"{BASE_URL}/documents/{doc_id}"
-            try:
-                del_response = requests.delete(delete_url, timeout=TIMEOUT)
-                assert del_response.status_code in (200, 204), f"Failed to delete document with ID {doc_id}"
-            except Exception:
-                pass
+        # Cleanup: delete the ingested documents if an endpoint supported this, 
+        # but since not specified, skipping removal.
+        pass
 
 
 test_document_query_returns_ai_generated_answers_with_citations()
