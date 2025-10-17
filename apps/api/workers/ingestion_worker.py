@@ -1,25 +1,24 @@
-@'
-"""
-Worker RQ para procesamiento de documentos.
-"""
-import sys
-import os
+"""Helper functions used by the ingestion RQ worker (and synchronous fallbacks)."""
+
+from __future__ import annotations
+
+import logging
+import uuid
 from pathlib import Path
+from typing import Callable, Dict
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
-
-from packages.parsers.pdf import parse_pdf_bytes
 from packages.parsers.docx_parser import parse_docx_bytes
 from packages.parsers.markdown import parse_markdown_bytes
+from packages.parsers.pdf import parse_pdf_bytes
 from packages.parsers.text import parse_text_bytes
-
-# Import from apps.api (adjusting path since we're in apps/api/workers)
-sys.path.insert(0, str(Path(__file__).parent.parent))
 from rag.pipeline import index_text
 
-CT = {
+logger = logging.getLogger(__name__)
+
+
+Parser = Callable[[bytes], str]
+
+CONTENT_TYPE_PARSERS: Dict[str, Parser] = {
     "application/pdf": parse_pdf_bytes,
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": parse_docx_bytes,
     "text/markdown": parse_markdown_bytes,
@@ -27,42 +26,61 @@ CT = {
     "application/octet-stream": parse_markdown_bytes,
 }
 
-def process_single_document(file_path: str, filename: str, content_type: str):
-    """
-    Procesa un documento individual: parseo + indexación.
-    """
-    print(f"🔄 Procesando: {filename}")
-    
-    # 1. Parsear
-    parser = CT.get(content_type)
-    if not parser:
-        raise ValueError(f"Unsupported content type: {content_type}")
-    
-    with open(file_path, "rb") as f:
-        content = f.read()
-    
-    text = parser(content)
-    
+EXTENSION_PARSERS: Dict[str, Parser] = {
+    ".pdf": parse_pdf_bytes,
+    ".docx": parse_docx_bytes,
+    ".md": parse_markdown_bytes,
+    ".markdown": parse_markdown_bytes,
+    ".txt": parse_text_bytes,
+}
+
+
+def _resolve_parser(filename: str, content_type: str) -> Parser:
+    parser = CONTENT_TYPE_PARSERS.get(content_type)
+    if parser:
+        return parser
+
+    extension = Path(filename).suffix.lower()
+    parser = EXTENSION_PARSERS.get(extension)
+    if parser:
+        logger.debug("Resolved parser for %s using extension %s", filename, extension)
+        return parser
+
+    raise ValueError(f"Unsupported content type '{content_type}' for file '{filename}'")
+
+
+def process_single_document(file_path: str, filename: str, content_type: str) -> Dict[str, object]:
+    """Parse and index a single document, returning a summary payload."""
+    path = Path(file_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Temporary file not found: {file_path}")
+
+    parser = _resolve_parser(filename, content_type)
+
+    payload = path.read_bytes()
+    if not payload:
+        raise ValueError("Empty file uploaded")
+
+    text = parser(payload)
     if not text.strip():
-        raise ValueError("Empty document after parsing")
-    
-    # 2. Indexar
-    chunks = index_text(text, {"filename": filename, "source": "upload"})
-    
-    # 3. Limpiar archivo temporal
+        raise ValueError("Parsed document is empty")
+
+    document_id = f"{Path(filename).stem}-{uuid.uuid4().hex}"
+    logger.info("Indexing document %s", document_id)
+
+    chunk_count = index_text(document_id, text)
+
     try:
-        os.remove(file_path)
-    except Exception as e:
-        print(f"⚠️ No se pudo eliminar archivo temporal: {e}")
-    
-    print(f"✅ Completado: {filename} ({chunks} chunks)")
-    return {"filename": filename, "chunks": chunks, "status": "completed"}
+        path.unlink()
+    except Exception as exc:  # pragma: no cover - best effort cleanup
+        logger.warning("Failed to remove temporary file %s: %s", file_path, exc)
+
+    result = {"filename": filename, "chunks": chunk_count, "status": "completed"}
+    logger.info("Completed ingestion for %s with %s chunks", filename, chunk_count)
+    return result
 
 
-def process_document_task(doc_id: str, batch_id: str, file_path: str, collection_name: str):
-    """
-    Task para procesamiento de documento en batch (implementación futura completa).
-    """
-    # TODO: Implementar lógica completa con BatchManager
+def process_document_task(*_args, **_kwargs) -> None:
+    """Placeholder for batch ingestion tasks."""
+    # TODO: Integrate with batch ingestion pipeline once available.
     pass
-'@ | Set-Content workers/ingestion_worker.py -Encoding UTF8

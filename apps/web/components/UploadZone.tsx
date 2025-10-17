@@ -1,4 +1,5 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { isAxiosError } from "axios";
 import { ingestDocument } from "@/lib/api";
 import { useUISettings } from "./ui-settings-context";
 
@@ -6,6 +7,16 @@ interface UploadZoneProps {
   onUploadSuccess: (fileName: string, chunks: number) => void;
   onUploadError: (error: string) => void;
 }
+
+const ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+  "text/markdown",
+  "application/octet-stream",
+]);
+
+const ALLOWED_EXTENSIONS = new Set([".pdf", ".docx", ".txt", ".md", ".markdown"]);
 
 export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZoneProps) {
   const { language } = useUISettings();
@@ -48,13 +59,41 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
     }
   };
 
+  const isSupportedFile = (file: File) => {
+    if (ALLOWED_MIME_TYPES.has(file.type)) {
+      return true;
+    }
+    const dotIndex = file.name.lastIndexOf(".");
+    const extension = dotIndex >= 0 ? file.name.slice(dotIndex).toLowerCase() : "";
+    return ALLOWED_EXTENSIONS.has(extension);
+  };
+
+  const unsupportedFileMessage =
+    language === "es"
+      ? "Tipo de archivo no soportado. Usa PDF, DOCX, TXT o Markdown."
+      : "Unsupported file type. Please upload PDF, DOCX, TXT or Markdown files.";
+
   const uploadFile = async (file: File) => {
+    if (!isSupportedFile(file)) {
+      onUploadError(unsupportedFileMessage);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
     setIsUploading(true);
     try {
       const result = await ingestDocument(file);
       onUploadSuccess(result.file, result.chunks);
-    } catch (error: any) {
-      onUploadError(error.response?.data?.detail || error.message);
+    } catch (error: unknown) {
+      const fallback =
+        error instanceof Error ? error.message : typeof error === "string" ? error : "Unknown error";
+      const detail =
+        isAxiosError(error) && error.response?.data && typeof error.response.data === "object"
+          ? (error.response.data as { detail?: string }).detail ?? fallback
+          : fallback;
+      onUploadError(detail);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

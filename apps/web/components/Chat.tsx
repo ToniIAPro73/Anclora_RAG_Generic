@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, FormEvent } from "react";
+import { isAxiosError } from "axios";
 import { queryDocuments } from "@/lib/api";
 import Message from "./Message";
 import { useUISettings } from "./ui-settings-context";
@@ -8,7 +9,8 @@ interface ChatMessage {
   content: string;
   sources?: Array<{
     text: string;
-    score: number;
+    score?: number | null;
+    metadata?: Record<string, unknown>;
   }>;
 }
 
@@ -55,15 +57,21 @@ export default function Chat() {
 
       const assistantMessage: ChatMessage = {
         role: "assistant",
-        content: result.response,
+        content: result.answer,
         sources: result.sources,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const fallback =
+        error instanceof Error ? error.message : typeof error === "string" ? error : "Unknown error";
+      const detail =
+        isAxiosError(error) && error.response?.data && typeof error.response.data === "object"
+          ? (error.response.data as { detail?: string }).detail ?? fallback
+          : fallback;
       const errorMessage: ChatMessage = {
         role: "assistant",
-        content: `Error: ${error.response?.data?.detail || error.message}`,
+        content: `Error: ${detail}`,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

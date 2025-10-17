@@ -6,7 +6,8 @@ interface MessageProps {
   language: LanguageCode;
   sources?: Array<{
     text: string;
-    score: number;
+    score?: number | null;
+    metadata?: Record<string, unknown>;
   }>;
 }
 
@@ -30,14 +31,24 @@ export default function Message({ role, content, sources, language }: MessagePro
         {sources && sources.length > 0 && (
           <div className="mt-3 border-t border-gray-200 pt-3 dark:border-slate-700">
             <p className="mb-2 text-xs font-semibold opacity-75">{SOURCES_LABEL[language]}</p>
-            {sources.map((source, idx) => (
-              <div key={idx} className="mb-1 text-xs opacity-70 dark:text-slate-300/80">
-                <span className="rounded bg-anclora-secondary/20 px-1 font-mono">
-                  {(source.score * 100).toFixed(1)}%
-                </span>{" "}
-                {source.text.substring(0, 100)}...
-              </div>
-            ))}
+            {sources.map((source, idx) => {
+              const hasScore = typeof source.score === "number" && Number.isFinite(source.score);
+              const safeScore = hasScore
+                ? `${(Math.max(Math.min(source.score as number, 1), 0) * 100).toFixed(1)}%`
+                : "n/a";
+              const filename =
+                source.metadata && typeof source.metadata === "object" && "filename" in source.metadata
+                  ? String((source.metadata as Record<string, unknown>)["filename"])
+                  : undefined;
+
+              return (
+                <div key={idx} className="mb-1 text-xs opacity-70 dark:text-slate-300/80">
+                  <span className="rounded bg-anclora-secondary/20 px-1 font-mono">{safeScore}</span>{" "}
+                  {filename ? <span className="mr-1 font-semibold">{filename}</span> : null}
+                  {source.text.substring(0, 100)}...
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

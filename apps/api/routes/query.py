@@ -26,7 +26,7 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     query: str
-    response: str
+    answer: str
     sources: List[Dict[str, Any]]
     metadata: Dict[str, Any]
 
@@ -98,27 +98,40 @@ async def query_documents(request: QueryRequest) -> QueryResponse:
     try:
         language = normalize_language(request.language)
         engine = get_query_engine(request.top_k or 5, language)
-        response = engine.query(request.query)
+        llama_response = engine.query(request.query)
 
         sources: List[Dict[str, Any]] = []
-        if hasattr(response, "source_nodes"):
-            for node in response.source_nodes:
+        if hasattr(llama_response, "source_nodes"):
+            for node in llama_response.source_nodes:
+                score = getattr(node, "score", None)
                 sources.append(
                     {
                         "text": node.node.text[:200],
-                        "score": float(node.score) if hasattr(node, "score") else None,
+                        "score": float(score) if score is not None else None,
+                        "metadata": getattr(node.node, "metadata", {}),
                     }
                 )
 
+        answer_text = getattr(llama_response, "response", None)
+        if not answer_text and hasattr(llama_response, "message"):
+            answer_text = getattr(llama_response, "message")
+        if not answer_text:
+            answer_text = str(llama_response)
+
+        metadata: Dict[str, Any] = {
+            "model": OLLAMA_MODEL,
+            "sources": len(sources),
+            "language": language,
+        }
+        llama_metadata = getattr(llama_response, "metadata", None)
+        if isinstance(llama_metadata, dict):
+            metadata.update(llama_metadata)
+
         return QueryResponse(
             query=request.query,
-            response=str(response),
+            answer=str(answer_text),
             sources=sources,
-            metadata={
-                "model": OLLAMA_MODEL,
-                "sources": len(sources),
-                "language": language,
-            },
+            metadata=metadata,
         )
 
     except Exception as exc:
