@@ -1,10 +1,8 @@
+import os
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
-
-# Import routers
-import sys
-import os
 
 # Add current directory and parent directories to Python path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,13 +13,25 @@ for path in [current_dir, parent_dir, project_root]:
     if path not in sys.path:
         sys.path.insert(0, path)
 
+# Configure structured logging BEFORE importing other modules
+from utils.logging_config import get_logger, setup_logging
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+USE_JSON_LOGS = os.getenv("USE_JSON_LOGS", "false").lower() == "true"
+setup_logging(level=LOG_LEVEL, use_json=USE_JSON_LOGS)
+
+logger = get_logger(__name__)
+
 try:
+    from middleware import CorrelationIdMiddleware
     from routes.auth import router as auth_router
-    from routes.ingest import router as ingest_router
     from routes.health import router as health_router
+    from routes.ingest import router as ingest_router
     from routes.query import router as query_router
+
     # from routes.batch import router as batch_router  # Temporarily disabled
 except ImportError as e:
+    logger.error(f"Import error: {e}", exc_info=True)
     print(f"Import error: {e}")
     print("Available paths:", sys.path)
     print("Current directory:", current_dir)
@@ -29,16 +39,15 @@ except ImportError as e:
     print("Project root:", project_root)
     raise
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 # Create FastAPI application
 app = FastAPI(
     title="Anclora RAG API",
     description="RAG (Retrieval-Augmented Generation) API for document processing and querying",
-    version="1.0.0"
+    version="1.0.0",
 )
+
+# Add correlation ID middleware (must be added FIRST for proper request tracking)
+app.add_middleware(CorrelationIdMiddleware)
 
 # Add CORS middleware
 app.add_middleware(
@@ -48,6 +57,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logger.info(f"FastAPI application initialized - version=1.0.0 log_level={LOG_LEVEL}")
 
 # Include routers
 app.include_router(auth_router)

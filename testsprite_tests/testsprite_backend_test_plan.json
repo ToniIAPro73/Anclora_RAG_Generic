@@ -1,37 +1,22 @@
 [
   {
     "id": "TC001",
-    "title": "document ingestion endpoint accepts supported file formats",
-    "description": "Test the POST /ingest endpoint to verify it accepts PDF, DOCX, TXT, and Markdown files, processes them correctly by chunking, embedding, and storing in the vector database, and returns accurate chunk counts."
+    "title": "test_health_check_endpoint_returns_service_status",
+    "description": "Verify that the /health endpoint returns the current service status and version information correctly."
   },
   {
     "id": "TC002",
-    "title": "rag query endpoint returns ai generated answers with sources",
-    "description": "Test the POST /query endpoint to ensure it accepts natural language queries, performs vector similarity retrieval, generates AI responses referencing source documents, and supports both Spanish and English languages."
+    "title": "test_document_ingestion_accepts_supported_file_types",
+    "description": "Test the /ingest endpoint to ensure it accepts supported file types (PDF, DOCX, TXT, Markdown) and returns accurate chunk counts upon successful ingestion."
   },
   {
     "id": "TC003",
-    "title": "health check endpoint returns operational status",
-    "description": "Test the GET /health endpoint to verify it returns HTTP 200 OK status along with service metadata confirming the system's operational status."
+    "title": "test_document_query_returns_ai_generated_answers_with_citations",
+    "description": "Validate that the /query endpoint returns AI-generated answers consistent with the indexed document content, including proper source citations."
   },
   {
     "id": "TC004",
-    "title": "authentication endpoints enforce secure access and support bypass",
-    "description": "Test the /auth/* endpoints to ensure OAuth2/JWT authentication is enforced in production environments and that the AUTH_BYPASS=true setting allows unrestricted access during local development."
-  },
-  {
-    "id": "TC005",
-    "title": "drag and drop upload interface shows progress and feedback",
-    "description": "Test the frontend drag-and-drop document upload interface to verify it normalizes file names including accented characters, shows upload progress, and provides accurate success or failure feedback."
-  },
-  {
-    "id": "TC006",
-    "title": "ui settings persist and apply dynamically without reload",
-    "description": "Test the UI settings endpoints and frontend components to ensure theme toggling, language selection, typography, and density settings persist across sessions using localStorage and apply dynamically without requiring page reload."
-  },
-  {
-    "id": "TC007",
-    "title": "batch processing endpoints exist and respond appropriately",
-    "description": "Test the /batch/* endpoints to verify their existence and that they respond appropriately, acknowledging that batch ingestion features are planned but backend implementation is pending."
+    "title": "test_authentication_protects_api_endpoints_and_dev_bypass_mode",
+    "description": "Ensure that authentication protects all API endpoints and that the development bypass mode functions correctly without compromising security in production."
   }
 ]

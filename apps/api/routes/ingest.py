@@ -35,8 +35,12 @@ async def ingest_document(
     """Ingesta síncrona de documentos para asegurar retroalimentación inmediata durante el testing."""
     filename = _validate_filename(file.filename)
     payload = await file.read()
+    file_size_kb = len(payload) / 1024
+
+    logger.info(f"Starting document ingestion: {filename} ({round(file_size_kb, 2)}KB)")
 
     if not payload:
+        logger.warning(f"Empty file upload attempted: {filename}")
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
     tmp_suffix = Path(filename).suffix or ".tmp"
@@ -45,30 +49,38 @@ async def ingest_document(
             temp_file.write(payload)
             temp_path = Path(temp_file.name)
 
+        logger.debug(f"Processing document: {filename} (temp: {temp_path})")
+
         result = process_single_document(
             file_path=str(temp_path),
             filename=filename,
             content_type=file.content_type or "application/octet-stream",
         )
 
+        logger.info(
+            f"Document ingestion completed: {filename} - {result['chunks']} chunks - {result.get('status', 'completed')}"
+        )
+
     except ValueError as exc:
-        logger.warning("Validation error ingesting %s: %s", filename, exc)
+        logger.warning(f"Validation error during ingestion: {filename} - {str(exc)}")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except FileNotFoundError as exc:
-        logger.error("Temporary file missing for %s: %s", filename, exc)
+        logger.error(f"Temporary file missing: {filename} - {str(exc)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Temporary file handling failed") from exc
     except Exception as exc:  # pragma: no cover - defend against unexpected worker issues
-        logger.exception("Unexpected error while ingesting %s", filename)
+        logger.error(f"Unexpected error during ingestion: {filename} - {str(exc)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to ingest document") from exc
     finally:
         if "temp_path" in locals() and temp_path.exists():
             try:
                 temp_path.unlink()
-            except Exception:
-                logger.debug("Temporary file %s already handled by worker", temp_path)
+                logger.debug(f"Temporary file cleaned up: {temp_path}")
+            except Exception as cleanup_exc:
+                logger.debug(f"Temporary file already handled: {temp_path} - {str(cleanup_exc)}")
 
     return {
         "file": result["filename"],
         "chunks": result["chunks"],
+        "chunk_count": result["chunks"],  # Alias for compatibility with tests
         "status": result.get("status", "completed"),
     }

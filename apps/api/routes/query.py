@@ -1,15 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import os
 import logging
+import os
+from typing import Any, Dict, List, Optional
 
-from llama_index.core import VectorStoreIndex, Settings
+from fastapi import APIRouter, Depends, HTTPException
+from llama_index.core import Settings, VectorStoreIndex
 from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.qdrant import QdrantVectorStore
+from pydantic import BaseModel, Field, field_validator
 
-from rag.pipeline import EMBED_MODEL, get_qdrant_client, COLLECTION_NAME
 from deps import require_viewer_or_admin
+from rag.pipeline import COLLECTION_NAME, EMBED_MODEL, get_qdrant_client
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["query"])
@@ -19,16 +19,39 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 
 
 class QueryRequest(BaseModel):
-    query: str
+    query: Optional[str] = None
+    question: Optional[str] = Field(None, description="Alias for 'query' field for compatibility")
     top_k: Optional[int] = 5
     language: Optional[str] = "es"
+
+    @field_validator("query", mode="before")
+    @classmethod
+    def set_query_from_question(cls, v, info):
+        """Accept both 'query' and 'question' fields for compatibility."""
+        # If query is not provided but question is, use question as query
+        if v is None and info.data.get("question"):
+            return info.data.get("question")
+        return v
+
+    def model_post_init(self, __context):
+        """Ensure query field is set after validation."""
+        if self.query is None and self.question is not None:
+            self.query = self.question
+        elif self.query is None:
+            raise ValueError("Either 'query' or 'question' field must be provided")
 
 
 class QueryResponse(BaseModel):
     query: str
     answer: str
     sources: List[Dict[str, Any]]
+    citations: Optional[List[Dict[str, Any]]] = Field(None, description="Alias for 'sources' field")
     metadata: Dict[str, Any]
+
+    def model_post_init(self, __context):
+        """Set citations as alias for sources."""
+        if self.citations is None:
+            self.citations = self.sources
 
 
 def normalize_language(language: Optional[str]) -> str:
@@ -97,20 +120,34 @@ async def query_post(
 async def query_documents(request: QueryRequest) -> QueryResponse:
     try:
         language = normalize_language(request.language)
-        engine = get_query_engine(request.top_k or 5, language)
+        top_k = request.top_k or 5
+
+        logger.info(f"Processing query: {len(request.query)} chars, language={language}, top_k={top_k}")
+
+        engine = get_query_engine(top_k, language)
         llama_response = engine.query(request.query)
 
         sources: List[Dict[str, Any]] = []
         if hasattr(llama_response, "source_nodes"):
             for node in llama_response.source_nodes:
                 score = getattr(node, "score", None)
-                sources.append(
-                    {
-                        "text": node.node.text[:200],
-                        "score": float(score) if score is not None else None,
-                        "metadata": getattr(node.node, "metadata", {}),
-                    }
-                )
+                node_metadata = getattr(node.node, "metadata", {})
+
+                # Build source entry with all expected fields
+                source_entry = {
+                    "text": node.node.text[:200],
+                    "score": float(score) if score is not None else None,
+                    "metadata": node_metadata,
+                    "source": node_metadata.get("filename", node_metadata.get("file_name", "unknown")),  # Add 'source' field for compatibility
+                }
+
+                # Add page/chunk_id if available in metadata
+                if "page" in node_metadata:
+                    source_entry["page"] = node_metadata["page"]
+                if "chunk_id" in node_metadata:
+                    source_entry["chunk_id"] = node_metadata["chunk_id"]
+
+                sources.append(source_entry)
 
         answer_text = getattr(llama_response, "response", None)
         if not answer_text and hasattr(llama_response, "message"):
@@ -127,6 +164,10 @@ async def query_documents(request: QueryRequest) -> QueryResponse:
         if isinstance(llama_metadata, dict):
             metadata.update(llama_metadata)
 
+        logger.info(
+            f"Query completed: {len(str(answer_text))} chars, {len(sources)} sources, language={language}"
+        )
+
         return QueryResponse(
             query=request.query,
             answer=str(answer_text),
@@ -135,5 +176,5 @@ async def query_documents(request: QueryRequest) -> QueryResponse:
         )
 
     except Exception as exc:
-        logger.error("Query error: %s", exc)
+        logger.error(f"Query processing failed: {request.query[:50]}... - {str(exc)}", exc_info=True)
         raise HTTPException(500, detail=str(exc))
