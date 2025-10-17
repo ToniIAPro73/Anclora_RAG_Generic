@@ -21,6 +21,7 @@
 ### Hallazgos Críticos
 
 🔴 **3 Problemas Críticos** identificados que impiden el funcionamiento del sistema:
+
 1. **Backend /ingest endpoint falla con HTTP 500** → No se pueden subir documentos
 2. **Validación de tipos de archivo faltante** → Riesgo de seguridad
 3. **Backend /query retorna formato incorrecto** → No se pueden hacer consultas
@@ -36,14 +37,16 @@
 ### Frontend Testing (Next.js 15)
 
 #### ✅ Áreas Funcionando Correctamente
+
 - **UI Settings:** Tema, idioma, tipografía, densidad (localStorage persistence)
 - **Normalización de nombres de archivo:** Acentos y caracteres especiales
 - **Rendimiento de API:** Tiempos de respuesta aceptables
 - **Manejo de casos extremos:** Queries vacías y muy largas
 
-#### ❌ Problemas Críticos Encontrados
+#### ❌ Problemas Críticos Encontrados (Frontend)
 
 **1. Validación de Tipos de Archivo Faltante** (CRÍTICO)
+
 - **Ubicación:** `apps/web/components/UploadZone.tsx`
 - **Problema:** La aplicación acepta archivos no soportados (.exe, .jpg) sin validación
 - **Impacto:**
@@ -53,6 +56,7 @@
 - **Solución:** Agregar atributo `accept` al input y validación MIME type antes de upload
 
 **2. Problemas de Estabilidad del Backend** (ALTO)
+
 - **Ubicación:** `apps/api/routes/query.py`
 - **Problema:** API retorna `ERR_EMPTY_RESPONSE` durante procesamiento de queries
 - **Impacto:** Sistema no disponible, pérdida de datos
@@ -62,6 +66,7 @@
   - Monitorear logs por OOM o crashes
 
 **3. Endpoint de Health en URL Incorrecta** (MEDIO)
+
 - **Problema:** Test buscaba `/health` en frontend (puerto 3030) en lugar de backend (8030)
 - **Impacto:** Falso negativo en tests
 - **Solución:** Actualizar configuración de tests
@@ -73,19 +78,22 @@
 - **GET /health** → Retorna `{"status": "healthy"}` correctamente
 - **UI Settings Persistence** → localStorage funciona (frontend)
 
-#### ❌ Problemas Críticos Encontrados
+#### ❌ Problemas Críticos Encontrados (Backend)
 
 **1. Endpoint /ingest Falla Completamente** (CRÍTICO)
+
 - **Test:** TC001, TC005
 - **Error:** HTTP 500 Internal Server Error
 - **Ubicación:** `apps/api/routes/ingest.py:30-69`
 - **Root Cause Probable:**
-  ```
+
+  ```text
   - Missing module: workers.ingestion_worker.process_single_document
   - File parsing errors in RAG pipeline
   - Qdrant connection issues
   - Missing environment variables
   ```
+
 - **Impacto:** **Sistema completamente no funcional** - usuarios no pueden subir documentos
 - **Solución Urgente:**
   1. Verificar logs: `docker logs docker-api-1`
@@ -94,10 +102,12 @@
   4. Verificar conexión a Qdrant y colección "documents"
 
 **2. Endpoint /query Retorna Formato Incorrecto** (ALTO)
+
 - **Test:** TC002
 - **Error:** Response JSON missing 'answer' field
 - **Ubicación:** `apps/api/routes/query.py`
 - **Formato Esperado vs Actual:**
+
   ```json
   // Esperado
   {
@@ -107,6 +117,7 @@
 
   // Actual: unknown format (missing 'answer')
   ```
+
 - **Impacto:** Frontend no puede mostrar respuestas AI
 - **Solución:**
   - Definir schema con Pydantic models
@@ -114,6 +125,7 @@
   - Implementar fallback cuando LLM no disponible
 
 **3. Endpoints de Autenticación No Implementados** (MEDIO)
+
 - **Test:** TC004
 - **Error:** HTTP 404 en `/auth/login`
 - **Ubicación:** `apps/api/routes/auth.py`
@@ -124,14 +136,17 @@
   - Agregar generación JWT para producción
 
 **4. Batch Processing Deshabilitado** (MEDIO)
+
 - **Ubicación:** `apps/api/routes/batch.py`, `apps/api/main.py:57-58`
 - **Problema:** Errores de importación forzaron deshabilitación temporal
 - **Módulos Faltantes:**
+
   ```python
   from database.postgres_client import get_db  # ImportError
   from database.batch_manager import BatchManager  # ImportError
   from workers.ingestion_worker import process_document_task  # ImportError
   ```
+
 - **Impacto:** Feature de batch ingestion no disponible
 - **Solución:** Implementar capa de base de datos completa
 
@@ -142,21 +157,25 @@
 ### Errores de Sintaxis (CORREGIDOS)
 
 1. **apps/api/main.py:1**
+
    ```python
    # Error: routersfrom fastapi import FastAPI
    # Fix: from fastapi import FastAPI
    ```
+
    - **Status:** ✅ CORREGIDO
 
 2. **apps/api/routes/ingest.py:1**
+
    ```python
    # Error: PowerShell delimiters (@' y '@) en archivo Python
    ```
+
    - **Status:** ✅ CORREGIDO
 
 ### Problemas de Arquitectura
 
-3. **Estructura de Imports Inconsistente**
+1. **Estructura de Imports Inconsistente**
    - `batch.py` usa imports absolutos (`from apps.api.database...`)
    - Falla en contenedor Docker donde `/app` es root
    - **Solución Aplicada:** Deshabilitado temporalmente batch router
@@ -167,22 +186,26 @@
 ## 📁 Archivos Generados
 
 ### Reportes de Testing
+
 1. `testsprite_tests/testsprite-mcp-test-report.md` - Reporte Frontend Detallado
 2. `testsprite_tests/testsprite-backend-test-report.md` - Reporte Backend Detallado
 3. `TESTING_REPORT_FINAL.md` - Este reporte consolidado
 
 ### Archivos de Configuración
-4. `testsprite_tests/tmp/code_summary.json` - Resumen del código
-5. `testsprite_tests/tmp/prd_files/frontend.md` - PRD Frontend
-6. `testsprite_tests/tmp/prd_files/backend.md` - PRD Backend
-7. `testsprite_tests/tmp/raw_report.md` - Reporte raw de TestSprite
+
+1. `testsprite_tests/tmp/code_summary.json` - Resumen del código
+2. `testsprite_tests/tmp/prd_files/frontend.md` - PRD Frontend
+3. `testsprite_tests/tmp/prd_files/backend.md` - PRD Backend
+4. `testsprite_tests/tmp/raw_report.md` - Reporte raw de TestSprite
 
 ### Código de Tests
-8. `testsprite_tests/tmp/TC*.py` - 22 archivos de tests individuales
+
+1. `testsprite_tests/tmp/TC*.py` - 22 archivos de tests individuales
 
 ### URLs de Visualización
-- **Frontend Tests:** https://www.testsprite.com/dashboard/mcp/tests/9577bbc4-25f2-4e9d-babe-310bdd802df7/
-- **Backend Tests:** https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/
+
+- **Frontend Tests:** <https://www.testsprite.com/dashboard/mcp/tests/9577bbc4-25f2-4e9d-babe-310bdd802df7/>
+- **Backend Tests:** <https://www.testsprite.com/dashboard/mcp/tests/a9a84834-38bd-447e-a859-9dded8791313/>
 
 ---
 
@@ -198,6 +221,7 @@
 | Ollama | 11464 | ✅ Running | Sin issues |
 
 **Configuración:**
+
 - `AUTH_BYPASS=true` (modo desarrollo)
 - Embedding Model: nomic-embed-text-v1.5 (768 dims)
 - LLM: Ollama llama3.2:1b
@@ -230,46 +254,46 @@
 
 ### 🟡 Prioridad ALTA (Esta Semana)
 
-4. **Implementar autenticación básica**
+1. **Implementar autenticación básica**
    - [ ] Crear `/auth/login` endpoint en `apps/api/routes/auth.py`
    - [ ] Retornar mock token cuando `AUTH_BYPASS=true`
    - [ ] Documentar en OpenAPI/Swagger
 
-5. **Reparar batch processing**
+2. **Reparar batch processing**
    - [ ] Implementar `database/postgres_client.py` con función `get_db()`
    - [ ] Implementar `database/batch_manager.py`
    - [ ] Implementar `workers/ingestion_worker.py` con `process_document_task()`
    - [ ] Re-habilitar batch router en `main.py`
 
-6. **Agregar logging comprehensivo**
+3. **Agregar logging comprehensivo**
    - [ ] Implementar logging estructurado con correlation IDs
    - [ ] Agregar logs en todos los endpoints
    - [ ] Configurar niveles de log (DEBUG en dev, INFO en prod)
 
 ### 🟢 Prioridad MEDIA (Próximas 2 Semanas)
 
-7. **Crear tests de integración con pytest**
+1. **Crear tests de integración con pytest**
    - [ ] Tests para `/ingest` endpoint end-to-end
    - [ ] Tests para `/query` endpoint end-to-end
    - [ ] Tests para RAG pipeline completo
    - [ ] Configurar CI/CD para ejecutar tests automáticamente
 
-8. **Mejorar manejo de errores**
+2. **Mejorar manejo de errores**
    - [ ] Try/catch blocks en todos los endpoints
    - [ ] Mensajes de error user-friendly
    - [ ] Status codes HTTP correctos
    - [ ] Logging de stack traces
 
-9. **Documentación API**
+3. **Documentación API**
    - [ ] Completar OpenAPI/Swagger docs
    - [ ] Ejemplos de requests/responses
    - [ ] Códigos de error y su significado
 
-10. **Monitoreo y observabilidad**
-    - [ ] Health checks para dependencias (Qdrant, Ollama, Postgres)
-    - [ ] Prometheus metrics
-    - [ ] Dashboards en Grafana
-    - [ ] Alertas para errores críticos
+4. **Monitoreo y observabilidad**
+   - [ ] Health checks para dependencias (Qdrant, Ollama, Postgres)
+   - [ ] Prometheus metrics
+   - [ ] Dashboards en Grafana
+   - [ ] Alertas para errores críticos
 
 ---
 
@@ -302,18 +326,21 @@
 ## 🎓 Lecciones Aprendidas
 
 ### Qué Funcionó Bien
+
 - ✅ Testing automatizado con TestSprite identificó problemas críticos rápidamente
 - ✅ Arquitectura modular (frontend/backend separados) facilitó testing independiente
 - ✅ Docker Compose permitió replicar entorno de producción localmente
 - ✅ UI Settings implementation es sólida y bien testeada
 
 ### Áreas de Mejora
+
 - ❌ Falta de tests de integración antes de deployment
 - ❌ Módulos críticos (workers, database) no implementados completamente
 - ❌ Manejo de errores insuficiente causa fallos en cascada
 - ❌ Estructura de imports necesita estandarización
 
 ### Recomendaciones para el Futuro
+
 1. **Test-Driven Development:** Escribir tests antes de implementar features
 2. **CI/CD Pipeline:** Ejecutar tests automáticamente en cada commit
 3. **Code Review:** Revisar imports y dependencias antes de merge
@@ -330,6 +357,7 @@
 **Repositorio:** C:\Users\Usuario\Workspace\01_Proyectos\Anclora-RAG-Generic
 
 Para consultas o seguimiento de issues, referirse a:
+
 - **Reporte Frontend Detallado:** `testsprite_tests/testsprite-mcp-test-report.md`
 - **Reporte Backend Detallado:** `testsprite_tests/testsprite-backend-test-report.md`
 - **Visualización Online:** Links en sección "Archivos Generados"
@@ -355,7 +383,7 @@ Antes de deployar a producción, asegurarse de:
 
 ---
 
-**🎉 Fin del Reporte de Testing**
+## 🎉 Fin del Reporte de Testing
 
 Este reporte consolida los resultados de testing automatizado con TestSprite para el proyecto Anclora RAG Generic. Los problemas identificados han sido documentados con ubicaciones exactas en el código, análisis de causa raíz, y recomendaciones de solución priorizadas.
 
