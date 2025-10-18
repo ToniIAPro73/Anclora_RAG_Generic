@@ -4,10 +4,11 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, Final
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from rq.job import Job
 
 from clients.redis_queue import get_ingestion_queue, get_redis_connection
+from clients.websocket_manager import get_ws_manager
 from deps import require_admin
 from workers.ingestion_worker import process_single_document
 
@@ -277,3 +278,43 @@ async def get_ingestion_history(
             status_code=500,
             detail="Failed to retrieve ingestion history"
         ) from exc
+
+
+@router.websocket("/ws/jobs/{job_id}")
+async def websocket_job_status(websocket: WebSocket, job_id: str):
+    """
+    WebSocket endpoint for real-time job status updates.
+
+    Clients connect to this endpoint to receive push notifications
+    about job status changes instead of polling.
+    """
+    manager = get_ws_manager()
+    await manager.connect(websocket, job_id)
+
+    try:
+        # Send initial connection confirmation
+        await websocket.send_json({
+            "type": "connected",
+            "job_id": job_id,
+            "message": "WebSocket connection established"
+        })
+
+        # Keep connection alive and handle incoming messages
+        while True:
+            try:
+                # Wait for any client messages (heartbeat, etc.)
+                data = await websocket.receive_text()
+
+                # Handle ping/pong for keepalive
+                if data == "ping":
+                    await websocket.send_json({"type": "pong"})
+
+            except WebSocketDisconnect:
+                break
+            except Exception as exc:
+                logger.error(f"Error in WebSocket loop for job {job_id}: {str(exc)}")
+                break
+
+    finally:
+        manager.disconnect(websocket, job_id)
+        logger.info(f"WebSocket connection closed for job {job_id}")

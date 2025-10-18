@@ -1,7 +1,8 @@
-import { useState, useRef, DragEvent, ChangeEvent, useEffect } from "react";
+import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { isAxiosError } from "axios";
-import { ingestDocument, getJobStatus } from "@/lib/api";
+import { ingestDocument } from "@/lib/api";
 import { useUISettings } from "./ui-settings-context";
+import { useWebSocket } from "@/lib/useWebSocket";
 
 interface UploadZoneProps {
   onUploadSuccess: (fileName: string, chunks: number) => void;
@@ -25,74 +26,57 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
   const [jobId, setJobId] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Poll job status when jobId is set
-  useEffect(() => {
-    if (!jobId) return;
+  // WebSocket connection for real-time updates
+  useWebSocket(jobId, {
+    onMessage: (message) => {
+      // Status messages for UI
+      const statusMessages: Record<string, { es: string; en: string }> = {
+        queued: { es: "En cola...", en: "Queued..." },
+        processing: { es: "Procesando documento...", en: "Processing document..." },
+        completed: { es: "Completado", en: "Completed" },
+        failed: { es: "Error en procesamiento", en: "Processing failed" },
+      };
 
-    const pollJobStatus = async () => {
-      try {
-        const status = await getJobStatus(jobId);
+      const status = message.status || "unknown";
+      setUploadStatus(statusMessages[status]?.[language] || status);
 
-        // Update status message
-        const statusMessages: Record<string, { es: string; en: string }> = {
-          queued: { es: "En cola...", en: "Queued..." },
-          processing: { es: "Procesando documento...", en: "Processing document..." },
-          completed: { es: "Completado", en: "Completed" },
-          failed: { es: "Error en procesamiento", en: "Processing failed" },
-        };
-
-        setUploadStatus(statusMessages[status.status]?.[language] || status.status);
-
+      // Handle different message types
+      if (message.type === "connected") {
+        console.log("WebSocket connected for job", message.job_id);
+      } else if (message.type === "job_update") {
         // Handle completion
-        if (status.status === "completed" && status.result) {
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-          }
+        if (status === "completed" && message.chunks !== undefined && message.filename) {
           setIsUploading(false);
           setJobId(null);
-          onUploadSuccess(status.result.file, status.result.chunks);
+          onUploadSuccess(message.filename, message.chunks);
         }
 
         // Handle failure
-        if (status.status === "failed") {
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-          }
+        if (status === "failed") {
           setIsUploading(false);
           setJobId(null);
-          onUploadError(status.error || "Job failed");
+          onUploadError(message.error || "Job failed");
         }
-      } catch (error) {
-        console.error("Error polling job status:", error);
-        // Don't stop polling on network errors, but stop if job not found
-        if (isAxiosError(error) && error.response?.status === 404) {
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-          }
-          setIsUploading(false);
-          setJobId(null);
-          onUploadError("Job not found or expired");
+
+        // Update status for processing steps
+        if (status === "processing" && message.step) {
+          const stepMessages: Record<string, { es: string; en: string }> = {
+            parsing: { es: "Analizando documento...", en: "Parsing document..." },
+            indexing: { es: "Indexando contenido...", en: "Indexing content..." },
+          };
+          setUploadStatus(stepMessages[message.step]?.[language] || statusMessages[status]?.[language]);
         }
       }
-    };
-
-    // Start polling immediately and then every 2 seconds
-    pollJobStatus();
-    pollingIntervalRef.current = setInterval(pollJobStatus, 2000);
-
-    // Cleanup on unmount or when jobId changes
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    };
-  }, [jobId, language, onUploadSuccess, onUploadError]);
+    },
+    onError: (error) => {
+      console.error("WebSocket error:", error);
+      // Fallback to showing error, but don't fail the upload
+    },
+    onDisconnected: () => {
+      console.log("WebSocket disconnected");
+    },
+  });
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
