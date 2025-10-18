@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import UploadZone from "@/components/UploadZone";
+import DocumentHistory from "@/components/DocumentHistory";
 import Chat from "@/components/Chat";
 import { useUISettings } from "@/components/ui-settings-context";
 
@@ -89,11 +90,12 @@ export default function Home() {
               {COPY.helper[language]}
             </p>
           </div>
-          <div className="mt-4 flex flex-1 flex-col">
+          <div className="mt-4 flex flex-1 flex-col space-y-6">
             <UploadZone
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}
             />
+            <DocumentHistory />
           </div>
         </section>
 

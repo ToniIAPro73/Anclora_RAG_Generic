@@ -1,6 +1,6 @@
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { useState, useRef, DragEvent, ChangeEvent, useEffect } from "react";
 import { isAxiosError } from "axios";
-import { ingestDocument } from "@/lib/api";
+import { ingestDocument, getJobStatus } from "@/lib/api";
 import { useUISettings } from "./ui-settings-context";
 
 interface UploadZoneProps {
@@ -22,7 +22,77 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
   const { language } = useUISettings();
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Poll job status when jobId is set
+  useEffect(() => {
+    if (!jobId) return;
+
+    const pollJobStatus = async () => {
+      try {
+        const status = await getJobStatus(jobId);
+
+        // Update status message
+        const statusMessages: Record<string, { es: string; en: string }> = {
+          queued: { es: "En cola...", en: "Queued..." },
+          processing: { es: "Procesando documento...", en: "Processing document..." },
+          completed: { es: "Completado", en: "Completed" },
+          failed: { es: "Error en procesamiento", en: "Processing failed" },
+        };
+
+        setUploadStatus(statusMessages[status.status]?.[language] || status.status);
+
+        // Handle completion
+        if (status.status === "completed" && status.result) {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          setIsUploading(false);
+          setJobId(null);
+          onUploadSuccess(status.result.file, status.result.chunks);
+        }
+
+        // Handle failure
+        if (status.status === "failed") {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          setIsUploading(false);
+          setJobId(null);
+          onUploadError(status.error || "Job failed");
+        }
+      } catch (error) {
+        console.error("Error polling job status:", error);
+        // Don't stop polling on network errors, but stop if job not found
+        if (isAxiosError(error) && error.response?.status === 404) {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          setIsUploading(false);
+          setJobId(null);
+          onUploadError("Job not found or expired");
+        }
+      }
+    };
+
+    // Start polling immediately and then every 2 seconds
+    pollJobStatus();
+    pollingIntervalRef.current = setInterval(pollJobStatus, 2000);
+
+    // Cleanup on unmount or when jobId changes
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [jobId, language, onUploadSuccess, onUploadError]);
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -83,9 +153,22 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
     }
 
     setIsUploading(true);
+    setUploadStatus(language === "es" ? "Subiendo archivo..." : "Uploading file...");
+
     try {
       const result = await ingestDocument(file);
-      onUploadSuccess(result.file, result.chunks);
+
+      // Check if async mode (has job_id) or sync mode (has chunks directly)
+      if (result.job_id) {
+        // Async mode: Start polling for job status
+        setJobId(result.job_id);
+        setUploadStatus(language === "es" ? "En cola..." : "Queued...");
+      } else {
+        // Sync mode: Handle immediate result
+        const chunks = result.chunks ?? result.chunk_count ?? 0;
+        onUploadSuccess(result.file, chunks);
+        setIsUploading(false);
+      }
     } catch (error: unknown) {
       const fallback =
         error instanceof Error ? error.message : typeof error === "string" ? error : "Unknown error";
@@ -94,8 +177,8 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
           ? (error.response.data as { detail?: string }).detail ?? fallback
           : fallback;
       onUploadError(detail);
-    } finally {
       setIsUploading(false);
+    } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -126,7 +209,12 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
       {isUploading ? (
         <div className="py-4">
           <div className="mx-auto mb-2 h-10 w-10 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
-          <p className="text-gray-600 dark:text-slate-300">Procesando documento...</p>
+          <p className="text-gray-600 dark:text-slate-300">
+            {uploadStatus || (language === "es" ? "Procesando documento..." : "Processing document...")}
+          </p>
+          {jobId && (
+            <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">Job ID: {jobId}</p>
+          )}
         </div>
       ) : (
         <>
