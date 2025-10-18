@@ -90,7 +90,18 @@ def ensure_collection(client: QdrantClient, collection_name: str) -> None:
 
 def index_text(doc_id: str, text: str) -> int:
     try:
-        document = Document(text=text, id_=doc_id)
+        from datetime import datetime, timezone
+
+        # Add timestamp metadata to document
+        timestamp = datetime.now(timezone.utc).isoformat()
+        document = Document(
+            text=text,
+            id_=doc_id,
+            metadata={
+                "document_id": doc_id,
+                "uploaded_at": timestamp,
+            }
+        )
         qdrant_client = get_qdrant_client()
 
         ensure_collection(qdrant_client, COLLECTION_NAME)
@@ -104,15 +115,21 @@ def index_text(doc_id: str, text: str) -> int:
         nodes = NODE_PARSER.get_nodes_from_documents([document])
         texts = [node.get_content(metadata_mode="all") for node in nodes]
         embeddings = EMBED_MODEL.get_text_embedding_batch(texts)
-        for node, embedding in zip(nodes, embeddings):
+
+        # Add metadata to each node
+        for idx, (node, embedding) in enumerate(zip(nodes, embeddings)):
             node.embedding = embedding
+            # Preserve and enrich metadata
+            node.metadata["document_id"] = doc_id
+            node.metadata["uploaded_at"] = timestamp
+            node.metadata["chunk_index"] = idx
 
         vector_store.add(nodes)
 
-        collection_info = qdrant_client.get_collection(COLLECTION_NAME)
-        chunk_count = collection_info.points_count
+        # Count chunks for this specific document
+        chunk_count = len(nodes)
 
-        logger.info("Successfully indexed document %s with %s chunks", doc_id, chunk_count)
+        logger.info("Successfully indexed document %s with %s chunks at %s", doc_id, chunk_count, timestamp)
         return chunk_count
 
     except Exception as exc:

@@ -246,7 +246,7 @@ async def get_ingestion_history(
                         "id": doc_id,
                         "filename": doc_id,
                         "chunks": 0,
-                        "created_at": None,  # Qdrant doesn't store timestamps by default
+                        "uploaded_at": payload.get("uploaded_at"),
                     }
 
                 documents_map[doc_id]["chunks"] += 1
