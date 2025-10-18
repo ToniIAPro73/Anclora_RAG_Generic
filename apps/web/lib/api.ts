@@ -64,10 +64,11 @@ export const getJobStatus = async (jobId: string): Promise<JobStatusResponse> =>
 };
 
 export interface DocumentHistoryItem {
-  id: string;
+  id: string | number;
   filename: string;
   chunks: number;
-  created_at: string | null;
+  created_at?: string | null;
+  uploaded_at?: string | null;
 }
 
 export interface DocumentHistoryResponse {

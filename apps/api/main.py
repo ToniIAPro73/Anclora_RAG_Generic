@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 try:
     from middleware import CorrelationIdMiddleware
     from routes.auth import router as auth_router
+    from routes.documents import router as documents_router
     from routes.health import router as health_router
     from routes.ingest import router as ingest_router
     from routes.query import router as query_router
@@ -62,6 +63,7 @@ logger.info(f"FastAPI application initialized - version=1.0.0 log_level={LOG_LEV
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(documents_router)
 app.include_router(health_router)
 app.include_router(ingest_router)
 app.include_router(query_router)

@@ -9,6 +9,7 @@ import ThemeModal from './ThemeModal';
 
 const NAV_LINKS = [
   { href: '/', label: { es: 'Dashboard', en: 'Dashboard' } },
+  { href: '/documentos', label: { es: 'Documentos', en: 'Documents' } },
   {
     href: '/ingesta-avanzada',
     label: { es: 'Ingesta Avanzada', en: 'Advanced Ingestion' },
