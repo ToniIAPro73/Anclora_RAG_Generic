@@ -134,4 +134,5 @@ passlib[bcrypt]==1.7.4
 python-jose==3.3.0
 email-validator==2.2.0
 psycopg2-binary==2.9.9
-llama-index-llms-gemini>=0.6.0
+llama-index-llms-google-genai>=0.2.0
+google-generativeai>=1.0.0

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from llama_index.core import Settings, VectorStoreIndex
-from llama_index.llms.gemini import Gemini
+from llama_index.llms.google_genai import GoogleAIGemini
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from pydantic import BaseModel, Field, field_validator
 
@@ -109,14 +109,20 @@ def get_query_engine(top_k: int, language: str):
                 "Get your free API key at: https://aistudio.google.com/app/apikey"
             )
 
-        llm = Gemini(
-            model=GEMINI_MODEL,
-            api_key=GEMINI_API_KEY,
-            system_instruction=build_system_prompt(language),
-            temperature=0.7,
-            api_base=SANITIZED_API_BASE,
-            transport=GEMINI_TRANSPORT,
-        )
+        llm_kwargs: Dict[str, Any] = {
+            "model": GEMINI_MODEL,
+            "api_key": GEMINI_API_KEY,
+            "temperature": 0.7,
+        }
+        system_prompt = build_system_prompt(language)
+        if system_prompt:
+            llm_kwargs["system_instruction"] = system_prompt
+        if SANITIZED_API_BASE:
+            llm_kwargs["api_base"] = SANITIZED_API_BASE
+        if GEMINI_TRANSPORT:
+            llm_kwargs["transport"] = GEMINI_TRANSPORT
+
+        llm = GoogleAIGemini(**llm_kwargs)
         Settings.llm = llm
         Settings.embed_model = EMBED_MODEL
 
