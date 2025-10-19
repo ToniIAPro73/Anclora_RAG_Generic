@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from llama_index.core import Settings, VectorStoreIndex
-from llama_index.llms.ollama import Ollama
+from llama_index.llms.gemini import Gemini
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from pydantic import BaseModel, Field, field_validator
 
@@ -14,8 +14,9 @@ from rag.pipeline import COLLECTION_NAME, EMBED_MODEL, get_qdrant_client
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["query"])
 
-OLLAMA_URL = os.getenv("OLLAMA_URL") or os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+# Gemini settings (cloud LLM, free tier)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
 
 
 class QueryRequest(BaseModel):
@@ -80,11 +81,17 @@ def build_system_prompt(language: str) -> str:
 def get_query_engine(top_k: int, language: str):
     """Initialize query engine per request."""
     try:
-        llm = Ollama(
-            model=OLLAMA_MODEL,
-            base_url=OLLAMA_URL,
-            request_timeout=120.0,
-            system_prompt=build_system_prompt(language),
+        if not GEMINI_API_KEY:
+            raise ValueError(
+                "GEMINI_API_KEY not configured. Please add it to your .env file.\n"
+                "Get your free API key at: https://aistudio.google.com/app/apikey"
+            )
+
+        llm = Gemini(
+            model=GEMINI_MODEL,
+            api_key=GEMINI_API_KEY,
+            system_instruction=build_system_prompt(language),
+            temperature=0.7,
         )
         Settings.llm = llm
         Settings.embed_model = EMBED_MODEL
@@ -156,7 +163,7 @@ async def query_documents(request: QueryRequest) -> QueryResponse:
             answer_text = str(llama_response)
 
         metadata: Dict[str, Any] = {
-            "model": OLLAMA_MODEL,
+            "model": GEMINI_MODEL,
             "sources": len(sources),
             "language": language,
         }

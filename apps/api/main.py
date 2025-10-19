@@ -1,8 +1,13 @@
 import os
 import sys
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# Load environment variables from .env file (for local development)
+# This will load from apps/api/.env when running locally
+load_dotenv()
 
 # Add current directory and parent directories to Python path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))

@@ -33,13 +33,6 @@ services:
     volumes:
       - redis_data:/data
 
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11464:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-
   api:
     build:
       context: ../../apps/api
@@ -57,8 +50,6 @@ services:
       qdrant:
         condition: service_started
       redis:
-        condition: service_started
-      ollama:
         condition: service_started
     ports:
       - "8030:8000"
@@ -98,4 +89,3 @@ volumes:
   postgres_data:
   qdrant_data:
   redis_data:
-  ollama_data:
