@@ -1,13 +1,23 @@
 import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Load environment variables from .env file (for local development)
-# This will load from apps/api/.env when running locally
-load_dotenv()
+# Load environment variables with local overrides taking precedence
+API_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = API_DIR.parent.parent
+
+for env_path in (
+    PROJECT_ROOT / ".env",
+    API_DIR / ".env",
+    PROJECT_ROOT / ".env.local",
+    API_DIR / ".env.local",
+):
+    if env_path.exists():
+        load_dotenv(env_path, override=True)
 
 # Add current directory and parent directories to Python path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -92,4 +102,3 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
-

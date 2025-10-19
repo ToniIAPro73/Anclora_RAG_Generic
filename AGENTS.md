@@ -20,27 +20,36 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `apps/api`: FastAPI RAG service (endpoints in `routes/`, orchestration in `rag/`, jobs in `workers/`).
-- `apps/web`: Next.js 15 client (`app/`, `components/`, `tailwind.config.ts`).
-- `packages/`: Shared Python libs (`parsers/`, `rag-core/`).
+- `apps/api`: FastAPI RAG service; endpoints in `routes/`, flows in `rag/`, worker jobs in `workers/`.
+- `apps/web`: Next.js 15 app; UI in `app/`, shared components under `components/`, Tailwind tokens in `tailwind.config.ts`.
+- `packages/`: Reusable Python libs such as `parsers/` and `rag-core/`.
 - `infra/docker`: Compose stacks for Postgres, Redis, Qdrant, Ollama, API, worker.
-- `scripts/`, `tests/`, `testsprite_tests/`: Automation helpers, fixtures, QA scripts.
+- `scripts/`, `tests/`, `testsprite_tests/`: Automation helpers, fixtures, regression scripts.
+- `openspec/`: Spec-driven change management; read before shipping new capabilities.
 
 ## Build, Test & Development Commands
-- `docker compose -f infra/docker/docker-compose.dev.yml up --build`: boots the dev stack (`--detach` optional).
-- `cd apps/api && uvicorn main:app --reload`: serves the API only; ensure `.env` variables are loaded.
-- `cd apps/web && npm install && npm run dev`: starts the web client on port 3030 (`npm run build` for production).
-- `python scripts/verify_system.py`: checks Docker, Ollama, and model assets.
-- `npm run lint` in `apps/web`: enforce ESLint/Tailwind defaults; resolve warnings before committing.
+- `docker compose -f infra/docker/docker-compose.dev.yml up --build`: bootstrap full stack (add `--detach` for background).
+- `cd apps/api && uvicorn main:app --reload`: run API locally; load `.env` with RAG credentials.
+- `cd apps/web && npm install && npm run dev`: start client on port 3030; use `npm run build` for production smoke tests.
+- `python scripts/verify_system.py`: validate Docker, Ollama models, and Qdrant indexes.
+- `npm run lint` in `apps/web`: enforce ESLint, Tailwind, and TypeScript rules.
 
 ## Coding Style & Naming Conventions
-Python follows PEP 8, 4-space indents, snake_case files, and dependency injection via FastAPI `Depends`. React components stay PascalCase, hooks/utilities camelCase, Tailwind classes inline, shared tokens in `lib/`. Keep configuration in code config files or env vars; never inline secrets or local paths.
+- Python: PEP 8, 4 spaces, snake_case modules, FastAPI dependencies via `Depends`.
+- TypeScript/React: Components PascalCase, hooks/utilities camelCase; keep Tailwind classes inline.
+- Prefer configuration files or env vars over inline secrets; share tokens via `apps/web/lib/`.
 
 ## Testing Guidelines
-Run `pytest` from `apps/api` for backend units (`test_<feature>.py`) and mock externals or reuse the compose stack for integrations. Port stable `testsprite_tests/` scenarios into Playwright or React Testing Library under `apps/web/__tests__/`.
+- Run `pytest` from `apps/api` for backend unit and integration tests; mock third-party services by default.
+- Frontend tests live in `apps/web/__tests__/` using React Testing Library; migrate stable `testsprite_tests/` scenarios.
+- Name tests `test_<feature>.py` or `<Component>.test.tsx`; keep coverage focused on approved behaviors.
 
 ## Commit & Pull Request Guidelines
-History shows brief Spanish imperatives (e.g., `nuevas correcciones en archivos .md`); keep them concise but move toward Conventional Commits (`feat(api): add rerank fallback`). PRs need a summary, impact radius, test evidence or rationale, linked tasks, and screenshots or curl traces for user-facing work. Request module owners as reviewers.
+- Follow concise imperative history; prefer Conventional Commit prefixes (`feat(api): ...`, `fix(web): ...`).
+- Each PR needs a clear summary, impact radius, test proof (commands or rationale), linked task, and UX evidence (screenshots or curl) for user-facing changes.
+- Request relevant module owners as reviewers and avoid unrelated changes in the same PR.
 
 ## Security & Configuration Tips
-Copy `.env.example`, keep secrets out of Git, and reset Postgres/Redis with `docker compose down -v` before sharing data. Run `scripts/backup_qdrant.sh` before schema changes, and keep `AUTH_BYPASS=true` strictly local.
+- Copy `.env.example` for local setups; never commit credentials.
+- Run `scripts/backup_qdrant.sh` before schema edits; reset data with `docker compose down -v`.
+- Keep `AUTH_BYPASS=true` strictly local and remove it before sharing environments.
