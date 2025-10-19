@@ -103,5 +103,5 @@ Write-Host "  • Todo:      .\scripts\powershell\stop_dev.ps1" -ForegroundColor
 Write-Host "  • Frontend:  npx kill-port 3030" -ForegroundColor White
 Write-Host "  • Backend:   docker compose -f infra/docker/docker-compose.dev.yml down" -ForegroundColor White
 Write-Host ""
-Write-Host "Estado actual: ✓ WebSocket Push implementado - Listo para testing" -ForegroundColor Green
+Write-Host "Estado actual: WebSocket Push implementado - Listo para testing" -ForegroundColor Green
 Write-Host ""

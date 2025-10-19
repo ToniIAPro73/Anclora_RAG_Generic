@@ -35,6 +35,7 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
         queued: { es: "En cola...", en: "Queued..." },
         processing: { es: "Procesando documento...", en: "Processing document..." },
         completed: { es: "Completado", en: "Completed" },
+        duplicate: { es: "Documento duplicado", en: "Duplicate document" },
         failed: { es: "Error en procesamiento", en: "Processing failed" },
       };
 
@@ -45,6 +46,18 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
       if (message.type === "connected") {
         console.log("WebSocket connected for job", message.job_id);
       } else if (message.type === "job_update") {
+        // Handle duplicate detection
+        if (status === "duplicate" && message.filename) {
+          setIsUploading(false);
+          setJobId(null);
+          const duplicateMsg = message.message || (
+            language === "es"
+              ? "Este documento ya fue indexado anteriormente"
+              : "This document was already indexed"
+          );
+          onUploadError(duplicateMsg);
+        }
+
         // Handle completion
         if (status === "completed" && message.chunks !== undefined && message.filename) {
           setIsUploading(false);
@@ -150,7 +163,18 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
       } else {
         // Sync mode: Handle immediate result
         const chunks = result.chunks ?? result.chunk_count ?? 0;
-        onUploadSuccess(result.file, chunks);
+
+        // Check for duplicate status
+        if (result.status === "duplicate") {
+          const duplicateMsg = result.message || (
+            language === "es"
+              ? `Este documento ya fue indexado como '${result.duplicate_of || "archivo previo"}'`
+              : `This document was already indexed as '${result.duplicate_of || "previous file"}'`
+          );
+          onUploadError(duplicateMsg);
+        } else {
+          onUploadSuccess(result.file, chunks);
+        }
         setIsUploading(false);
       }
     } catch (error: unknown) {

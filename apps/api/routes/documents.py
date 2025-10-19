@@ -83,6 +83,62 @@ async def delete_document(
         ) from exc
 
 
+@router.delete("/documents")
+async def delete_all_documents(
+    _: None = Depends(require_admin),
+) -> Dict[str, Any]:
+    """
+    Delete ALL documents and chunks from the vector store.
+
+    WARNING: This operation cannot be undone. It will completely clear
+    the RAG knowledge base.
+
+    Returns:
+        Success message with deletion count
+    """
+    try:
+        from rag.pipeline import get_qdrant_client, COLLECTION_NAME
+
+        client = get_qdrant_client()
+
+        # Check if collection exists
+        if not client.collection_exists(COLLECTION_NAME):
+            logger.warning("Collection does not exist, nothing to delete")
+            return {
+                "success": True,
+                "message": "No documents to delete (collection does not exist)",
+                "deleted_count": 0
+            }
+
+        # Count points before deletion
+        collection_info = client.get_collection(COLLECTION_NAME)
+        total_points = collection_info.points_count if hasattr(collection_info, 'points_count') else 0
+
+        logger.warning(f"Deleting ALL documents from collection: {total_points} points")
+
+        # Delete the entire collection and recreate it
+        client.delete_collection(COLLECTION_NAME)
+
+        # Recreate empty collection
+        from rag.pipeline import ensure_collection
+        ensure_collection(client, COLLECTION_NAME)
+
+        logger.info(f"All documents deleted successfully: {total_points} chunks removed")
+
+        return {
+            "success": True,
+            "message": f"All documents have been deleted ({total_points} chunks removed)",
+            "deleted_count": total_points
+        }
+
+    except Exception as exc:
+        logger.error(f"Error deleting all documents: {str(exc)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete all documents: {str(exc)}"
+        ) from exc
+
+
 @router.get("/documents/{document_id:path}")
 async def get_document_details(
     document_id: str,
@@ -137,16 +193,32 @@ async def get_document_details(
                 detail=f"Document '{document_id}' not found"
             )
 
-        # Collect all chunks
+        # Collect all chunks and extract text from node content
         chunks = []
         for point in points:
             payload = point.payload or {}
+
+            # The text is stored in the _node_content field by LlamaIndex
+            text = ""
+            if "_node_content" in payload:
+                # Parse the JSON content
+                import json
+                try:
+                    node_content = json.loads(payload["_node_content"]) if isinstance(payload["_node_content"], str) else payload["_node_content"]
+                    text = node_content.get("text", "")
+                except (json.JSONDecodeError, AttributeError):
+                    # Fallback: try to get text directly
+                    text = str(payload.get("_node_content", ""))
+
             chunks.append({
-                "chunk_id": point.id,
-                "text": payload.get("text", ""),
+                "chunk_id": str(point.id),
+                "text": text,
                 "page": payload.get("page"),
                 "chunk_index": payload.get("chunk_index"),
             })
+
+        # Sort chunks by chunk_index if available
+        chunks.sort(key=lambda x: x.get("chunk_index", 0) if x.get("chunk_index") is not None else 0)
 
         return {
             "document_id": document_id,

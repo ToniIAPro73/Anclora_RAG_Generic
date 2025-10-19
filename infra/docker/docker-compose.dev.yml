@@ -87,7 +87,7 @@ services:
         condition: service_started
       postgres:
         condition: service_healthy
-    command: rq worker ingestion_queue --url redis://redis:6379
+    command: rq worker ingestion --url redis://redis:6379
     healthcheck:
       test: ["CMD", "rq", "info", "--url", "redis://redis:6379"]
       interval: 60s

@@ -100,16 +100,26 @@ async def ingest_document(
             content_type=content_type,
         )
 
+        status = result.get("status", "completed")
+
         logger.info(
-            f"Document ingestion completed: {filename} - {result['chunks']} chunks - {result.get('status', 'completed')}"
+            f"Document ingestion completed: {filename} - {result['chunks']} chunks - {status}"
         )
 
-        return {
+        response = {
             "file": result["filename"],
             "chunks": result["chunks"],
             "chunk_count": result["chunks"],  # Alias for compatibility with tests
-            "status": result.get("status", "completed"),
+            "status": status,
         }
+
+        # Add duplicate information if applicable
+        if status == "duplicate":
+            response["duplicate_of"] = result.get("duplicate_of")
+            response["message"] = result.get("message")
+            response["uploaded_at"] = result.get("uploaded_at")
+
+        return response
 
     except ValueError as exc:
         logger.warning(f"Validation error during ingestion: {filename} - {str(exc)}")

@@ -75,6 +75,22 @@ const COPY = {
     es: "Exportar CSV",
     en: "Export CSV",
   },
+  deleteAll: {
+    es: "Eliminar Todo",
+    en: "Delete All",
+  },
+  confirmDeleteAll: {
+    es: "¿Estás ABSOLUTAMENTE seguro de eliminar TODOS los documentos del RAG? Esta acción NO SE PUEDE DESHACER y borrará permanentemente toda tu base de conocimiento.",
+    en: "Are you ABSOLUTELY sure you want to delete ALL documents from the RAG? This action CANNOT BE UNDONE and will permanently erase your entire knowledge base.",
+  },
+  deleteAllSuccess: {
+    es: (count: number) => `Se eliminaron exitosamente ${count} chunks de la base de conocimiento`,
+    en: (count: number) => `Successfully deleted ${count} chunks from the knowledge base`,
+  },
+  deleteAllError: {
+    es: "Error al eliminar todos los documentos",
+    en: "Error deleting all documents",
+  },
   showing: {
     es: (start: number, end: number, total: number) => `Mostrando ${start}-${end} de ${total}`,
     en: (start: number, end: number, total: number) => `Showing ${start}-${end} of ${total}`,
@@ -155,6 +171,51 @@ export default function DocumentosPage() {
       setNotification({
         type: "error",
         message: COPY.deleteError[language],
+      });
+      setTimeout(() => setNotification(null), 5000);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!confirm(COPY.confirmDeleteAll[language])) {
+      return;
+    }
+
+    // Double confirmation for safety
+    const secondConfirm = language === "es"
+      ? "Escribe 'ELIMINAR TODO' para confirmar:"
+      : "Type 'DELETE ALL' to confirm:";
+    const confirmText = language === "es" ? "ELIMINAR TODO" : "DELETE ALL";
+
+    const userInput = prompt(secondConfirm);
+    if (userInput !== confirmText) {
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8030/documents", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete all documents");
+      }
+
+      const data = await response.json();
+
+      setNotification({
+        type: "success",
+        message: COPY.deleteAllSuccess[language](data.deleted_count || 0),
+      });
+
+      // Reload the document list
+      await loadHistory();
+
+      setTimeout(() => setNotification(null), 5000);
+    } catch (err) {
+      setNotification({
+        type: "error",
+        message: COPY.deleteAllError[language],
       });
       setTimeout(() => setNotification(null), 5000);
     }
@@ -288,25 +349,46 @@ export default function DocumentosPage() {
                 />
               </svg>
             </div>
-            <button
-              onClick={handleExportCSV}
-              className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div className="flex gap-2">
+              <button
+                onClick={handleExportCSV}
+                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              {COPY.export[language]}
-            </button>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                {COPY.export[language]}
+              </button>
+              <button
+                onClick={handleDeleteAll}
+                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                {COPY.deleteAll[language]}
+              </button>
+            </div>
           </div>
         )}
 

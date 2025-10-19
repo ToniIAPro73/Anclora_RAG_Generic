@@ -1,6 +1,7 @@
 import logging
 import os
 import types
+from typing import Optional, Dict, Any
 
 from fastapi import HTTPException
 from llama_index.core import Document, Settings
@@ -9,7 +10,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import UnexpectedResponse
-from qdrant_client.http.models import Distance, VectorParams
+from qdrant_client.http.models import Distance, VectorParams, Filter, FieldCondition, MatchValue
 
 logger = logging.getLogger(__name__)
 
@@ -88,19 +89,100 @@ def ensure_collection(client: QdrantClient, collection_name: str) -> None:
     )
 
 
-def index_text(doc_id: str, text: str) -> int:
+def check_duplicate_document(content_hash: str) -> Optional[Dict[str, Any]]:
+    """
+    Check if a document with the given content hash already exists in Qdrant.
+
+    Args:
+        content_hash: SHA-256 hash of the document content
+
+    Returns:
+        Dictionary with duplicate info if found, None otherwise.
+        Contains: original_filename, chunks, uploaded_at
+    """
+    try:
+        qdrant_client = get_qdrant_client()
+
+        # Check if collection exists
+        if not qdrant_client.collection_exists(COLLECTION_NAME):
+            logger.debug("Collection does not exist yet, no duplicates possible")
+            return None
+
+        # Search for points with this content_hash
+        scroll_result = qdrant_client.scroll(
+            collection_name=COLLECTION_NAME,
+            scroll_filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="content_hash",
+                        match=MatchValue(value=content_hash)
+                    )
+                ]
+            ),
+            limit=1,
+            with_payload=True,
+            with_vectors=False,
+        )
+
+        points, _ = scroll_result
+
+        if points:
+            # Found duplicate
+            payload = points[0].payload or {}
+            duplicate_info = {
+                "original_filename": payload.get("document_id", "unknown"),
+                "chunks": 0,  # Will be counted below
+                "uploaded_at": payload.get("uploaded_at"),
+            }
+
+            # Count all chunks for this content_hash
+            count_result = qdrant_client.count(
+                collection_name=COLLECTION_NAME,
+                count_filter=Filter(
+                    must=[
+                        FieldCondition(
+                            key="content_hash",
+                            match=MatchValue(value=content_hash)
+                        )
+                    ]
+                ),
+                exact=True,
+            )
+
+            duplicate_info["chunks"] = count_result.count
+
+            logger.info(f"Duplicate found for hash {content_hash[:16]}... - {duplicate_info['chunks']} chunks")
+            return duplicate_info
+
+        return None
+
+    except Exception as exc:
+        logger.warning(f"Error checking for duplicates: {exc}")
+        # Don't fail ingestion if duplicate check fails, just proceed
+        return None
+
+
+def index_text(doc_id: str, text: str, content_hash: Optional[str] = None) -> int:
     try:
         from datetime import datetime, timezone
 
         # Add timestamp metadata to document
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Build metadata
+        metadata = {
+            "document_id": doc_id,
+            "uploaded_at": timestamp,
+        }
+
+        # Add content hash if provided
+        if content_hash:
+            metadata["content_hash"] = content_hash
+
         document = Document(
             text=text,
             id_=doc_id,
-            metadata={
-                "document_id": doc_id,
-                "uploaded_at": timestamp,
-            }
+            metadata=metadata
         )
         qdrant_client = get_qdrant_client()
 
@@ -123,6 +205,8 @@ def index_text(doc_id: str, text: str) -> int:
             node.metadata["document_id"] = doc_id
             node.metadata["uploaded_at"] = timestamp
             node.metadata["chunk_index"] = idx
+            if content_hash:
+                node.metadata["content_hash"] = content_hash
 
         vector_store.add(nodes)
 

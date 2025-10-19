@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 from packages.parsers.docx_parser import parse_docx_bytes
 from packages.parsers.markdown import parse_markdown_bytes
 from packages.parsers.pdf import parse_pdf_bytes
 from packages.parsers.text import parse_text_bytes
-from rag.pipeline import index_text
+from rag.pipeline import index_text, check_duplicate_document
 from rq import get_current_job
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,19 @@ def _resolve_parser(filename: str, content_type: str) -> Parser:
         return parser
 
     raise ValueError(f"Unsupported content type '{content_type}' for file '{filename}'")
+
+
+def _calculate_content_hash(payload: bytes) -> str:
+    """
+    Calculate SHA-256 hash of file content for duplicate detection.
+
+    Args:
+        payload: Raw file bytes
+
+    Returns:
+        Hexadecimal hash string
+    """
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _notify_job_progress(job_id: str, status: str, data: Dict = None):
@@ -96,6 +110,41 @@ def process_single_document(file_path: str, filename: str, content_type: str) ->
         if not payload:
             raise ValueError("Empty file uploaded")
 
+        # Calculate content hash for duplicate detection
+        content_hash = _calculate_content_hash(payload)
+        logger.debug(f"Content hash for {filename}: {content_hash}")
+
+        # Check for duplicates
+        duplicate_info = check_duplicate_document(content_hash)
+        if duplicate_info:
+            # Cleanup temp file
+            try:
+                path.unlink()
+            except Exception as exc:
+                logger.warning("Failed to remove temporary file %s: %s", file_path, exc)
+
+            # Return duplicate warning
+            result = {
+                "filename": filename,
+                "chunks": duplicate_info["chunks"],
+                "status": "duplicate",
+                "duplicate_of": duplicate_info["original_filename"],
+                "uploaded_at": duplicate_info["uploaded_at"],
+                "message": f"This document was already indexed as '{duplicate_info['original_filename']}'"
+            }
+
+            # Notify: Duplicate detected
+            if job_id:
+                _notify_job_progress(job_id, "completed", {
+                    "filename": filename,
+                    "chunks": duplicate_info["chunks"],
+                    "status": "duplicate",
+                    "message": result["message"]
+                })
+
+            logger.info("Duplicate document detected: %s (hash: %s)", filename, content_hash[:16])
+            return result
+
         # Notify: Parsing document
         if job_id:
             _notify_job_progress(job_id, "processing", {
@@ -117,7 +166,7 @@ def process_single_document(file_path: str, filename: str, content_type: str) ->
                 "step": "indexing"
             })
 
-        chunk_count = index_text(document_id, text)
+        chunk_count = index_text(document_id, text, content_hash)
 
         try:
             path.unlink()
