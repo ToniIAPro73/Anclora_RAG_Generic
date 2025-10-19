@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from typing import Any, Dict, List, Optional
@@ -167,7 +168,7 @@ async def query_documents(request: QueryRequest) -> QueryResponse:
         logger.info(f"Processing query: {len(request.query)} chars, language={language}, top_k={top_k}")
 
         engine = get_query_engine(top_k, language)
-        llama_response = engine.query(request.query)
+        llama_response = await asyncio.to_thread(engine.query, request.query)
 
         sources: List[Dict[str, Any]] = []
         if hasattr(llama_response, "source_nodes"):

@@ -1,7 +1,7 @@
 # .vscode/bootstrap.ps1 — Arranque de terminal VS Code para Anclora-RAG
 param(
   [string]$BackendPath = "$PSScriptRoot\..\apps\api",
-  [string]$VenvName    = "venv"
+  [string]$VenvName    = "venv311"
 )
 
 # ------------------------------------------------------------
