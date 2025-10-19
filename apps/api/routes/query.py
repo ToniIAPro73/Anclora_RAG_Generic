@@ -16,7 +16,29 @@ router = APIRouter(tags=["query"])
 
 # Gemini settings (cloud LLM, free tier)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "models/gemini-1.5-flash")
+GEMINI_API_BASE = os.getenv("GEMINI_API_BASE")
+GEMINI_TRANSPORT = os.getenv("GEMINI_TRANSPORT", "rest")
+
+
+def sanitize_api_base(api_base: Optional[str]) -> Optional[str]:
+    if not api_base:
+        return None
+    cleaned = api_base.rstrip("/")
+    for suffix in ("/v1beta", "/v1"):
+        if cleaned.endswith(suffix):
+            cleaned = cleaned[: -len(suffix)]
+    return cleaned
+
+
+SANITIZED_API_BASE = sanitize_api_base(GEMINI_API_BASE)
+if GEMINI_API_KEY and GEMINI_MODEL:
+    logger.info(
+        "Gemini config loaded - model=%s api_base=%s transport=%s",
+        GEMINI_MODEL,
+        SANITIZED_API_BASE or "default",
+        GEMINI_TRANSPORT,
+    )
 
 
 class QueryRequest(BaseModel):
@@ -92,6 +114,8 @@ def get_query_engine(top_k: int, language: str):
             api_key=GEMINI_API_KEY,
             system_instruction=build_system_prompt(language),
             temperature=0.7,
+            api_base=SANITIZED_API_BASE,
+            transport=GEMINI_TRANSPORT,
         )
         Settings.llm = llm
         Settings.embed_model = EMBED_MODEL
