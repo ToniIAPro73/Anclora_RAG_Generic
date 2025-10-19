@@ -80,7 +80,7 @@ export default function DocumentHistory() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-slate-200">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-slate-100">
           {COPY.title[language]}
         </h3>
         {totalCount > MAX_DISPLAY && (
@@ -98,15 +98,15 @@ export default function DocumentHistory() {
           {COPY.empty[language]}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-600">
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white/60 dark:border-slate-600 dark:bg-transparent">
           <div className="max-h-[180px] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-slate-800">
+              <thead className="sticky top-0 bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                  <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                     {COPY.filename[language]}
                   </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                  <th className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                     {COPY.chunks[language]}
                   </th>
                 </tr>
@@ -115,7 +115,7 @@ export default function DocumentHistory() {
                 {documents.map((doc) => (
                   <tr
                     key={doc.id}
-                    className="transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
+                    className="transition-colors hover:bg-purple-50/30 dark:hover:bg-slate-800"
                   >
                     <td className="px-4 py-2.5 text-sm text-gray-900 dark:text-slate-200">
                       <div className="flex items-center">

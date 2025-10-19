@@ -81,15 +81,15 @@ export default function Home() {
       )}
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
-        <section className="panel panel-primary flex flex-col bg-white">
+        <section className="panel panel-primary flex flex-col">
           <div className="space-y-1">
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-lg font-bold">
               <span className="text-xl" role="img" aria-hidden>
                 📤
-              </span>
+              </span>{" "}
               {COPY.uploadTitle[language]}
             </h2>
-            <p className="text-xs text-gray-500 dark:text-slate-400">
+            <p className="text-xs">
               {COPY.helper[language]}
             </p>
           </div>
@@ -102,15 +102,15 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="panel panel-secondary flex flex-col bg-white lg:h-[440px]">
+        <section className="panel panel-secondary flex flex-col lg:h-[440px]">
           <div className="border-b border-gray-100 px-6 pb-2 dark:border-slate-700">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-slate-200">
+            <h2 className="text-lg font-bold">
               <span className="text-xl" role="img" aria-hidden>
                 💬
-              </span>
+              </span>{" "}
               {COPY.chatTitle[language]}
             </h2>
-            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+            <p className="mt-1 text-xs">
               {language === "es"
                 ? "Formula preguntas en tu idioma."
                 : "Ask questions in your preferred language."}

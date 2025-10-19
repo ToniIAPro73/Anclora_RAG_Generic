@@ -293,24 +293,24 @@ export default function DocumentosPage() {
         </div>
       )}
 
-      <div className="panel panel-primary bg-white">
+      <div className="panel panel-primary">
         <div className="border-b border-gray-100 pb-4 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="card-header text-gray-900 dark:text-slate-200">
+              <h1 className="card-header">
                 <span className="text-2xl" role="img" aria-hidden>
                   📚
-                </span>
+                </span>{" "}
                 {COPY.title[language]}
               </h1>
-              <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
+              <p className="mt-2 text-sm">
                 {COPY.subtitle[language]}
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => router.push("/")}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 hover:border-anclora-primary/30 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 {COPY.back[language]}
               </button>
@@ -333,7 +333,7 @@ export default function DocumentosPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={COPY.search[language]}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 pl-10 focus:border-anclora-primary focus:outline-none focus:ring-2 focus:ring-anclora-primary/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 pl-10 text-gray-900 placeholder-gray-500 focus:border-anclora-primary focus:outline-none focus:ring-2 focus:ring-anclora-primary/50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-400"
               />
               <svg
                 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
@@ -416,20 +416,20 @@ export default function DocumentosPage() {
             </div>
           ) : (
             <>
-              <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-600">
+              <div className="overflow-hidden rounded-lg border border-gray-200 bg-white/60 dark:border-slate-600 dark:bg-transparent">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
-                  <thead className="bg-gray-50 dark:bg-slate-800">
+                  <thead className="sticky top-0 bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                      <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.filename[language]}
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                      <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.chunks[language]}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                      <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.uploadedAt[language]}
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                      <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.actions[language]}
                       </th>
                     </tr>
@@ -438,7 +438,7 @@ export default function DocumentosPage() {
                     {paginatedDocuments.map((doc) => (
                       <tr
                         key={doc.id}
-                        className="transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
+                        className="transition-colors hover:bg-purple-50/30 dark:hover:bg-slate-800"
                       >
                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-slate-200">
                           <div className="flex items-center">
@@ -451,7 +451,7 @@ export default function DocumentosPage() {
                             {doc.chunks}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-slate-400">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-slate-400">
                           {doc.uploaded_at ? formatDate(doc.uploaded_at) : "-"}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm">

@@ -197,9 +197,9 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
     <div
       className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
         isDragging
-          ? "border-anclora-primary bg-purple-50 dark:border-anclora-primary/80 dark:bg-slate-900/70"
-          : "border-gray-300 bg-gray-50 hover:border-anclora-secondary dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-anclora-secondary/70"
-      } ${isUploading ? "pointer-events-none opacity-50" : ""} dark:text-slate-200`}
+          ? "border-anclora-primary bg-gradient-to-br from-purple-50 to-cyan-50 dark:border-anclora-primary/80 dark:bg-slate-900/70"
+          : "border-gray-200 bg-white/80 hover:border-anclora-secondary/60 dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-anclora-secondary/70"
+      } ${isUploading ? "pointer-events-none opacity-50" : ""}`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -217,11 +217,11 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
       {isUploading ? (
         <div className="py-2">
           <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
-          <p className="text-sm text-gray-600 dark:text-slate-300">
+          <p className="text-sm text-gray-700 dark:text-slate-300">
             {uploadStatus || (language === "es" ? "Procesando documento..." : "Processing document...")}
           </p>
           {jobId && (
-            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Job ID: {jobId}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-500">Job ID: {jobId}</p>
           )}
         </div>
       ) : (
@@ -239,12 +239,12 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
               strokeLinejoin="round"
             />
           </svg>
-          <p className="mb-1 text-sm font-medium text-gray-700 dark:text-slate-100">
+          <p className="mb-1 text-sm font-medium text-gray-800 dark:text-slate-100">
             {language === "es"
               ? "Arrastra un documento o haz clic"
               : "Drag & drop or click"}
           </p>
-          <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
+          <p className="mb-3 text-xs text-gray-600 dark:text-slate-400">
             {language === "es" ? "PDF, TXT, DOCX, MD" : "PDF, TXT, DOCX, MD"}
           </p>
           <button

@@ -113,14 +113,14 @@ export default function Chat() {
         )}
       </div>
 
-      <div className="mt-auto border-t border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-transparent">
+      <div className="mt-auto border-t border-gray-100 bg-white/80 p-4 dark:border-slate-700 dark:bg-transparent">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={PLACEHOLDER_TEXT[language]}
-            className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-anclora-primary dark:border-slate-600 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-anclora-secondary/60"
+            className="flex-1 rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-anclora-primary/50 focus:border-anclora-primary dark:border-slate-600 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-anclora-secondary/60"
             disabled={isLoading}
           />
           <button
