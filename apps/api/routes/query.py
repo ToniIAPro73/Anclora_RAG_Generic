@@ -3,8 +3,9 @@ import os
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from google.genai.types import GenerateContentConfig, HttpOptions
 from llama_index.core import Settings, VectorStoreIndex
-from llama_index.llms.google_genai import GoogleAIGemini
+from llama_index.llms.google_genai import GoogleGenAI
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from pydantic import BaseModel, Field, field_validator
 
@@ -18,7 +19,6 @@ router = APIRouter(tags=["query"])
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "models/gemini-1.5-flash")
 GEMINI_API_BASE = os.getenv("GEMINI_API_BASE")
-GEMINI_TRANSPORT = os.getenv("GEMINI_TRANSPORT", "rest")
 
 
 def sanitize_api_base(api_base: Optional[str]) -> Optional[str]:
@@ -34,10 +34,9 @@ def sanitize_api_base(api_base: Optional[str]) -> Optional[str]:
 SANITIZED_API_BASE = sanitize_api_base(GEMINI_API_BASE)
 if GEMINI_API_KEY and GEMINI_MODEL:
     logger.info(
-        "Gemini config loaded - model=%s api_base=%s transport=%s",
+        "Gemini config loaded - model=%s api_base=%s",
         GEMINI_MODEL,
         SANITIZED_API_BASE or "default",
-        GEMINI_TRANSPORT,
     )
 
 
@@ -109,20 +108,26 @@ def get_query_engine(top_k: int, language: str):
                 "Get your free API key at: https://aistudio.google.com/app/apikey"
             )
 
+        model_name = GEMINI_MODEL
+        if "/" not in model_name:
+            model_name = f"models/{model_name}"
+
+        system_prompt = build_system_prompt(language)
         llm_kwargs: Dict[str, Any] = {
-            "model": GEMINI_MODEL,
+            "model": model_name,
             "api_key": GEMINI_API_KEY,
             "temperature": 0.7,
         }
-        system_prompt = build_system_prompt(language)
         if system_prompt:
-            llm_kwargs["system_instruction"] = system_prompt
+            llm_kwargs["generation_config"] = GenerateContentConfig(system_instruction=system_prompt)
         if SANITIZED_API_BASE:
-            llm_kwargs["api_base"] = SANITIZED_API_BASE
-        if GEMINI_TRANSPORT:
-            llm_kwargs["transport"] = GEMINI_TRANSPORT
+            llm_kwargs["http_options"] = HttpOptions(
+                base_url=SANITIZED_API_BASE,
+                api_version="v1",
+            )
+        llm_kwargs["use_file_api"] = False
 
-        llm = GoogleAIGemini(**llm_kwargs)
+        llm = GoogleGenAI(**llm_kwargs)
         Settings.llm = llm
         Settings.embed_model = EMBED_MODEL
 

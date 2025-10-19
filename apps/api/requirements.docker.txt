@@ -136,5 +136,5 @@ email-validator==2.2.0
 psycopg2-binary==2.9.9
 
 # Gemini LLM (cloud-based, no local dependencies needed)
-llama-index-llms-google-genai==0.2.0
-google-generativeai==1.0.0
+llama-index-llms-google-genai==0.6.2
+google-genai==1.45.0
