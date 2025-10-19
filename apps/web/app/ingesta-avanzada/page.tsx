@@ -338,7 +338,7 @@ export default function AdvancedIngestionPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.nameLabel}
+                    {copy.tabs.documents.nameLabel}
                   </label>
                   <input
                     type="text"
@@ -349,7 +349,7 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.collectionLabel}
+                    {copy.tabs.documents.collectionLabel}
                   </label>
                   <input
                     type="text"
@@ -360,7 +360,7 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.descriptionLabel}
+                    {copy.tabs.documents.descriptionLabel}
                   </label>
                   <textarea
                     className="input-control min-h-[120px]"
@@ -370,7 +370,7 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.fileLabel}
+                    {copy.tabs.documents.fileLabel}
                   </label>
                   <div className="flex items-center justify-between rounded-lg border border-dashed border-anclora-secondary/60 bg-white px-4 py-3 text-sm text-gray-600">
                     <span>knowledge_base.zip</span>
@@ -386,7 +386,7 @@ export default function AdvancedIngestionPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.repoLabel}
+                    {copy.tabs.github.repoLabel}
                   </label>
                   <input
                     type="text"
@@ -397,13 +397,13 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.branchLabel}
+                    {copy.tabs.github.branchLabel}
                   </label>
                   <input type="text" className="input-control" placeholder="main" disabled />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.includeLabel}
+                    {copy.tabs.github.includeLabel}
                   </label>
                   <textarea
                     className="input-control min-h-[120px]"
@@ -413,7 +413,7 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.excludeLabel}
+                    {copy.tabs.github.excludeLabel}
                   </label>
                   <textarea
                     className="input-control min-h-[120px]"
@@ -428,7 +428,7 @@ export default function AdvancedIngestionPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.endpointLabel}
+                    {copy.tabs.structured.endpointLabel}
                   </label>
                   <input
                     type="text"
@@ -439,7 +439,7 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.authLabel}
+                    {copy.tabs.structured.authLabel}
                   </label>
                   <input
                     type="text"
@@ -450,7 +450,7 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.mappingLabel}
+                    {copy.tabs.structured.mappingLabel}
                   </label>
                   <textarea
                     className="input-control min-h-[140px] font-mono text-sm"
@@ -460,7 +460,7 @@ export default function AdvancedIngestionPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    {tab.scheduleLabel}
+                    {copy.tabs.structured.scheduleLabel}
                   </label>
                   <input
                     type="text"

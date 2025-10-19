@@ -195,10 +195,10 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
 
   return (
     <div
-      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+      className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
         isDragging
           ? "border-anclora-primary bg-purple-50 dark:border-anclora-primary/80 dark:bg-slate-900/70"
-          : "border-gray-300 hover:border-anclora-secondary dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-anclora-secondary/70"
+          : "border-gray-300 bg-gray-50 hover:border-anclora-secondary dark:border-slate-600 dark:bg-slate-900/60 dark:hover:border-anclora-secondary/70"
       } ${isUploading ? "pointer-events-none opacity-50" : ""} dark:text-slate-200`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -215,19 +215,19 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
       />
 
       {isUploading ? (
-        <div className="py-4">
-          <div className="mx-auto mb-2 h-10 w-10 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
-          <p className="text-gray-600 dark:text-slate-300">
+        <div className="py-2">
+          <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             {uploadStatus || (language === "es" ? "Procesando documento..." : "Processing document...")}
           </p>
           {jobId && (
-            <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">Job ID: {jobId}</p>
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Job ID: {jobId}</p>
           )}
         </div>
       ) : (
         <>
           <svg
-            className="mx-auto mb-4 h-12 w-12 text-anclora-secondary"
+            className="mx-auto mb-2 h-10 w-10 text-anclora-secondary"
             stroke="currentColor"
             fill="none"
             viewBox="0 0 48 48"
@@ -239,17 +239,17 @@ export default function UploadZone({ onUploadSuccess, onUploadError }: UploadZon
               strokeLinejoin="round"
             />
           </svg>
-          <p className="mb-2 font-medium text-gray-700 dark:text-slate-100">
+          <p className="mb-1 text-sm font-medium text-gray-700 dark:text-slate-100">
             {language === "es"
-              ? "Arrastra un documento o haz clic para seleccionar"
-              : "Drag & drop a document or click to select"}
+              ? "Arrastra un documento o haz clic"
+              : "Drag & drop or click"}
           </p>
-          <p className="mb-4 text-sm text-gray-500 dark:text-slate-400">
-            {language === "es" ? "Soporta: PDF, TXT, DOCX, MD" : "Supported: PDF, TXT, DOCX, MD"}
+          <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
+            {language === "es" ? "PDF, TXT, DOCX, MD" : "PDF, TXT, DOCX, MD"}
           </p>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="rounded-lg bg-gradient-anclora px-6 py-2 text-white shadow-md transition-opacity hover:opacity-90"
+            className="rounded-lg bg-gradient-anclora px-4 py-1.5 text-sm text-white shadow-md transition-opacity hover:opacity-90"
           >
             {language === "es" ? "Seleccionar archivo" : "Choose file"}
           </button>

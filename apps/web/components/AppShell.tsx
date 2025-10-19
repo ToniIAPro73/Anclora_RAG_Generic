@@ -1,11 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useUISettings } from './ui-settings-context';
-import LanguageModal from './LanguageModal';
-import ThemeModal from './ThemeModal';
 
 const NAV_LINKS = [
   { href: '/', label: { es: 'Dashboard', en: 'Dashboard' } },
@@ -29,19 +26,29 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     setTheme,
   } = useUISettings();
   const pathname = usePathname();
-  const [isLanguageModalOpen, setLanguageModalOpen] = useState(false);
-  const [isThemeModalOpen, setThemeModalOpen] = useState(false);
 
-  useEffect(() => {
-    const acknowledged = window.localStorage.getItem('anclora.languageAcknowledged');
-    if (!acknowledged) {
-      setLanguageModalOpen(true);
+  const cycleTheme = () => {
+    const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+    const currentIndex = themes.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'es' ? 'en' : 'es');
+  };
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light':
+        return '☀️';
+      case 'dark':
+        return '🌙';
+      case 'system':
+        return '💻';
+      default:
+        return '☀️';
     }
-  }, []);
-
-  const closeLanguageModal = () => {
-    setLanguageModalOpen(false);
-    window.localStorage.setItem('anclora.languageAcknowledged', 'true');
   };
 
   const headlineClass =
@@ -69,24 +76,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 by Anclora
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setThemeModalOpen(true)}
-                className="flex items-center gap-2 rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur transition-colors hover:bg-white/20"
+                onClick={cycleTheme}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 text-lg backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
+                title={`Tema: ${theme === 'light' ? 'Claro' : theme === 'dark' ? 'Oscuro' : 'Sistema'}`}
               >
                 <span role="img" aria-label="theme">
-                  🎨
+                  {getThemeIcon()}
                 </span>
-                {language === 'es' ? 'Tema' : 'Theme'}
               </button>
               <button
-                onClick={() => setLanguageModalOpen(true)}
-                className="flex items-center gap-2 rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur transition-colors hover:bg-white/20"
+                onClick={toggleLanguage}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 text-sm font-bold backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
+                title={language === 'es' ? 'Español' : 'English'}
               >
-                <span role="img" aria-label="language">
-                  🌐
+                <span aria-label="language">
+                  {language === 'es' ? 'ES' : 'EN'}
                 </span>
-                {language === 'es' ? 'Idioma' : 'Language'}
               </button>
             </div>
           </div>
@@ -116,19 +123,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main>{children}</main>
-      <LanguageModal
-        isOpen={isLanguageModalOpen}
-        selected={language}
-        onSelect={(value) => setLanguage(value)}
-        onClose={closeLanguageModal}
-      />
-      <ThemeModal
-        isOpen={isThemeModalOpen}
-        selected={theme}
-        onSelect={(value) => setTheme(value)}
-        onClose={() => setThemeModalOpen(false)}
-        language={language}
-      />
     </>
   );
 }

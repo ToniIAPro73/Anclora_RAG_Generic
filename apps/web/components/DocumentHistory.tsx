@@ -80,7 +80,7 @@ export default function DocumentHistory() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-gray-800 dark:text-slate-200">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-slate-200">
           {COPY.title[language]}
         </h3>
         {totalCount > MAX_DISPLAY && (
@@ -99,7 +99,7 @@ export default function DocumentHistory() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-600">
-          <div className="max-h-[240px] overflow-y-auto">
+          <div className="max-h-[180px] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
               <thead className="sticky top-0 bg-gray-50 dark:bg-slate-800">
                 <tr>

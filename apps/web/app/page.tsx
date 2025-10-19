@@ -45,6 +45,7 @@ export default function Home() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleUploadSuccess = (fileName: string, chunks: number) => {
     const normalized = normalizeFileName(fileName);
@@ -53,6 +54,8 @@ export default function Home() {
       message: COPY.success[language](normalized, chunks),
     });
     setTimeout(() => setNotification(null), 5000);
+    // Trigger refresh of document history
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleUploadError = (error: string) => {
@@ -64,7 +67,7 @@ export default function Home() {
   };
 
   return (
-    <div className="container-app space-y-6 py-6">
+    <div className="container-app space-y-3 py-3">
       {notification && (
         <div
           className={`rounded-xl border-2 p-4 shadow-lg ${
@@ -77,40 +80,40 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:min-h-[calc(100vh-280px)]">
-        <section className="panel panel-primary flex h-full flex-col bg-white">
-          <div className="space-y-3">
-            <h2 className="card-header text-gray-900">
-              <span className="text-2xl" role="img" aria-hidden>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
+        <section className="panel panel-primary flex flex-col bg-white">
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-gray-900">
+              <span className="text-xl" role="img" aria-hidden>
                 📤
               </span>
               {COPY.uploadTitle[language]}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-slate-400">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               {COPY.helper[language]}
             </p>
           </div>
-          <div className="mt-4 flex flex-1 flex-col space-y-6">
+          <div className="mt-3 flex flex-col space-y-3">
             <UploadZone
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}
             />
-            <DocumentHistory />
+            <DocumentHistory key={refreshKey} />
           </div>
         </section>
 
-        <section className="panel panel-secondary flex h-full flex-col bg-white">
-          <div className="border-b border-gray-100 px-6 pb-4 dark:border-slate-700">
-            <h2 className="card-header text-gray-900 dark:text-slate-200">
-              <span className="text-2xl" role="img" aria-hidden>
+        <section className="panel panel-secondary flex flex-col bg-white lg:h-[440px]">
+          <div className="border-b border-gray-100 px-6 pb-2 dark:border-slate-700">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-slate-200">
+              <span className="text-xl" role="img" aria-hidden>
                 💬
               </span>
               {COPY.chatTitle[language]}
             </h2>
-            <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
               {language === "es"
-                ? "Formula preguntas en tu idioma. Cambia a otra lengua en cualquier momento desde el selector superior."
-                : "Ask questions in your preferred language. Switch languages at any time from the top selector."}
+                ? "Formula preguntas en tu idioma."
+                : "Ask questions in your preferred language."}
             </p>
           </div>
           <div className="flex flex-1 flex-col">
