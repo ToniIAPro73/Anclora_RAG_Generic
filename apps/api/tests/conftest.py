@@ -21,6 +21,7 @@ os.environ["AUTH_BYPASS"] = "true"
 os.environ["QDRANT_URL"] = "http://localhost:6333"
 os.environ["OLLAMA_URL"] = "http://localhost:11434"
 os.environ["OLLAMA_MODEL"] = "llama3.2:1b"
+os.environ["USE_ASYNC_INGESTION"] = "false"  # Disable async ingestion for tests (no Redis required)
 
 
 @pytest.fixture
@@ -118,12 +119,16 @@ This is useful for testing the RAG pipeline and query functionality.
 @pytest.fixture
 def mock_process_single_document():
     """Mock the process_single_document worker function."""
-    with patch("workers.ingestion_worker.process_single_document") as mock:
-        mock.return_value = {
-            "filename": "test.pdf",
+    def mock_side_effect(file_path: str, filename: str, content_type: str):
+        """Return a dynamic mock response based on the input filename."""
+        return {
+            "filename": filename,
             "chunks": 5,
             "status": "completed",
         }
+
+    with patch("routes.ingest.process_single_document") as mock:
+        mock.side_effect = mock_side_effect
         yield mock
 
 

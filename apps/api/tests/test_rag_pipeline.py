@@ -23,6 +23,8 @@ def test_get_qdrant_client():
 @pytest.mark.unit
 def test_ensure_collection_creates_missing_collection(mock_qdrant_client):
     """Test that ensure_collection creates collection if it doesn't exist."""
+    from qdrant_client.models import VectorParams
+
     from rag.pipeline import ensure_collection
 
     # Mock collection doesn't exist
@@ -30,9 +32,13 @@ def test_ensure_collection_creates_missing_collection(mock_qdrant_client):
 
     ensure_collection(mock_qdrant_client, "test_collection")
 
-    mock_qdrant_client.create_collection.assert_called_once_with(
-        collection_name="test_collection", vectors_config=pytest.approx(object, rel=1)
-    )
+    # Verify create_collection was called once
+    assert mock_qdrant_client.create_collection.call_count == 1
+    # Verify collection name
+    call_args = mock_qdrant_client.create_collection.call_args
+    assert call_args.kwargs["collection_name"] == "test_collection"
+    # Verify vectors_config is a VectorParams instance
+    assert isinstance(call_args.kwargs["vectors_config"], VectorParams)
 
 
 @pytest.mark.unit
@@ -65,13 +71,15 @@ def test_index_text_creates_document():
         # Setup mocks
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
-        mock_client.get_collection.return_value = MagicMock(points_count=5)
 
-        mock_node = MagicMock()
-        mock_node.get_content.return_value = "test content"
-        mock_parser.get_nodes_from_documents.return_value = [mock_node]
+        # Create 5 mock nodes to match expected chunk count
+        mock_nodes = [MagicMock() for _ in range(5)]
+        for node in mock_nodes:
+            node.get_content.return_value = "test content"
+            node.metadata = {}
+        mock_parser.get_nodes_from_documents.return_value = mock_nodes
 
-        mock_embed.get_text_embedding_batch.return_value = [[0.1] * 768]
+        mock_embed.get_text_embedding_batch.return_value = [[0.1] * 768] * 5
 
         mock_vector_store = MagicMock()
         mock_vector_store_class.return_value = mock_vector_store
@@ -79,7 +87,7 @@ def test_index_text_creates_document():
         # Execute
         chunk_count = index_text("doc-123", "This is test text")
 
-        # Verify
+        # Verify - should return number of nodes, not points_count
         assert chunk_count == 5
         mock_ensure.assert_called_once()
         mock_vector_store.add.assert_called_once()
@@ -99,7 +107,6 @@ def test_index_text_handles_empty_text():
     ):
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
-        mock_client.get_collection.return_value = MagicMock(points_count=0)
 
         # Return empty nodes for empty text
         mock_parser.get_nodes_from_documents.return_value = []
@@ -110,6 +117,7 @@ def test_index_text_handles_empty_text():
 
         chunk_count = index_text("doc-empty", "")
 
+        # Returns length of nodes list (0 for empty)
         assert chunk_count == 0
 
 
@@ -133,6 +141,7 @@ def test_index_text_generates_embeddings():
         mock_nodes = [MagicMock() for _ in range(3)]
         for node in mock_nodes:
             node.get_content.return_value = "content"
+            node.metadata = {}
         mock_parser.get_nodes_from_documents.return_value = mock_nodes
 
         # Mock embeddings
@@ -164,11 +173,12 @@ def test_index_text_handles_qdrant_error():
 
     with (
         patch("rag.pipeline.get_qdrant_client") as mock_get_client,
-        patch("rag.pipeline.ensure_collection"),
+        patch("rag.pipeline.ensure_collection") as mock_ensure,
     ):
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
-        mock_client.get_collection.side_effect = Exception("Qdrant connection failed")
+        # Make ensure_collection raise an exception
+        mock_ensure.side_effect = Exception("Qdrant connection failed")
 
         with pytest.raises(HTTPException) as exc_info:
             index_text("doc-error", "Test text")
