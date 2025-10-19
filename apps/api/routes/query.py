@@ -4,7 +4,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from google.genai.types import GenerateContentConfig, HttpOptions
+from google.genai.types import Content, GenerateContentConfig, HttpOptions, Part
 from llama_index.core import Settings, VectorStoreIndex
 from llama_index.llms.google_genai import GoogleGenAI
 from llama_index.vector_stores.qdrant import QdrantVectorStore
@@ -120,7 +120,9 @@ def get_query_engine(top_k: int, language: str):
             "temperature": 0.7,
         }
         if system_prompt:
-            llm_kwargs["generation_config"] = GenerateContentConfig(system_instruction=system_prompt)
+            llm_kwargs["generation_config"] = GenerateContentConfig(
+                system_instruction=Content(role="system", parts=[Part(text=system_prompt)])
+            )
         if SANITIZED_API_BASE:
             llm_kwargs["http_options"] = HttpOptions(
                 base_url=SANITIZED_API_BASE,
