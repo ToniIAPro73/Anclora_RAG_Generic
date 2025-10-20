@@ -18,17 +18,21 @@ Se ha implementado exitosamente el sistema backend de waitlist para el beta laun
 ## 🎯 Tareas Completadas (T001-T008)
 
 ### T001: Instalación de Dependencias ✅
+
 ```bash
 pip install slowapi==0.1.9 fastapi-mail==1.4.1
 ```
 
 **Archivos modificados:**
+
 - `apps/api/requirements.txt` - Añadidas nuevas dependencias
 
 ### T002: Modelos Pydantic ✅
+
 **Archivo creado:** `apps/api/models/waitlist.py`
 
 Modelos implementados:
+
 - `WaitlistBase` - Base con email y referral_source
 - `WaitlistCreate` - Para requests de creación
 - `WaitlistEntry` - Modelo completo con UUID y timestamps
@@ -37,11 +41,13 @@ Modelos implementados:
 - `WaitlistErrorCode` - Enum con códigos de error
 
 **Características:**
+
 - Validación de email con regex en base de datos
 - Campos opcionales con valores por defecto
 - Documentación completa con docstrings
 
 ### T003: Endpoints API ✅
+
 **Archivo creado:** `apps/api/routes/waitlist.py`
 
 **Endpoints implementados:**
@@ -59,15 +65,18 @@ Modelos implementados:
    - Returns: `{total_pending: N, message: "..."}`
 
 **Manejo de errores:**
+
 - `IntegrityError` → 409 Conflict
 - `ValidationError` → 400 Bad Request
 - Exception genérica → 500 Internal Server Error
 - Rate limit → 429 Too Many Requests
 
 ### T004: Rate Limiting ✅
+
 **Archivo creado:** `apps/api/middleware/rate_limit.py`
 
 **Configuración:**
+
 ```python
 limiter = Limiter(
     key_func=get_remote_address,
@@ -78,27 +87,33 @@ limiter = Limiter(
 ```
 
 **Integración en main.py:**
+
 - Añadido exception handler para RateLimitExceeded
 - Limiter configurado en app.state
 
 ### T005: Cliente de Email ✅
+
 **Archivo creado:** `apps/api/clients/email_client.py`
 
 **Configuración SMTP (Hostinger):**
+
 - Host: smtp.hostinger.com
 - Port: 465 (SSL/TLS)
-- From: noreply@anclora.com
+- From: <noreply@anclora.com>
 - Validación de credenciales al inicio
 
 **Métodos implementados:**
+
 - `send_template_email()` - Envío con templates HTML
 - `validate_connection()` - Verifica credenciales SMTP
 - Logging de errores y éxitos
 
 ### T006: Template HTML de Email ✅
+
 **Archivo creado:** `apps/api/templates/emails/waitlist_confirmation.html`
 
 **Características del template:**
+
 - Diseño responsive (mobile-first)
 - Branding con colores corporativos (#2563EB)
 - Personalización con `{{email}}` y `{{position}}`
@@ -107,11 +122,13 @@ limiter = Limiter(
 - Profesional y moderno
 
 **Variables dinámicas:**
+
 - `email` - Email del usuario
 - `position` - Posición en la cola
 - `total_pending` - Total de personas en waitlist
 
 ### T007: Repositorio de Base de Datos ✅
+
 **Archivo creado:** `apps/api/database/waitlist_repository.py`
 
 **Métodos implementados:**
@@ -128,17 +145,20 @@ class WaitlistRepository:
 ```
 
 **Patrón de diseño:**
+
 - Repository pattern para abstracción de DB
 - Manejo de sesiones con context manager
 - Método `close()` para cleanup
 - Type hints completos
 
 ### T008: Tablas de Base de Datos ✅
+
 **Archivo creado:** `apps/api/database/create_waitlist_tables.sql`
 
 **Tablas creadas:**
 
 1. **waitlist**
+
    ```sql
    CREATE TABLE waitlist (
        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -157,6 +177,7 @@ class WaitlistRepository:
    - `idx_waitlist_invited` - Filtro de no invitados
 
 2. **analytics_events**
+
    ```sql
    CREATE TABLE analytics_events (
        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -174,6 +195,7 @@ class WaitlistRepository:
    - `idx_analytics_user_id` - Filtro por usuario
 
 **Ejecución:**
+
 ```bash
 docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag -f /ruta/create_waitlist_tables.sql
 ```
@@ -206,6 +228,7 @@ apps/api/
 ## 🔐 Variables de Entorno Configuradas
 
 **Añadidas a `.env`:**
+
 ```bash
 # Email Configuration (Hostinger SMTP) - Beta Launch
 SMTP_HOST=smtp.hostinger.com
@@ -240,6 +263,7 @@ docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag `
 ```
 
 **Uso:**
+
 ```powershell
 .\test_waitlist.ps1
 ```
@@ -247,6 +271,7 @@ docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag `
 ## 🚀 Estado del Sistema
 
 ### ✅ Completado
+
 - [x] Dependencias instaladas
 - [x] Modelos Pydantic con validación
 - [x] Endpoints API funcionales
@@ -259,6 +284,7 @@ docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag `
 - [x] Manejo de errores robusto
 
 ### ⏳ Pendiente (Fase 0 - Frontend)
+
 - [ ] T009: Landing page en Next.js
 - [ ] T010: Formulario de waitlist
 - [ ] T011: Integración con API
@@ -267,21 +293,25 @@ docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag `
 ### 🔍 Para Probar Cuando Docker Esté Activo
 
 1. **Iniciar stack completo:**
+
    ```bash
    docker-compose -f infra/docker/docker-compose.dev.yml up -d
    ```
 
 2. **Verificar PostgreSQL:**
+
    ```bash
    docker ps --filter "name=postgres"
    ```
 
 3. **Ejecutar test:**
+
    ```bash
    .\test_waitlist.ps1
    ```
 
 4. **Verificar BD directamente:**
+
    ```bash
    docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag -c "SELECT * FROM waitlist;"
    ```
@@ -313,19 +343,25 @@ docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag `
 ## 📝 Notas Importantes
 
 ### Docker Desktop Requerido
+
 El sistema depende de PostgreSQL en Docker. Si Docker Desktop se detiene:
+
 - API funcionará pero devolverá 500 al interactuar con BD
 - Error típico: `connection to server at "localhost" port 5432 failed`
 - Solución: Reiniciar Docker Desktop desde menú inicio Windows
 
 ### SMTP Testing
+
 Para verificar que emails se envían correctamente:
+
 1. Revisar logs de API (debe aparecer "Confirmation email sent")
 2. Verificar bandeja de entrada del email de prueba
 3. Revisar spam/junk si no aparece en inbox
 
 ### Next Steps (Frontend)
+
 La siguiente fase (T009-T012) requiere:
+
 - Landing page en Next.js con diseño responsive
 - Formulario con validación client-side
 - Integración con endpoint `/api/waitlist`
