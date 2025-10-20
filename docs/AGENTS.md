@@ -82,11 +82,13 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 ### Frontend Development
 
 **Dashboard App (apps/web):**
+
 - `cd apps/web && npm install && npm run dev`: Start client on port 3030
 - `cd apps/web && npm run build`: Production smoke tests
 - `cd apps/web && npm run lint`: Enforce ESLint, Tailwind, and TypeScript rules
 
 **Landing Page (apps/landing):** ✅ NUEVO
+
 - `cd apps/landing && npm install && npm run dev`: Start landing page on port 3000
 - `cd apps/landing && npm run build`: Production build
 - `cd apps/landing && npm run lint`: Enforce ESLint rules

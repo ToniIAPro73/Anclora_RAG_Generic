@@ -27,12 +27,14 @@ Este archivo proporciona orientación a Claude Code (claude.ai/code) cuando trab
 ### Frontend
 
 **Dashboard App (Next.js 15):**
+
 - **Install**: `cd apps/web && npm install`
 - **Dev server**: `npm run dev` (puerto 3030)
 - **Build**: `npm run build`
 - **Lint**: `npm run lint`
 
 **Landing Page (Next.js 15):**
+
 - **Install**: `cd apps/landing && npm install`
 - **Dev server**: `npm run dev` (puerto 3000 por defecto)
 - **Build**: `npm run build`

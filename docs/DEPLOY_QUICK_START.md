@@ -22,7 +22,7 @@ vercel --prod
 
 ### Backend API (Railway)
 
-1. Ir a https://railway.app/new
+1. Ir a <https://railway.app/new>
 2. "Deploy from GitHub repo" → Seleccionar `Anclora-RAG-Generic`
 3. Configurar variables (ver `.env.production.template`)
 4. Añadir Postgres + Redis plugins
