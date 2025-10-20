@@ -416,7 +416,7 @@
 
 - [ ] **T052:** Página /limits explicativa
   - Archivo: `apps/web/app/limits/page.tsx`
-  - Contenido: Límites beta, razones, upgrade a Pro (teaser)
+  - Contenido: Límites beta, razones y formulario para solicitar ampliaciones
   - **Estimación:** 1.5h
   - **Dependencias:** Ninguna
 
@@ -549,7 +549,6 @@
   - Posts:
     - LinkedIn: Anuncio lanzamiento + demo video
     - Twitter: Thread de 5 tweets explicando problema/solución
-    - ProductHunt: Draft de post (si aplica)
   - Schedule: Preparar pero NO publicar aún
   - **Estimación:** 3h
   - **Dependencias:** T061
@@ -643,13 +642,6 @@
   - **Estimación:** 1h
   - **Dependencias:** T069
 
-- [ ] **T076:** Considerar Product Hunt (OPCIONAL)
-  - **DECISIÓN:** Lanzar día 1 o esperar a tener tracción
-  - Si sí: Preparar post, hunter, assets
-  - Timing: Preferiblemente martes-jueves
-  - **Estimación:** 2h (si se decide)
-  - **Dependencias:** T069, T061
-
 ### Primeras Invitaciones
 
 - [ ] **T077:** Invitar primeros 10 usuarios de waitlist
@@ -679,107 +671,6 @@
 
 ---
 
-## FASE 5: Post-Lanzamiento (Días 14-21) 📊
-
-### Monitoreo Continuo
-
-- [ ] **T080:** Revisar métricas diariamente
-  - Dashboard: GA4 + Admin dashboard
-  - Métricas clave:
-    - Landing: Page views, conversion rate
-    - App: Active users, queries/user, retention
-    - Errors: Error rate, response time P95
-  - Acción: Documento diario de métricas en Notion/GDrive
-  - **Estimación:** 30min/día x 7 días = 3.5h
-  - **Dependencias:** T078
-
-- [ ] **T081:** Responder usuarios en <24h
-  - Canales: Email, feedback forms
-  - SLA: Respuesta en <24h, resolución <72h
-  - Template: Respuestas amigables y accionables
-  - **Estimación:** 1h/día x 7 días = 7h
-  - **Dependencias:** T077
-
-- [ ] **T082:** Fix bugs emergentes
-  - Prioridad: P0 (bloqueantes) → fix inmediato
-  - Tracking: GitHub Issues con labels
-  - Deploy: Hotfix si crítico, sino próximo release
-  - **Estimación:** 8h (buffer)
-  - **Dependencias:** T080
-
-### Invitaciones Progresivas
-
-- [ ] **T083:** Ola 2 de invitaciones (día 15, +20 usuarios)
-  - Proceso: Igual que T077
-  - Criterio: Performance estable en ola 1
-  - **Estimación:** 1h
-  - **Dependencias:** T077
-
-- [ ] **T084:** Ola 3 de invitaciones (día 18, +30 usuarios)
-  - **Estimación:** 1h
-  - **Dependencias:** T083
-
-- [ ] **T085:** Ola 4 de invitaciones (día 21, +50 usuarios)
-  - **Estimación:** 1h
-  - **Dependencias:** T084
-
-### Optimización Continua
-
-- [ ] **T086:** A/B test de headlines landing
-  - Herramienta: Vercel Analytics o Google Optimize
-  - Variantes: 2 headlines (ver T060)
-  - Métrica: Conversion rate
-  - Duración: 7 días, mínimo 100 visitors/variant
-  - **Estimación:** 2h (setup) + 1h (análisis)
-  - **Dependencias:** T069
-
-- [ ] **T087:** Mejorar onboarding según feedback
-  - Analizar: Survey responses + analytics (drop-off points)
-  - Cambios: Simplificar pasos, mejorar copy, añadir tooltips
-  - **Estimación:** 4h
-  - **Dependencias:** T079
-
-- [ ] **T088:** Optimizar queries lentas
-  - Identificar: Queries >5seg en logs
-  - Optimizar: Cache, índices DB, rerank
-  - **Estimación:** 3h
-  - **Dependencias:** T080
-
-- [ ] **T089:** Expandir FAQ según preguntas reales
-  - Recopilar: Preguntas recurrentes de usuarios
-  - Añadir: 5+ nuevas preguntas a FAQ
-  - **Estimación:** 2h
-  - **Dependencias:** T081
-
-### Preparación Plan Pro
-
-- [ ] **T090:** Definir features Premium vs Free
-  - Documento: `docs/PRICING_STRATEGY.md`
-  - Free: 50 docs, 50 queries/día, 1 usuario
-  - Pro: Ilimitado, prioridad soporte, analytics avanzados
-  - **Estimación:** 2h
-  - **Dependencias:** Ninguna (análisis paralelo)
-
-- [ ] **T091:** Diseñar página de pricing
-  - Mockup: Tabla comparativa Free vs Pro
-  - Copy: Emphasize value, no solo features
-  - CTA: "Upgrade to Pro" (sin funcionalidad aún)
-  - **Estimación:** 3h
-  - **Dependencias:** T090
-
-- [ ] **T092:** Planificar migración Free → Paid
-  - Stripe integration: Setup cuenta
-  - Flow: Checkout → Webhook → Upgrade role
-  - Timeline: Implementar en mes 2
-  - **Estimación:** 2h (planning)
-  - **Dependencias:** T090
-
-### Subtotal Fase 5
-
-**Tiempo estimado:** 43 horas (distribuido en 7 días, ~6h/día)
-
----
-
 ## Resumen de Estimaciones
 
 | Fase | Tiempo Estimado | Días Calendario | Dependencias Críticas |
@@ -789,8 +680,7 @@
 | **Fase 2** | 56h | 7 días (overlap → 4 días) | Completar Fase 0 y Fase 1 |
 | **Fase 3** | 29h | 3.5 días | Todas las anteriores |
 | **Fase 4** | 14h | 1 día | Todas las anteriores |
-| **Fase 5** | 43h | 7 días (6h/día) | Fase 4 completada |
-| **TOTAL** | **187.5h** | **~13 días** | Con overlaps y eficiencia |
+| **TOTAL** | **144.5h** | **~9 días** | Con overlaps y eficiencia |
 
 ---
 
@@ -835,8 +725,6 @@ Las siguientes decisiones bloquean el inicio de tareas:
 2. **Dominio** (T012): ¿Cuál usar?
 3. **Servicio email** (T006): ¿Resend, SendGrid, o Mailgun?
 4. **Estrategia invitaciones** (T067): ¿Automático o manual?
-5. **Product Hunt** (T076): ¿Día 1 o esperar?
-
 **ACCIÓN:** Tomar estas decisiones ANTES de iniciar Fase 0.
 
 ### Riesgos de Timeline
@@ -845,7 +733,7 @@ Las siguientes decisiones bloquean el inicio de tareas:
 - **Load testing (T058):** Puede revelar problemas de performance → buffer adicional
 - **Bug fixing (T059, T082):** Estimaciones conservadoras pero pueden variar
 
-**MITIGACIÓN:** Añadir 20% buffer a estimación total (187.5h → 225h = ~16 días)
+**MITIGACIÓN:** Añadir 20% buffer a estimación total (144.5h → 174h ≈ 11 días)
 
 ### Recursos Requeridos
 

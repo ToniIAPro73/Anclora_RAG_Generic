@@ -23,7 +23,7 @@
 │  Propósito: Marketing, conversión, SEO                     │
 └─────────────────────────────────────────────────────────────┘
                              │
-                             │ CTA → "Solicitar Acceso"
+                             │ CTA → "Solicitar Acceso Beta Gratuito"
                              ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                    WAITLIST API                             │
@@ -499,49 +499,20 @@ interface IngestionStatusResponse {
 **Estrategia:** Honestidad + roadmap claro = confianza de early adopters
 
 ### 4.1 Hero Section (Above the Fold)
-```text
-
-┌─────────────────────────────────────────────────────────────┐
-│  NAVBAR: [Logo] ──────────────────── [Demo] [Iniciar Sesión]│
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  [Lado Izquierdo: 50%]                                       │
-│                                                               │
-│  Headline (H1, 48px, bold):                                  │
-│  "Deja de buscar entre miles de documentos."                │
-│  "Pregúntale directamente a tu conocimiento empresarial."   │
-│                                                               │
-│  Subheadline (H2, 24px, regular):                           │
-│  "Anclora transforma tus PDFs y documentos en un asistente  │
-│   inteligente que responde al instante, con fuentes         │
-│   verificadas y sin alucinaciones."                          │
-│                                                               │
-│  Diferenciador vs NotebookLM (badge/small, destacado):      │
-│  "💡 A diferencia de NotebookLM que da citas incorrectas,   │
-│   Anclora garantiza cada respuesta con fuentes verificables."│
-│                                                               │
-│  [Formulario Email]                                          │
-│  ┌─────────────────────┐ ┌──────────────┐                   │
-│  │ tu@empresa.com      │ │ Solicitar    │                   │
-│  │                     │ │ Acceso Beta  │                   │
-│  └─────────────────────┘ └──────────────┘                   │
-│                                                               │
-│  "✅ Gratis durante beta · Sin tarjeta · Acceso prioritario"│
-│  "🔥 Únete a los primeros 100 usuarios"                     │
-│                                                               │
-│  [Lado Derecho: 50%]                                         │
-│  ┌───────────────────────────────┐                           │
-│  │                               │                           │
-│  │     [VIDEO DEMO / GIF]        │                           │
-│  │   90 seg: Upload → Query      │                           │
-│  │     → Answer con citas        │                           │
-│  │   MOSTRAR: similarity scores  │                           │
-│  │                               │                           │
-│  └───────────────────────────────┘                           │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
-```text
-
+- **Navbar:** Logo a la izquierda; links `Demo` y `Iniciar Sesión` a la derecha.
+- **Headline (H1, 48 px, bold):** “Deja de buscar entre miles de documentos. Pregúntale directamente a tu conocimiento empresarial.”
+- **Subheadline (H2, 24 px):** “Anclora transforma tus PDFs y documentos en un asistente inteligente que responde al instante, con fuentes verificadas y sin alucinaciones.”
+- **Badge diferenciador:** “💡 A diferencia de NotebookLM que da citas incorrectas, Anclora garantiza cada respuesta con fuentes verificables.”
+- **Formulario de captura:**
+  - Input con placeholder `tu@empresa.com`.
+  - Botón primario con la etiqueta **“Solicitar Acceso Beta Gratuito”**.
+  - Microcopy bajo el CTA:
+    - ✅ Gratis durante beta
+    - 💳 Sin tarjeta ni compromiso
+    - 🚀 Acceso prioritario a mejoras
+    - 🗣️ Influye en el roadmap
+  - Llamada adicional: “🔥 Únete a los primeros 100 usuarios”.
+- **Lado derecho:** video/GIF de 90 segundos (upload → query → respuesta con citas y similarity scores visibles).
 ### 4.2 Sección: Problema → Solución
 ```text
 
@@ -842,7 +813,7 @@ export const trackEvent = (eventName: string, params?: Record<string, any>) => {
 };
 
 // Eventos críticos
-trackEvent('cta_click', { location: 'hero', cta_text: 'Solicitar Acceso' });
+trackEvent('cta_click', { location: 'hero', cta_text: 'Solicitar Acceso Beta Gratuito' });
 trackEvent('email_submit', { referral_source: 'linkedin' });
 trackEvent('video_play', { video_id: 'demo' });
 trackEvent('faq_expand', { question_id: 'seguridad' });
@@ -1026,7 +997,7 @@ test('landing page email capture flow', async ({ page }) => {
 
   // Completar formulario
   await page.fill('input[type="email"]', 'test@example.com');
-  await page.click('button:has-text("Solicitar Acceso")');
+  await page.click('button:has-text("Solicitar Acceso Beta Gratuito")');
 
   // Verificar redirección a thank-you
   await expect(page).toHaveURL('/thank-you');
