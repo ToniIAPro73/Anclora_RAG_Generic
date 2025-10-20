@@ -187,7 +187,7 @@ New request?
 - Affected code: [key files/systems]
 ```
 
-3. **Create spec deltas:** `specs/[capability]/spec.md`
+1. **Create spec deltas:** `specs/[capability]/spec.md`
 
 **Example spec delta format:**
 
@@ -212,7 +212,7 @@ The system SHALL provide...
 
 If multiple capabilities are affected, create multiple delta files under `changes/[change-id]/specs/<capability>/spec.md`—one per capability.
 
-4. **Create tasks.md:**
+1. **Create tasks.md:**
 
 ```markdown
 ## 1. Implementation
@@ -222,7 +222,7 @@ If multiple capabilities are affected, create multiple delta files under `change
 - [ ] 1.4 Write tests
 ```
 
-5. **Create design.md when needed:**
+1. **Create design.md when needed:**
 Create `design.md` if any of the following apply; otherwise omit it:
 
 - Cross-cutting change (multiple services/modules) or a new architectural pattern
@@ -326,7 +326,7 @@ Example for RENAMED:
 - Check scenarios use `#### Scenario:` format (4 hashtags)
 - Don't use bullet points or bold for scenario headers
 
-**Silent scenario parsing failures**
+#### Silent scenario parsing failures
 
 - Exact format required: `#### Scenario: Name`
 - Debug with: `openspec show [change] --json --deltas-only`
