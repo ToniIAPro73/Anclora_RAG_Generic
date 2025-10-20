@@ -8,8 +8,8 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
-from apps.api.database.postgres_client import get_db_session
-from apps.api.models.waitlist import WaitlistCreate, WaitlistEntry
+from database.postgres_client import get_db_session
+from models.waitlist import WaitlistCreate, WaitlistEntry
 
 
 class WaitlistRepository:

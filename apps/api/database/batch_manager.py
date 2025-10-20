@@ -4,8 +4,8 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from apps.api.models.batch import IngestionBatch, BatchStatus
-from apps.api.models.document import BatchDocument, DocumentStatus
+from models.batch import IngestionBatch, BatchStatus
+from models.document import BatchDocument, DocumentStatus
 
 
 class BatchManager:
