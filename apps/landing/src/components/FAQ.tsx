@@ -17,8 +17,10 @@ export function FAQ() {
           <span className="text-sm font-semibold uppercase tracking-[0.35em] text-[#06B6D4]">
             FAQ
           </span>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-            Resolvemos las dudas más comunes antes de que te sumes a la beta
+          <h2 className="text-3xl font-semibold sm:text-4xl">
+            <span className="bg-gradient-to-r from-[#06B6D4] via-[#5AE2D9] to-[#D946EF] bg-clip-text text-transparent">
+              Resolvemos las dudas más comunes antes de que te sumes a la beta
+            </span>
           </h2>
           <p className="text-lg text-slate-300">
             Si no encuentras lo que buscas, escríbenos a{' '}

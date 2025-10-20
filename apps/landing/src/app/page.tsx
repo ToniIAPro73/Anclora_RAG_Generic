@@ -32,7 +32,7 @@ export default function Home() {
       <EmailCapture />
       <FAQ />
       <footer className="border-t border-white/10 px-6 py-10 text-center text-sm text-slate-400 sm:px-10 lg:px-16">
-        © {new Date().getFullYear()} Anclora · Construyendo la plataforma RAG colaborativa para equipos.
+        © {new Date().getFullYear()} Anclora RAG · Construyendo la plataforma RAG colaborativa para equipos.
       </footer>
     </main>
   );

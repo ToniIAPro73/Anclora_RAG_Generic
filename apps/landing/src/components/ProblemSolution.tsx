@@ -23,7 +23,7 @@ const solutionHighlights = [
   {
     title: 'Memoria extendida y viva',
     description:
-      'Anclora memoriza documentos completos, preserva contexto y elimina duplicados para todo el equipo.',
+      'Anclora RAG memoriza documentos completos, preserva contexto y elimina duplicados para todo el equipo.',
     benefit: 'Cobertura del 100% del corpus',
   },
   {
@@ -55,12 +55,12 @@ export function ProblemSolution() {
               Los RAG convencionales se quedan cortos.
             </span>
             <span className="mt-2 block bg-gradient-to-r from-[#06B6D4] via-[#4CC0E7] to-[#D946EF] bg-clip-text text-transparent">
-              Diseñamos Anclora para equipos exigentes y regulados.
+              Diseñamos Anclora RAG para equipos exigentes y regulados.
             </span>
           </h2>
           <p className="mx-auto max-w-3xl text-base text-slate-300 sm:text-lg">
             El 64% de las organizaciones abandona sus pruebas de RAG en las primeras semanas por falta
-            de colaboración real, citas poco confiables y límites técnicos. Anclora cambia las reglas con
+            de colaboración real, citas poco confiables y límites técnicos. Anclora RAG cambia las reglas con
             una aproximación integral lista para producción.
           </p>
         </div>

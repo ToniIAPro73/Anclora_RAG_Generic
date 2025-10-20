@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Anclora RAG - Sistema RAG Colaborativo e Inteligente",
   description: "La primera plataforma RAG verdaderamente colaborativa. Sube documentos, haz preguntas complejas y obtén respuestas con citas verificables. Beta cerrado disponible.",
   keywords: "RAG, inteligencia artificial, colaboración, documentos, búsqueda inteligente, beta",
-  authors: [{ name: "Anclora" }],
+  authors: [{ name: "Anclora RAG" }],
   openGraph: {
     title: "Anclora RAG - Sistema RAG Colaborativo",
     description: "La primera plataforma RAG verdaderamente colaborativa para equipos",

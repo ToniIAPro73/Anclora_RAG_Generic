@@ -64,8 +64,10 @@ export function Features() {
           <span className="text-sm font-semibold uppercase tracking-[0.35em] text-[#D946EF]">
             Valor tangible
           </span>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-            Para equipos que necesitan velocidad, precisión y colaboración
+          <h2 className="text-3xl font-semibold sm:text-4xl">
+            <span className="bg-gradient-to-r from-[#D946EF] via-[#AC6CFF] to-[#06B6D4] bg-clip-text text-transparent">
+              Para equipos que necesitan velocidad, precisión y colaboración
+            </span>
           </h2>
           <p className="mx-auto max-w-3xl text-lg text-slate-300">
             Cada pilar de Anclora RAG está diseñado para disminuir el riesgo operativo y garantizar

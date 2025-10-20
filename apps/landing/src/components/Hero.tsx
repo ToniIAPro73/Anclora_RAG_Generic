@@ -1,27 +1,27 @@
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-6 pb-24 pt-28 sm:px-10 lg:px-16">
+    <section className="relative overflow-hidden px-6 py-6 sm:px-10 lg:px-16">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-x-0 top-[-40%] mx-auto h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_top,#D946EF40,transparent_65%)] blur-3xl md:h-[780px] md:w-[780px]" />
         <div className="absolute right-[-10%] top-[-20%] h-[520px] w-[520px] rotate-12 rounded-full bg-[radial-gradient(circle_at_center,#06B6D440,transparent_70%)] blur-3xl" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl gap-16 lg:grid-cols-[1.1fr,0.9fr] lg:items-center">
-        <div className="space-y-10 text-center lg:text-left">
+      <div className="relative mx-auto flex min-h-[calc(100vh-320px)] w-full max-w-6xl flex-col justify-center gap-8 text-center lg:min-h-[calc(100vh-280px)] lg:flex-row lg:items-center lg:gap-12 lg:text-left">
+        <div className="space-y-7 text-center lg:text-left">
           <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-sm font-medium text-slate-200 shadow-[0_0_30px_rgba(217,70,239,0.25)] backdrop-blur">
             <span className="inline-flex h-2 w-2 rounded-full bg-gradient-to-r from-[#D946EF] to-[#06B6D4]" />
             Beta privada abierta · cupos limitados
           </div>
 
-          <div className="space-y-6">
-            <h1 className="text-4xl font-semibold leading-tight text-slate-100 sm:text-5xl lg:text-6xl">
+          <div className="space-y-5">
+            <h1 className="text-4xl font-semibold leading-tight text-slate-100 sm:text-[2.9rem] sm:leading-[1.05] lg:text-[3.1rem] lg:leading-[1.05]">
               Inteligencia RAG
               <span className="block bg-gradient-to-r from-[#D946EF] via-[#AC6CFF] to-[#06B6D4] bg-clip-text text-transparent">
                 colaborativa y verificada
               </span>
               para tus equipos.
             </h1>
-            <p className="mx-auto max-w-2xl text-lg text-slate-300 lg:mx-0 lg:text-xl">
+            <p className="mx-auto max-w-2xl text-base text-slate-300 lg:mx-0 lg:text-lg">
               Anclora RAG combina orquestación avanzada, memoria contextual persistente y flujos
               colaborativos para que cada respuesta llegue con citas auditables y contexto completo.
             </p>
@@ -61,11 +61,11 @@ export function Hero() {
         </div>
 
         <div
-          className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_40px_80px_-45px_rgba(217,70,239,0.75)] backdrop-blur-lg"
+          className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-6 py-4 shadow-[0_40px_80px_-45px_rgba(217,70,239,0.75)] backdrop-blur-lg"
           aria-label="Vista previa de Anclora RAG"
         >
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(217,70,239,0.35),transparent_70%)]" />
-          <div className="grid gap-6">
+          <div className="grid gap-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.28em] text-slate-400">Dashboard</p>

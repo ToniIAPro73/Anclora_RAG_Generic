@@ -70,8 +70,10 @@ export function EmailCapture() {
             <span className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#06B6D4]">
               Early access
             </span>
-            <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-              Únete a las primeras organizaciones que activan Anclora RAG
+            <h2 className="text-3xl font-semibold sm:text-4xl">
+              <span className="bg-gradient-to-r from-[#D946EF] via-[#AC6CFF] to-[#06B6D4] bg-clip-text text-transparent">
+                Únete a las primeras organizaciones que activan Anclora RAG
+              </span>
             </h2>
             <p className="text-lg text-slate-300">
               Garantizamos onboarding asistido, soporte en menos de 2 horas y un canal directo con
