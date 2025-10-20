@@ -236,18 +236,18 @@ export default function ConfigurationPage() {
 
   return (
     <div className="container-app space-y-6 py-6">
-      <section className="card relative overflow-hidden bg-white p-6 shadow-xl">
+      <section className="card relative overflow-hidden bg-white dark:bg-slate-800 p-6 shadow-xl">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-anclora-primary/10 via-transparent to-anclora-secondary/10" />
         <div className="relative space-y-3">
-          <h1 className="text-3xl font-semibold text-gray-900">{text.heroTitle}</h1>
-          <p className="text-gray-600">{text.heroSubtitle}</p>
+          <h1 className="text-3xl font-semibold text-gray-900 dark:text-slate-100">{text.heroTitle}</h1>
+          <p className="text-gray-600 dark:text-slate-300">{text.heroSubtitle}</p>
         </div>
       </section>
 
-      <section className="card bg-white p-6 shadow-md">
-        <div className="flex flex-col gap-3 border-b border-gray-100 pb-4">
-          <h2 className="card-header text-gray-900">{text.identityTitle}</h2>
-          <p className="text-sm text-gray-500">{text.identityHelper}</p>
+      <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
+        <div className="flex flex-col gap-3 border-b border-gray-100 dark:border-slate-700 pb-4">
+          <h2 className="card-header text-gray-900 dark:text-slate-100">{text.identityTitle}</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400">{text.identityHelper}</p>
         </div>
         <form
           className="mt-4 grid gap-4 md:grid-cols-2"
@@ -257,7 +257,7 @@ export default function ConfigurationPage() {
           }}
         >
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">
+            <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">
               {language === 'es' ? 'Título del dashboard' : 'Dashboard title'}
             </label>
             <input
@@ -269,7 +269,7 @@ export default function ConfigurationPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">
+            <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">
               {language === 'es' ? 'Descripción' : 'Tagline'}
             </label>
             <input
@@ -283,10 +283,10 @@ export default function ConfigurationPage() {
         </form>
       </section>
 
-      <section className="card bg-white p-6 shadow-md">
-        <div className="flex flex-col gap-3 border-b border-gray-100 pb-4">
-          <h2 className="card-header text-gray-900">{text.accentTitle}</h2>
-          <p className="text-sm text-gray-500">{text.accentHelper}</p>
+      <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
+        <div className="flex flex-col gap-3 border-b border-gray-100 dark:border-slate-700 pb-4">
+          <h2 className="card-header text-gray-900 dark:text-slate-100">{text.accentTitle}</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400">{text.accentHelper}</p>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           {(Object.keys(accentPresets) as AccentId[]).map((preset) => {
@@ -299,12 +299,12 @@ export default function ConfigurationPage() {
                 type="button"
                 className={`rounded-xl border p-4 text-left shadow-sm transition-colors ${
                   isActive
-                    ? 'border-anclora-primary ring-2 ring-anclora-primary'
-                    : 'border-gray-200 hover:border-anclora-secondary'
+                    ? 'border-anclora-primary ring-2 ring-anclora-primary bg-white dark:bg-slate-700'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-anclora-secondary bg-white dark:bg-slate-700/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">{colors.label}</span>
+                  <span className="font-semibold text-gray-900 dark:text-slate-100">{colors.label}</span>
                   {isActive && (
                     <span className="text-xs font-semibold text-anclora-primary">
                       {language === 'es' ? 'Activo' : 'Active'}
@@ -327,14 +327,14 @@ export default function ConfigurationPage() {
         </div>
 
         <form className="mt-6 space-y-4" onSubmit={handleCustomSubmit}>
-          <h3 className="text-sm font-semibold text-gray-700">{text.customLabel}</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300">{text.customLabel}</h3>
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 p-4">
               <div>
-                <p className="text-sm font-semibold text-gray-700">
+                <p className="text-sm font-semibold text-gray-700 dark:text-slate-200">
                   {language === 'es' ? 'Primario' : 'Primary'}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   {language === 'es' ? 'Botones y elementos destacados.' : 'Buttons and highlights.'}
                 </p>
               </div>
@@ -342,15 +342,15 @@ export default function ConfigurationPage() {
                 type="color"
                 value={customPrimary}
                 onChange={(event) => setCustomPrimary(event.target.value)}
-                className="h-10 w-16 cursor-pointer rounded border border-gray-300 bg-white"
+                className="h-10 w-16 cursor-pointer rounded border border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-800"
               />
             </div>
-            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 p-4">
               <div>
-                <p className="text-sm font-semibold text-gray-700">
+                <p className="text-sm font-semibold text-gray-700 dark:text-slate-200">
                   {language === 'es' ? 'Secundario' : 'Secondary'}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   {language === 'es' ? 'Acentos y elementos auxiliares.' : 'Accents and outlines.'}
                 </p>
               </div>
@@ -358,7 +358,7 @@ export default function ConfigurationPage() {
                 type="color"
                 value={customSecondary}
                 onChange={(event) => setCustomSecondary(event.target.value)}
-                className="h-10 w-16 cursor-pointer rounded border border-gray-300 bg-white"
+                className="h-10 w-16 cursor-pointer rounded border border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-800"
               />
             </div>
           </div>
@@ -369,7 +369,7 @@ export default function ConfigurationPage() {
             <button
               type="button"
               onClick={handleReset}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-anclora-secondary"
+              className="rounded-lg border border-gray-200 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-slate-300 transition-colors hover:border-anclora-secondary"
             >
               {text.reset}
             </button>
@@ -377,9 +377,9 @@ export default function ConfigurationPage() {
         </form>
       </section>
 
-      <section className="card bg-white p-6 shadow-md">
-        <div className="flex flex-col gap-3 border-b border-gray-100 pb-4">
-          <h2 className="card-header text-gray-900">{text.typographyTitle}</h2>
+      <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
+        <div className="flex flex-col gap-3 border-b border-gray-100 dark:border-slate-700 pb-4">
+          <h2 className="card-header text-gray-900 dark:text-slate-100">{text.typographyTitle}</h2>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           {FONT_OPTIONS.map((option) => {
@@ -391,13 +391,13 @@ export default function ConfigurationPage() {
                 type="button"
                 className={`flex items-center justify-between rounded-xl border p-4 transition-colors ${
                   isActive
-                    ? 'border-anclora-primary ring-2 ring-anclora-primary'
-                    : 'border-gray-200 hover:border-anclora-secondary'
+                    ? 'border-anclora-primary ring-2 ring-anclora-primary bg-white dark:bg-slate-700'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-anclora-secondary bg-white dark:bg-slate-700/50'
                 }`}
               >
                 <div>
-                  <p className="font-semibold text-gray-900">{option.label[language]}</p>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="font-semibold text-gray-900 dark:text-slate-100">{option.label[language]}</p>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                     {language === 'es'
                       ? option.id === 'mono'
                         ? 'Ideal para mantener bloques de código alineados.'
@@ -412,7 +412,7 @@ export default function ConfigurationPage() {
                   </p>
                 </div>
                 <span
-                  className="text-2xl font-semibold text-gray-700"
+                  className="text-2xl font-semibold text-gray-700 dark:text-slate-300"
                   style={{
                     fontFamily:
                       option.id === 'mono'
@@ -429,8 +429,8 @@ export default function ConfigurationPage() {
           })}
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-4">
-          <h3 className="text-sm font-semibold text-gray-700">{text.layoutTitle}</h3>
+        <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 dark:border-slate-700 pt-4">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300">{text.layoutTitle}</h3>
           <div className="grid gap-3 md:grid-cols-2">
             {DENSITY_OPTIONS.map((option) => {
               const isActive = density === option.id;
@@ -441,12 +441,12 @@ export default function ConfigurationPage() {
                   type="button"
                   className={`text-left rounded-xl border p-4 transition-colors ${
                     isActive
-                      ? 'border-anclora-primary ring-2 ring-anclora-primary'
-                      : 'border-gray-200 hover:border-anclora-secondary'
+                      ? 'border-anclora-primary ring-2 ring-anclora-primary bg-white dark:bg-slate-700'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-anclora-secondary bg-white dark:bg-slate-700/50'
                   }`}
                 >
-                  <p className="font-semibold text-gray-900">{option.label[language]}</p>
-                  <p className="mt-1 text-sm text-gray-500">{option.helper[language]}</p>
+                  <p className="font-semibold text-gray-900 dark:text-slate-100">{option.label[language]}</p>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{option.helper[language]}</p>
                 </button>
               );
             })}
@@ -454,8 +454,8 @@ export default function ConfigurationPage() {
         </div>
       </section>
 
-      <section className="card bg-white p-6 shadow-md">
-        <h2 className="card-header text-gray-900">{text.headlineTitle}</h2>
+      <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
+        <h2 className="card-header text-gray-900 dark:text-slate-100">{text.headlineTitle}</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {HEADLINE_OPTIONS.map((option) => {
             const isActive = headlineStyle === option.id;
@@ -466,21 +466,21 @@ export default function ConfigurationPage() {
                 type="button"
                 className={`text-left rounded-xl border p-4 transition-colors ${
                   isActive
-                    ? 'border-anclora-primary ring-2 ring-anclora-primary'
-                    : 'border-gray-200 hover:border-anclora-secondary'
+                    ? 'border-anclora-primary ring-2 ring-anclora-primary bg-white dark:bg-slate-700'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-anclora-secondary bg-white dark:bg-slate-700/50'
                 }`}
               >
-                <p className="font-semibold text-gray-900">{option.label[language]}</p>
-                <p className="mt-2 text-sm text-gray-500">{option.description[language]}</p>
+                <p className="font-semibold text-gray-900 dark:text-slate-100">{option.label[language]}</p>
+                <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">{option.description[language]}</p>
               </button>
             );
           })}
         </div>
       </section>
 
-      <section className="card bg-white p-6 shadow-md">
-        <h2 className="card-header text-gray-900">{text.feedbackTitle}</h2>
-        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+      <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
+        <h2 className="card-header text-gray-900 dark:text-slate-100">{text.feedbackTitle}</h2>
+        <div className="mt-4 rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 p-4 text-sm text-gray-600 dark:text-slate-300">
           <p>
             {language === 'es' ? 'Estado actual del tema:' : 'Current theme status:'}{' '}
             <span className="font-semibold text-anclora-primary">
@@ -493,15 +493,15 @@ export default function ConfigurationPage() {
           </p>
           <p className="mt-2">
             {language === 'es' ? 'Título visible:' : 'Visible title:'}{' '}
-            <span className="font-semibold text-gray-900">{appTitle}</span>
+            <span className="font-semibold text-gray-900 dark:text-slate-100">{appTitle}</span>
           </p>
           <p className="mt-2">
             {language === 'es' ? 'Lema actual:' : 'Tagline:'}{' '}
-            <span className="font-semibold text-gray-900">{tagline}</span>
+            <span className="font-semibold text-gray-900 dark:text-slate-100">{tagline}</span>
           </p>
           <p className="mt-2">
             {language === 'es' ? 'Fuente seleccionada:' : 'Selected font:'}{' '}
-            <span className="font-semibold text-gray-900">
+            <span className="font-semibold text-gray-900 dark:text-slate-100">
               {language === 'es'
                 ? bodyFont === 'mono'
                   ? 'Monoespaciada'
@@ -515,7 +515,7 @@ export default function ConfigurationPage() {
           </p>
           <p className="mt-2">
             {language === 'es' ? 'Distribución:' : 'Layout density:'}{' '}
-            <span className="font-semibold text-gray-900">
+            <span className="font-semibold text-gray-900 dark:text-slate-100">
               {language === 'es'
                 ? density === 'compact'
                   ? 'Compacta'

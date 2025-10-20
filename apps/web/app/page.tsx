@@ -102,7 +102,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="panel panel-secondary flex flex-col lg:h-[440px]">
+        <section className="panel panel-secondary flex flex-col lg:min-h-[440px]">
           <div className="border-b border-gray-100 px-6 pb-2 dark:border-slate-700">
             <h2 className="text-lg font-bold">
               <span className="text-xl" role="img" aria-hidden>
@@ -116,7 +116,7 @@ export default function Home() {
                 : "Ask questions in your preferred language."}
             </p>
           </div>
-          <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col overflow-hidden">
             <Chat />
           </div>
         </section>

@@ -10,7 +10,7 @@
 
 ### 2.1 Organización del repositorio
 
-ag
+apps
 /
 ├── apps/
 │   ├── api/        # FastAPI, routers, pipeline RAG, worker RQ
@@ -21,7 +21,7 @@ ag
 ├── docs/          # Documentación clave (INGESTA-AVANZADA, AGENTS)
 └── tests/         # Recursos base para pruebas (sin suites)
 
-```
+```text
 
 ### 2.2 Backend (apps/api)
 

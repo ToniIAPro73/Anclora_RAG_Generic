@@ -24,12 +24,22 @@ const EMPTY_STATE_TEXT = {
   en: "Upload a document and start asking questions",
 } as const;
 
+const NEW_CHAT_TEXT = {
+  es: "Nuevo chat",
+  en: "New chat",
+} as const;
+
 export default function Chat() {
   const { language } = useUISettings();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setInput("");
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -81,6 +91,23 @@ export default function Chat() {
 
   return (
     <div className="flex h-full flex-col">
+      {/* Header with New Chat button */}
+      {messages.length > 0 && (
+        <div className="flex items-center justify-between border-b border-gray-200 bg-white/60 px-4 py-2 dark:border-slate-700 dark:bg-transparent">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300">
+            {language === "es" ? "Conversación" : "Conversation"}
+          </h3>
+          <button
+            onClick={handleNewChat}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          >
+            <span className="text-base">✨</span>
+            {NEW_CHAT_TEXT[language]}
+          </button>
+        </div>
+      )}
+
+      {/* Messages area with dynamic scroll */}
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-gray-500 dark:text-slate-400">
@@ -113,6 +140,7 @@ export default function Chat() {
         )}
       </div>
 
+      {/* Input area */}
       <div className="mt-auto border-t border-gray-100 bg-white/80 p-4 dark:border-slate-700 dark:bg-transparent">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input

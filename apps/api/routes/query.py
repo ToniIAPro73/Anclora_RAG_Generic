@@ -4,7 +4,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from llama_index.core import Settings, VectorStoreIndex
+from llama_index.core import Settings, VectorStoreIndex, PromptTemplate
 from llama_index.llms.google_genai import GoogleGenAI
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from pydantic import BaseModel, Field, field_validator
@@ -76,6 +76,34 @@ def get_query_engine(top_k: int, language: str):
                 "Get your free API key at: https://aistudio.google.com/app/apikey"
             )
 
+        # Prepare language-specific prompts
+        if language == "es":
+            qa_prompt_tmpl_str = (
+                "A continuación se proporciona información de contexto.\n"
+                "---------------------\n"
+                "{context_str}\n"
+                "---------------------\n"
+                "Dada la información de contexto y sin conocimiento previo, "
+                "responde a la consulta en ESPAÑOL de manera profesional y clara.\n"
+                "Si la información no está en el contexto, di que no puedes responder basándote en el contexto proporcionado.\n"
+                "Consulta: {query_str}\n"
+                "Respuesta en español: "
+            )
+        else:
+            qa_prompt_tmpl_str = (
+                "Context information is below.\n"
+                "---------------------\n"
+                "{context_str}\n"
+                "---------------------\n"
+                "Given the context information and no prior knowledge, "
+                "answer the query in ENGLISH in a professional and clear manner.\n"
+                "If the information is not in the context, say you cannot answer based on the provided context.\n"
+                "Query: {query_str}\n"
+                "Answer in English: "
+            )
+
+        qa_prompt = PromptTemplate(qa_prompt_tmpl_str)
+
         llm = GoogleGenAI(
             model=normalize_model_name(GEMINI_MODEL),
             api_key=GEMINI_API_KEY,
@@ -89,7 +117,12 @@ def get_query_engine(top_k: int, language: str):
         vector_store = QdrantVectorStore(client=client, collection_name=COLLECTION_NAME)
 
         index = VectorStoreIndex.from_vector_store(vector_store)
-        return index.as_query_engine(similarity_top_k=top_k)
+        query_engine = index.as_query_engine(
+            similarity_top_k=top_k,
+            text_qa_template=qa_prompt,
+        )
+
+        return query_engine
 
     except Exception as exc:
         logger.error("Query engine error: %s", exc)

@@ -7,8 +7,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Load shared environment variables from project root
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-load_dotenv(PROJECT_ROOT / ".env")
+# In Docker, we're at /app, so we look for .env there or in parent dirs
+current_path = Path(__file__).resolve()
+try:
+    PROJECT_ROOT = current_path.parents[2]  # Local development: apps/api/main.py -> project root
+except IndexError:
+    PROJECT_ROOT = current_path.parent  # Docker: /app/main.py -> /app
+
+# Try to load .env from project root, then from current directory
+if (PROJECT_ROOT / ".env").exists():
+    load_dotenv(PROJECT_ROOT / ".env")
+elif (current_path.parent / ".env").exists():
+    load_dotenv(current_path.parent / ".env")
+else:
+    # In Docker, env vars are passed directly, no .env file needed
+    load_dotenv()
 
 # Add current directory and parent directories to Python path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
