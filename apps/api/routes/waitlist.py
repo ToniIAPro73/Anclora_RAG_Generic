@@ -5,16 +5,16 @@ from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy.exc import IntegrityError
 from pydantic import ValidationError
 
-from apps.api.database.waitlist_repository import WaitlistRepository
-from apps.api.models.waitlist import (
+from database.waitlist_repository import WaitlistRepository
+from models.waitlist import (
     WaitlistCreate,
     WaitlistResponse,
     WaitlistError,
     WaitlistErrorCode
 )
-from apps.api.utils.logging_config import get_logger
-from apps.api.middleware import limiter
-from apps.api.clients.email_client import email_client
+from utils.logging_config import get_logger
+from middleware import limiter
+from clients.email_client import email_client
 
 logger = get_logger(__name__)
 
