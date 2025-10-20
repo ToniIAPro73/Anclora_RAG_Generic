@@ -10,26 +10,29 @@
 ### Backend (FastAPI)
 
 1. **WebSocket Manager** (`apps/api/clients/websocket_manager.py`)
+
    - Gestión de conexiones WebSocket por job_id
    - Redis pub/sub listener en background
    - Auto-cleanup de conexiones muertas
    - Broadcast de actualizaciones a clientes conectados
 
 2. **WebSocket Endpoint** (`apps/api/routes/ingest.py`)
+
    - Ruta: `ws://localhost:8030/ws/jobs/{job_id}`
    - Ping/pong heartbeat
    - Mensajes de conexión/desconexión
 
 3. **Worker Notifications** (`apps/api/workers/ingestion_worker.py`)
    - Publicación a Redis pub/sub en 4 puntos:
-     * `processing` (inicio)
-     * `processing` + step=`parsing`
-     * `processing` + step=`indexing`
-     * `completed` / `failed`
+     - `processing` (inicio)
+     - `processing` + step=`parsing`
+     - `processing` + step=`indexing`
+     - `completed` / `failed`
 
 ### Frontend (Next.js)
 
 1. **Custom Hook** (`apps/web/lib/useWebSocket.ts`)
+
    - Conexión automática cuando se recibe jobId
    - Auto-reconnect con intervalo configurable
    - Heartbeat cada 30 segundos
@@ -46,7 +49,7 @@
 
 ## 🎯 Arquitectura del Sistema
 
-```
+```text
 ┌─────────────┐
 │   Browser   │
 │  (Frontend) │
@@ -96,6 +99,7 @@
 **Mensaje**: `feat(websocket): implement real-time push notifications for async ingestion`
 
 **Cambios**:
+
 - +529 líneas, -83 líneas
 - 6 archivos modificados
 - 3 archivos nuevos
@@ -124,6 +128,7 @@ cd C:\Users\Usuario\Workspace\01_Proyectos\Anclora-RAG-Generic
 ```
 
 Este script:
+
 1. Levanta todos los servicios Docker (API, Worker, Qdrant, Redis, Postgres, Ollama)
 2. Verifica que la API esté saludable
 3. Inicia el frontend Next.js en segundo plano
@@ -149,6 +154,7 @@ npm run dev
 ### 1. Verificar que todo está corriendo
 
 **Backend:**
+
 ```bash
 curl http://localhost:8030/health
 # Debe retornar: {"status": "healthy", ...}
@@ -186,6 +192,7 @@ WebSocket disconnected for job <job_id>
 ### 5. Verificar UI
 
 La UI debería mostrar en español (o inglés):
+
 - "Subiendo archivo..."
 - "En cola..."
 - "Procesando documento..."
@@ -196,6 +203,7 @@ La UI debería mostrar en español (o inglés):
 ### 6. Verificar historial
 
 El documento debe aparecer en la sección "Historial de Documentos" con:
+
 - Nombre del archivo
 - Número de chunks
 - Timestamp
@@ -207,6 +215,7 @@ El documento debe aparecer en la sección "Historial de Documentos" con:
 ### WebSocket no conecta
 
 **Verificar:**
+
 ```bash
 # Backend logs
 docker logs docker-api-1
@@ -221,10 +230,12 @@ docker exec -it docker-redis-1 redis-cli ping
 ### No aparecen actualizaciones
 
 **Verificar en DevTools → Network → WS:**
+
 - Debe haber una conexión a `ws://localhost:8030/ws/jobs/xxx`
 - Estado: 101 Switching Protocols (éxito)
 
 **Verificar Redis pub/sub:**
+
 ```bash
 docker exec -it docker-redis-1 redis-cli
 > PSUBSCRIBE job:*
@@ -234,6 +245,7 @@ docker exec -it docker-redis-1 redis-cli
 ### Documento no se procesa
 
 **Verificar servicios:**
+
 ```bash
 # Qdrant
 curl http://localhost:6363/health
@@ -246,14 +258,14 @@ curl http://localhost:11464/api/tags
 
 ## 📊 Diferencias vs Sistema Anterior
 
-| Aspecto | Antes (Polling) | Ahora (WebSocket) |
-|---------|-----------------|-------------------|
-| Método | HTTP GET cada 2s | WebSocket persistente |
-| Latencia | 2s promedio | < 100ms |
-| Requests | ~30/min | 1 conexión + heartbeat/30s |
-| Recursos | Alto overhead | Bajo overhead |
-| Granularidad | Status general | 4 pasos detallados |
-| UX | Updates lentos | Updates instantáneos |
+| Aspecto      | Antes (Polling)  | Ahora (WebSocket)          |
+| ------------ | ---------------- | -------------------------- |
+| Método       | HTTP GET cada 2s | WebSocket persistente      |
+| Latencia     | 2s promedio      | < 100ms                    |
+| Requests     | ~30/min          | 1 conexión + heartbeat/30s |
+| Recursos     | Alto overhead    | Bajo overhead              |
+| Granularidad | Status general   | 4 pasos detallados         |
+| UX           | Updates lentos   | Updates instantáneos       |
 
 ---
 
@@ -274,20 +286,24 @@ Si el testing manual es exitoso:
 ## 📂 Archivos Relevantes
 
 **Backend:**
+
 - `apps/api/clients/websocket_manager.py` - WebSocket connection manager
 - `apps/api/routes/ingest.py` - Endpoint `/ws/jobs/{job_id}`
 - `apps/api/workers/ingestion_worker.py` - Notificaciones Redis pub/sub
 
 **Frontend:**
+
 - `apps/web/lib/useWebSocket.ts` - Custom React hook
 - `apps/web/components/UploadZone.tsx` - Integración WebSocket
 - `apps/web/lib/api.ts` - API client functions
 
 **Scripts:**
+
 - `scripts/powershell/start_dev.ps1` - Iniciar stack completo
 - `scripts/powershell/stop_dev.ps1` - Detener stack completo
 
 **Documentación:**
+
 - `docs/WEBSOCKET_STATUS.md` - Este documento
 - `docs/ESTADO_PROYECTO.md` - Estado general del proyecto
 
