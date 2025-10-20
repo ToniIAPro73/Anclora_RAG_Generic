@@ -140,10 +140,12 @@ def test_ingest_handles_file_not_found_error(client: TestClient, sample_pdf_byte
 @pytest.mark.unit
 def test_ingest_handles_unexpected_error(client: TestClient, sample_pdf_bytes: bytes):
     """Test handling of unexpected errors from worker."""
-    files = {"file": ("test.pdf", io.BytesIO(sample_pdf_bytes), "application/pdf")}
+    files = {"file": ("test_error.pdf", io.BytesIO(sample_pdf_bytes), "application/pdf")}
 
-    with patch("workers.ingestion_worker.process_single_document") as mock:
-        mock.side_effect = RuntimeError("Unexpected error")
+    # Mock both duplicate check and worker to force error path
+    # Patch where the functions are imported/used, not where they're defined
+    with patch("routes.ingest.process_single_document") as mock_worker:
+        mock_worker.side_effect = RuntimeError("Unexpected error")
         response = client.post("/ingest", files=files)
 
         assert response.status_code == 500
