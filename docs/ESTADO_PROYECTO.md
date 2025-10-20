@@ -103,13 +103,38 @@ apps
 
 **Propuesta Aprobada:** `openspec/changes/beta-launch-with-landing/`
 
+**Análisis de Mercado (2025):**
+- Mercado RAG: $1.2-3.8B (2025) → $165B en 2034 (CAGR 45.8%)
+- Adopción: 70.5% grandes empresas
+- Momento ideal para lanzar: mercado en explosión
+
+**Estrategia de Posicionamiento:**
+- **vs NotebookLM:** Resuelve problema #1 (citas incorrectas) + sin límite 500k palabras
+- **vs RAG tradicionales:** Listo en 5 minutos, sin necesidad de ser MLops engineer
+- **vs Búsqueda empresarial:** Inteligencia contextual, respuestas en lugar de solo documentos
+
+**Diferenciadores REALES del MVP (enfatizar en landing):**
+- ✅ Citas verificables (similarity scores + metadata: filename, page, score)
+- ✅ Multilenguaje ES/EN nativo
+- ✅ Sin límites artificiales de palabras
+- ✅ Privacidad total (self-hostable, no depende de Google)
+- ✅ Fácil de usar (drag & drop)
+
+**Features NO prometer en beta (roadmap futuro):**
+- ❌ Colaboración tiempo real (roadmap v1.1)
+- ❌ Procesamiento imágenes/tablas (roadmap v1.2)
+- ❌ 20+ integraciones (roadmap v1.3)
+- ❌ Graph RAG (roadmap v2.0)
+
+**Estrategia:** Honestidad + roadmap claro = confianza de early adopters
+
 **Decisiones de Infraestructura Confirmadas:**
 - ✅ Landing separada: `www.anclora.com` → Vercel (gratis)
 - ✅ App beta: `app.anclora.com` → Railway/Fly.io
 - ✅ Email: Hostinger SMTP (ya contratado, $0 adicional)
 - ✅ Estrategia: Waitlist con aprobación manual de invitaciones
 
-### 7.2 Timeline de Implementación (13 días)
+### 7.2 Timeline de Implementación (9 días, 144.5h estimadas)
 
 | Fase | Días | Objetivo | Estado |
 |------|------|----------|--------|
@@ -118,7 +143,8 @@ apps
 | **Fase 2** | 6-9 | Auth real + onboarding + performance | ⏳ Pendiente |
 | **Fase 3** | 10-12 | Testing E2E + preparación | ⏳ Pendiente |
 | **Fase 4** | 13 | Deploy + primeros 10 usuarios | ⏳ Pendiente |
-| **Fase 5** | 14-21 | Monitoreo + iteración | ⏳ Pendiente |
+
+**Nota:** Fase 5 (Post-Lanzamiento) eliminada del scope inicial. Se manejará como iteración continua post-deploy.
 
 ### 7.3 Métricas de Éxito Beta
 
@@ -137,10 +163,13 @@ apps
 
 ### 7.4 Documentos de Referencia
 
+- **Estrategia MVP**: `landing-resources/copy/MVP_STRATEGY.md` (basado en análisis mercado 2025)
 - **Propuesta completa**: `openspec/changes/beta-launch-with-landing/proposal.md`
-- **Tareas detalladas**: `openspec/changes/beta-launch-with-landing/tasks.md` (92 tareas)
+- **Tareas detalladas**: `openspec/changes/beta-launch-with-landing/tasks.md`
 - **Diseño técnico**: `openspec/changes/beta-launch-with-landing/design.md`
 - **Spec deltas**: `openspec/changes/beta-launch-with-landing/specs/`
+- **Maqueta landing**: `landing-resources/assets/index.html`
+- **Competitive matrix**: `landing-resources/assets/anclora_rag_competitive_matrix.csv`
 
 ## 8. Próximos pasos inmediatos
 
