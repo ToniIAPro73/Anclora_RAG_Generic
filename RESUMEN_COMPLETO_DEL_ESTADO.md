@@ -14,23 +14,22 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
 
   1. Revisión de tu Implementación (T009-T012)
 
-  - ✅ Landing Page: 84/100 puntos - Excelente calidad
-  - ✅ Backend Waitlist: Completamente funcional
-  - ✅ Integración: Frontend ↔ API ↔ PostgreSQL ↔ Email SMTP
+- ✅ Landing Page: 84/100 puntos - Excelente calidad
+- ✅ Backend Waitlist: Completamente funcional
+- ✅ Integración: Frontend ↔ API ↔ PostgreSQL ↔ Email SMTP
 
   2. Documentación Creada/Actualizada (7 archivos)
 
   | Archivo                       | Estado        | Descripción
-               |
-  |-------------------------------|---------------|-----------------------------------------    
-  -------------|
-  | docs/FASE_0_IMPLEMENTACION.md | ✅ Actualizado | Fase 0 marcada como completada (Backend    
-   + Frontend)  |
-  | docs/REVISION_LANDING_PAGE.md | ✅ Creado      | Revisión técnica detallada con scoring     
+  |-------------------------------|---------------|-----------------------------------------|
+  | docs/FASE_0_IMPLEMENTACION.md | ✅ Actualizado | Fase 0 marcada como completada (Backend
+
+- Frontend)  |
+  | docs/REVISION_LANDING_PAGE.md | ✅ Creado      | Revisión técnica detallada con scoring
   84/100        |
   | docs/ESTADO_PROYECTO.md       | ✅ Actualizado | Estado actualizado a "Fase 0
   completada"             |
-  | docs/DEPLOYMENT_GUIDE.md      | ✅ Creado      | Guía completa de deployment a staging      
+  | docs/DEPLOYMENT_GUIDE.md      | ✅ Creado      | Guía completa de deployment a staging
   (10 secciones) |
   | CLAUDE.md                     | ✅ Actualizado | Info de landing + comandos de
   desarrollo             |
@@ -39,7 +38,7 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
   | DEPLOY_QUICK_START.md         | ✅ Creado      | Quick reference para deployment
                 |
 
-  3. Archivos de Configuración para Deployment (4 archivos)
+  1. Archivos de Configuración para Deployment (4 archivos)
 
   | Archivo                                 | Propósito                        |
   |-----------------------------------------|----------------------------------|
@@ -51,8 +50,9 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
   4. Issues Resueltos
 
   ✅ Imports absolutos en Docker → Corregidos en:
-  - apps/api/routes/waitlist.py
-  - apps/api/database/waitlist_repository.py
+
+- apps/api/routes/waitlist.py
+- apps/api/database/waitlist_repository.py
 
   ✅ Build Docker API → Completado exitosamente con nuevas dependencias
 
@@ -61,18 +61,18 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
 
   Completado (100%)
 
-  - ✅ Backend Waitlist (T001-T008)
-  - ✅ Landing Page (T009-T012)
-  - ✅ Documentación técnica
-  - ✅ Configuración deployment
-  - ✅ Scripts de validación
+- ✅ Backend Waitlist (T001-T008)
+- ✅ Landing Page (T009-T012)
+- ✅ Documentación técnica
+- ✅ Configuración deployment
+- ✅ Scripts de validación
 
   Listo para Deployment
 
-  - ✅ Landing Page → Vercel (gratis)
-  - ✅ Backend API → Railway ($5/mes)
-  - ✅ Variables de entorno documentadas
-  - ✅ Checklist de seguridad
+- ✅ Landing Page → Vercel (gratis)
+- ✅ Backend API → Railway ($5/mes)
+- ✅ Variables de entorno documentadas
+- ✅ Checklist de seguridad
 
   ---
   📂 ARCHIVOS CLAVE PARA DEPLOYMENT
@@ -107,19 +107,21 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
 
   3. Deploy Backend (15 min)
 
-  - Ir a https://railway.app/new
-  - Deploy from GitHub
-  - Configurar variables (seguir DEPLOYMENT_GUIDE.md)
+- Ir a <https://railway.app/new>
+- Deploy from GitHub
+- Configurar variables (seguir DEPLOYMENT_GUIDE.md)
 
   4. Verificación (5 min)
 
-  # Health check backend
-  curl https://tu-api.up.railway.app/health
+# Health check backend
 
-  # Test waitlist
-  curl -X POST https://www.anclora.com/api/waitlist \
+  curl <https://tu-api.up.railway.app/health>
+
+# Test waitlist
+
+  curl -X POST <https://www.anclora.com/api/waitlist> \
     -H "Content-Type: application/json" \
-    -d '{"email":"test@example.com"}'
+    -d '{"email":"<test@example.com>"}'
 
   ---
   💾 LO QUE FALTA COMMITEAR
@@ -133,11 +135,11 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
   git add DEPLOY_QUICK_START.md
   git commit -m "docs(deploy): add complete deployment configuration and guides
 
-  - Add comprehensive deployment guide (DEPLOYMENT_GUIDE.md)
-  - Add Railway configuration (railway.json)
-  - Add pre-deployment validation script
-  - Add production env template
-  - Update all project documentation for Fase 0 completion
+- Add comprehensive deployment guide (DEPLOYMENT_GUIDE.md)
+- Add Railway configuration (railway.json)
+- Add pre-deployment validation script
+- Add production env template
+- Update all project documentation for Fase 0 completion
 
   ✅ Ready for staging deployment (Vercel + Railway)"
   git push origin master
@@ -155,9 +157,9 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
   ¿Listo para deployment? Ejecuta .\scripts\powershell\pre_deploy_check.ps1 y sigue
   DEPLOY_QUICK_START.md 🚀
 
-> quiero ver cómo queda la landing page 
+> quiero ver cómo queda la landing page
 
-● Perfecto! Vamos a levantar la landing page para que la veas. Primero déjame verificar el      
+● Perfecto! Vamos a levantar la landing page para que la veas. Primero déjame verificar el
   estado de los builds de Docker y luego iniciaremos la landing.
 
 ● Kill Shell(Kill shell: 8a703b)
@@ -190,81 +192,87 @@ Perfecto, voy a completar rápidamente y darte un resumen completo del estado.
 
   Accede desde tu navegador:
 
-  URL Local: http://localhost:3001
+  URL Local: <http://localhost:3001>
 
   ---
   📱 Qué Verás en la Landing
 
   1. Hero Section
 
-  - Título: "Anclora RAG"
-  - Subtítulo: "La primera plataforma RAG verdaderamente colaborativa para equipos"
-  - 2 CTAs: "Únete a la Beta" + "Ver Demo"
-  - Trust signals: ✅ Sin tarjeta • 🚀 Setup 2 min • 👥 10 usuarios gratis
+- Título: "Anclora RAG"
+- Subtítulo: "La primera plataforma RAG verdaderamente colaborativa para equipos"
+- 2 CTAs: "Únete a la Beta" + "Ver Demo"
+- Trust signals: ✅ Sin tarjeta • 🚀 Setup 2 min • 👥 10 usuarios gratis
 
   2. Problema vs Solución
 
-  - Comparativa visual (❌ vs ✅)
-  - 3 problemas actuales del mercado
-  - 3 soluciones de Anclora
+- Comparativa visual (❌ vs ✅)
+- 3 problemas actuales del mercado
+- 3 soluciones de Anclora
 
-  3. Features (4 características)
+  1. Features (4 características)
 
-  - 🤝 Colaboración en Tiempo Real
-  - 🧠 Inteligencia Multimodal
-  - ⚡ Automatización Inteligente
-  - 💭 Memoria Contextual Persistente
+- 🤝 Colaboración en Tiempo Real
+- 🧠 Inteligencia Multimodal
+- ⚡ Automatización Inteligente
+- 💭 Memoria Contextual Persistente
 
-  4. EmailCapture (Formulario Waitlist) ⭐
+  2. EmailCapture (Formulario Waitlist) ⭐
 
-  - Input de email con validación
-  - Botón "Únete a la Beta"
-  - Estados: Loading → Success → Error
-  - Muestra tu posición en la cola tras registro
+- Input de email con validación
+- Botón "Únete a la Beta"
+- Estados: Loading → Success → Error
+- Muestra tu posición en la cola tras registro
 
-  5. FAQ (10 preguntas)
+  3. FAQ (10 preguntas)
 
-  - Acordeón interactivo
-  - Preguntas sobre diferenciación, precio, seguridad, etc.
-  - Email de contacto: hola@anclora.com
+- Acordeón interactivo
+- Preguntas sobre diferenciación, precio, seguridad, etc.
+- Email de contacto: <hola@anclora.com>
 
   ---
   🧪 Prueba el Flujo Completo
 
   NOTA: Para que el formulario funcione completamente, necesitas:
-  1. Backend API corriendo en http://localhost:8000
+
+  1. Backend API corriendo en <http://localhost:8000>
   2. PostgreSQL con tabla waitlist creada
 
   Opción 1: Solo ver UI (sin backend)
 
-  - Puedes navegar por toda la landing
-  - El formulario dará error al enviar (normal sin backend)
+- Puedes navegar por toda la landing
+- El formulario dará error al enviar (normal sin backend)
 
   Opción 2: Test completo (con backend)
 
-  # En otra terminal
+# En otra terminal
+
   docker compose -f infra/docker/docker-compose.dev.yml up -d
 
-  # Esperar que PostgreSQL esté listo
-  # Probar formulario → debe funcionar 100%
+# Esperar que PostgreSQL esté listo
+
+# Probar formulario → debe funcionar 100%
 
   ---
   🎨 Características Técnicas
 
-  - ✅ Responsive: Mobile, tablet, desktop
-  - ✅ Tailwind CSS 4: Estilos modernos
-  - ✅ Next.js 15: App Router + React 19
-  - ✅ TypeScript: Type-safe
-  - ✅ SEO: Metadata completa + Open Graph
-  - ✅ Analytics: Google Analytics 4 ready
+- ✅ Responsive: Mobile, tablet, desktop
+- ✅ Tailwind CSS 4: Estilos modernos
+- ✅ Next.js 15: App Router + React 19
+- ✅ TypeScript: Type-safe
+- ✅ SEO: Metadata completa + Open Graph
+- ✅ Analytics: Google Analytics 4 ready
 
   ---
   🛑 Para Detener el Servidor
 
   Cuando quieras parar la landing:
-  # Encuentra el proceso
+
+# Encuentra el proceso
+
   taskkill /F /PID <pid_de_node>
-  # O cierra la terminal donde corre
+
+# O cierra la terminal donde corre
 
   ---
   ¡Disfruta explorando tu landing page! 🚀

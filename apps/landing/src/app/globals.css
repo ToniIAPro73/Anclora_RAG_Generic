@@ -10,7 +10,7 @@
   --brand-primary: #D946EF;
   --brand-secondary: #06B6D4;
   --gradient-primary: linear-gradient(135deg, #D946EF 0%, #06B6D4 100%);
-  --gradient-surface: linear-gradient(180deg, rgba(14,17,32,0.9) 0%, rgba(5,8,22,1) 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(14, 17, 32, 0.9) 0%, rgba(5, 8, 22, 1) 100%);
 }
 
 @theme inline {

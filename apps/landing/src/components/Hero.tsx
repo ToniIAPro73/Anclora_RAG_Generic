@@ -23,7 +23,7 @@ export function Hero() {
             </h1>
             <p className="mx-auto max-w-2xl text-lg text-slate-300 lg:mx-0 lg:text-xl">
               Anclora RAG combina orquestación avanzada, memoria contextual persistente y flujos
-              colaborativos para que cada respuesta llegue con citas auditable y contexto completo.
+              colaborativos para que cada respuesta llegue con citas auditables y contexto completo.
             </p>
           </div>
 
@@ -79,13 +79,13 @@ export function Hero() {
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-inner">
               <p className="text-xs uppercase tracking-wide text-slate-400">Consulta</p>
               <p className="mt-3 text-base font-medium text-slate-100">
-                “Resume los principales riesgos regulatorios para operar IA generativa en la UE.”
+                &ldquo;Resume los principales riesgos regulatorios para operar IA generativa en la UE.&rdquo;
               </p>
               <div className="mt-5 space-y-3 text-sm text-slate-300">
                 <div className="rounded-xl border border-[#06B6D4]/30 bg-[#0F172A]/80 p-3">
                   <p className="font-semibold text-white">Respuesta verificada</p>
                   <p className="mt-2 text-slate-300">
-                    ✔ Cumple con la AI Act (Capítulo II) · ✔ GDPR Art. 22 · ✔ Directrices CNIL 2024
+                    ✓ Cumple con la AI Act (Capítulo II) · ✓ GDPR Art. 22 · ✓ Directrices CNIL 2024
                   </p>
                 </div>
                 <div className="grid gap-2 rounded-xl border border-white/5 bg-white/3 p-3 text-xs text-slate-200 md:grid-cols-3">
