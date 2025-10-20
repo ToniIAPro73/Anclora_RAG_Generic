@@ -116,6 +116,8 @@ export default function ConfigurationPage() {
     setBodyFont,
     density,
     setDensity,
+    isPro,
+    setIsPro,
   } = useUISettings();
 
   const text = useMemo(
@@ -280,6 +282,48 @@ export default function ConfigurationPage() {
             </div>
           </form>
         </div>
+      </section>
+
+      {/* Sección de Suscripción (Simulación PRO) */}
+      <section className="card bg-white dark:bg-slate-800 p-6 shadow-md border-2 border-anclora-primary/20">
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <h2 className="card-header text-gray-900 dark:text-slate-100 mb-2">
+              {language === 'es' ? 'Suscripción (Simulación)' : 'Subscription (Simulation)'}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-slate-400">
+              {language === 'es'
+                ? 'Activa/desactiva el modo PRO para probar las funcionalidades avanzadas como Ingesta Avanzada.'
+                : 'Toggle PRO mode to test advanced features like Advanced Ingestion.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-semibold ${isPro ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-slate-400'}`}>
+              {isPro ? (language === 'es' ? 'PRO Activo' : 'PRO Active') : (language === 'es' ? 'FREE' : 'FREE')}
+            </span>
+            <button
+              onClick={() => setIsPro(!isPro)}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                isPro ? 'bg-green-600' : 'bg-gray-300 dark:bg-slate-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                  isPro ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+        {isPro && (
+          <div className="mt-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3">
+            <p className="text-sm text-green-800 dark:text-green-400">
+              ✨ {language === 'es'
+                ? 'Modo PRO activo. Ahora tienes acceso a Ingesta Avanzada y funciones premium.'
+                : 'PRO mode active. You now have access to Advanced Ingestion and premium features.'}
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">

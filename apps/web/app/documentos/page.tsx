@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { getDocumentHistory, DocumentHistoryItem } from "@/lib/api";
 import { useUISettings } from "@/components/ui-settings-context";
-import DocumentViewerModal from "@/components/DocumentViewerModal";
+
+// Lazy load the DocumentViewerModal since it's only used on demand
+const DocumentViewerModal = dynamic(() => import("@/components/DocumentViewerModal"), {
+  ssr: false,
+});
 
 const COPY = {
   title: {

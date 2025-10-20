@@ -28,6 +28,7 @@ interface UISettingsState {
   headlineStyle: HeadlineStyle;
   bodyFont: BodyFont;
   density: DensityMode;
+  isPro: boolean;
 }
 
 interface AccentPreset {
@@ -54,6 +55,7 @@ interface UISettingsContext extends UISettingsState {
   setHeadlineStyle: (style: HeadlineStyle) => void;
   setBodyFont: (font: BodyFont) => void;
   setDensity: (density: DensityMode) => void;
+  setIsPro: (isPro: boolean) => void;
   accentPresets: Record<AccentId, AccentPreset & { label: string }>;
 }
 
@@ -89,6 +91,7 @@ const DEFAULT_SETTINGS: UISettingsState = {
   headlineStyle: 'rounded',
   bodyFont: 'sans',
   density: 'comfortable',
+  isPro: true, // TODO: Set to true to simulate PRO subscription
 };
 
 const UISettingsContext = createContext<UISettingsContext | null>(null);
@@ -326,6 +329,10 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, density }));
   }, []);
 
+  const setIsPro = useCallback((isPro: boolean) => {
+    setState((prev) => ({ ...prev, isPro }));
+  }, []);
+
   useEffect(() => {
     if (!isHydrated) return;
     const root = document.documentElement;
@@ -359,6 +366,7 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
       setHeadlineStyle,
       setBodyFont,
       setDensity,
+      setIsPro,
       accentPresets: ACCENT_PRESETS,
     }),
     [
@@ -372,6 +380,7 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
       setHeadlineStyle,
       setBodyFont,
       setDensity,
+      setIsPro,
     ],
   );
 

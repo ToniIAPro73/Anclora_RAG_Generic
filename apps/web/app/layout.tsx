@@ -4,7 +4,11 @@ import './globals.css';
 import { Providers } from '@/components/Providers';
 import AppShell from '@/components/AppShell';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: 'Anclora RAG',

@@ -7,40 +7,53 @@ dotenv.config({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Enable React strict mode for better error detection
+  reactStrictMode: true,
 
-  // Disable caching in development to always serve fresh content
-  ...(process.env.NODE_ENV === 'development' && {
-    webpack: (config) => {
-      config.cache = false;
-      return config;
-    },
+  // Optimize images
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
+  },
+
+  // Compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // Enable experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['react', 'react-dom'],
+  },
+
+  // Production-only optimizations
+  ...(process.env.NODE_ENV === 'production' && {
+    compress: true,
+    poweredByHeader: false,
   }),
 
-  // Add headers to prevent browser caching in development
+  // Headers for caching and performance
   async headers() {
-    if (process.env.NODE_ENV === 'development') {
-      return [
-        {
-          source: '/:path*',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
-            },
-            {
-              key: 'Pragma',
-              value: 'no-cache',
-            },
-            {
-              key: 'Expires',
-              value: '0',
-            },
-          ],
-        },
-      ];
-    }
-    return [];
+    return [
+      {
+        source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 

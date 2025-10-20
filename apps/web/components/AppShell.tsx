@@ -24,6 +24,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     setLanguage,
     theme,
     setTheme,
+    isPro,
   } = useUISettings();
   const pathname = usePathname();
 
@@ -83,13 +84,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <nav className="flex flex-wrap justify-center gap-2 flex-1">
               {NAV_LINKS.map(({ href, label, pro }) => {
                 const isActive = pathname === href;
+                const isDisabled = pro && !isPro;
                 return (
                   <Link
                     key={href}
-                    href={href}
+                    href={isDisabled ? '#' : href}
+                    onClick={(e) => {
+                      if (isDisabled) {
+                        e.preventDefault();
+                      }
+                    }}
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
                       isActive
                         ? 'bg-white text-anclora-primary shadow-lg'
+                        : isDisabled
+                        ? 'bg-white/5 text-white/40 cursor-not-allowed'
                         : 'bg-white/10 hover:bg-white/20'
                     }`}
                   >
