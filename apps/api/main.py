@@ -6,18 +6,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Load environment variables with local overrides taking precedence
-API_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = API_DIR.parent.parent
-
-for env_path in (
-    PROJECT_ROOT / ".env",
-    API_DIR / ".env",
-    PROJECT_ROOT / ".env.local",
-    API_DIR / ".env.local",
-):
-    if env_path.exists():
-        load_dotenv(env_path, override=True)
+# Load shared environment variables from project root
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
 
 # Add current directory and parent directories to Python path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))

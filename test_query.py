@@ -6,6 +6,6 @@ payload = {
     "top_k": 3
 }
 
-response = requests.post("http://localhost:8001/query", json=payload)
+response = requests.post("http://localhost:8000/query", json=payload)
 print(response.status_code)
 print(response.text)
