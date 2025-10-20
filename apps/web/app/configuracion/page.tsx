@@ -127,7 +127,7 @@ export default function ConfigurationPage() {
               'Personaliza tu espacio Anclora preservando la accesibilidad, la legibilidad y la coherencia visual.',
             identityTitle: 'Identidad visual',
             identityHelper:
-              'Ajusta el título y la descripción visibles en la cabecera. Siempre añadimos una referencia a Anclora para mantener la marca.',
+              'Ajusta el título visible en la cabecera. Máximo 30 caracteres para mantener un diseño equilibrado.',
             accentTitle: 'Tema cromático',
             accentHelper:
               'Elige un tema validado o define tus propios colores. Comprobamos automáticamente el contraste para garantizar la accesibilidad.',
@@ -148,7 +148,7 @@ export default function ConfigurationPage() {
               'Customize your Anclora workspace while preserving accessibility, legibility, and visual coherence.',
             identityTitle: 'Visual identity',
             identityHelper:
-              'Adjust the title and tagline shown in the header. We always keep a reference to Anclora to preserve the brand.',
+              'Adjust the title shown in the header. Maximum 30 characters to maintain a balanced design.',
             accentTitle: 'Color theme',
             accentHelper:
               'Pick a validated theme or define your own palette. We automatically check contrast to ensure accessibility.',
@@ -245,42 +245,41 @@ export default function ConfigurationPage() {
       </section>
 
       <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
-        <div className="flex flex-col gap-3 border-b border-gray-100 dark:border-slate-700 pb-4">
-          <h2 className="card-header text-gray-900 dark:text-slate-100">{text.identityTitle}</h2>
-          <p className="text-sm text-gray-500 dark:text-slate-400">{text.identityHelper}</p>
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <h2 className="card-header text-gray-900 dark:text-slate-100 mb-2">{text.identityTitle}</h2>
+            <p className="text-sm text-gray-500 dark:text-slate-400">{text.identityHelper}</p>
+          </div>
+          <form
+            className="w-80"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setFeedback(text.identitySaved);
+            }}
+          >
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">
+                {language === 'es' ? 'Título del dashboard' : 'Dashboard title'}
+              </label>
+              <input
+                type="text"
+                value={appTitle}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value.length <= 30) {
+                    setAppTitle(value);
+                  }
+                }}
+                className="input-control"
+                placeholder="Anclora RAG"
+                maxLength={30}
+              />
+              <p className="text-xs text-gray-500 dark:text-slate-400">
+                {appTitle.length}/30 {language === 'es' ? 'caracteres' : 'characters'}
+              </p>
+            </div>
+          </form>
         </div>
-        <form
-          className="mt-4 grid gap-4 md:grid-cols-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setFeedback(text.identitySaved);
-          }}
-        >
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">
-              {language === 'es' ? 'Título del dashboard' : 'Dashboard title'}
-            </label>
-            <input
-              type="text"
-              value={appTitle}
-              onChange={(event) => setAppTitle(event.target.value)}
-              className="input-control"
-              placeholder="Anclora RAG"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">
-              {language === 'es' ? 'Descripción' : 'Tagline'}
-            </label>
-            <input
-              type="text"
-              value={tagline}
-              onChange={(event) => setTagline(event.target.value)}
-              className="input-control"
-              placeholder="LLM + Embeddings + Qdrant"
-            />
-          </div>
-        </form>
       </section>
 
       <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">

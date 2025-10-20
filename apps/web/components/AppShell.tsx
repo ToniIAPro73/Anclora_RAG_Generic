@@ -69,41 +69,44 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <header className="bg-gradient-anclora text-white shadow-lg">
         <div className="container-app py-3">
           <div className="flex items-center justify-between gap-4">
-            {/* Título + Navegación en una sola fila */}
-            <div className="flex items-center gap-6 flex-1 min-w-0">
-              <div className="flex-shrink-0">
-                <h1 className={`text-2xl ${headlineClass}`}>{resolvedTitle}</h1>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70">
-                  by Anclora
-                </p>
-              </div>
-              <nav className="flex flex-wrap gap-2">
-                {NAV_LINKS.map(({ href, label, pro }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
-                        isActive
-                          ? 'bg-white text-anclora-primary shadow-lg'
-                          : 'bg-white/10 hover:bg-white/20'
-                      }`}
-                    >
-                      <span>{label[language]}</span>
-                      {pro ? (
-                        <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold">
-                          Pro
-                        </span>
-                      ) : null}
-                    </Link>
-                  );
-                })}
-              </nav>
+            {/* Título (izquierda) */}
+            <div className="flex-shrink-0" style={{ minWidth: '150px', maxWidth: '280px' }}>
+              <h1 className={`text-2xl truncate ${headlineClass}`} title={resolvedTitle}>
+                {resolvedTitle}
+              </h1>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70">
+                by Anclora
+              </p>
             </div>
 
-            {/* Botones de tema e idioma */}
+            {/* Navegación (centro) */}
+            <nav className="flex flex-wrap justify-center gap-2 flex-1">
+              {NAV_LINKS.map(({ href, label, pro }) => {
+                const isActive = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+                      isActive
+                        ? 'bg-white text-anclora-primary shadow-lg'
+                        : 'bg-white/10 hover:bg-white/20'
+                    }`}
+                  >
+                    <span>{label[language]}</span>
+                    {pro ? (
+                      <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                        Pro
+                      </span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Usuario + Tema + Idioma (derecha) */}
             <div className="flex items-center gap-2 flex-shrink-0">
+              {/* TODO: Añadir botón de usuario aquí */}
               <button
                 onClick={cycleTheme}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-base backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
