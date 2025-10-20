@@ -136,3 +136,7 @@ email-validator==2.2.0
 psycopg2-binary==2.9.9
 llama-index-llms-google-genai>=0.6.2
 google-genai>=1.24.0
+
+# Rate limiting & Email (Fase 0 beta)
+slowapi==0.1.9
+fastapi-mail==1.4.1

@@ -109,6 +109,43 @@ def create_tables():
             created_at TIMESTAMPTZ DEFAULT NOW()
         );
         """)
+
+        # SQL para tabla de waitlist (T001)
+        create_waitlist_table = text("""
+        CREATE TABLE IF NOT EXISTS waitlist (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            email VARCHAR(255) UNIQUE NOT NULL,
+            referral_source VARCHAR(100),
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            invited BOOLEAN DEFAULT FALSE,
+            invited_at TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
+        );
+        """)
+
+        create_waitlist_indexes = text("""
+        CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email);
+        CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_waitlist_invited ON waitlist(invited) WHERE invited = FALSE;
+        """)
+
+        # SQL para tabla de analytics (para tracking de eventos)
+        create_analytics_table = text("""
+        CREATE TABLE IF NOT EXISTS analytics_events (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            event_type VARCHAR(50) NOT NULL,
+            user_id UUID REFERENCES app_users(id),
+            email VARCHAR(255),
+            metadata JSONB,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+        """)
+
+        create_analytics_indexes = text("""
+        CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON analytics_events(event_type);
+        CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON analytics_events(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_analytics_user_id ON analytics_events(user_id) WHERE user_id IS NOT NULL;
+        """)
         
         print("🔧 Creando tabla 'ingestion_batches'...")
         session.execute(create_batches_table)
@@ -130,10 +167,26 @@ def create_tables():
         session.execute(create_reset_tokens)
         session.commit()
 
+        print("🔧 Creando tabla 'waitlist'...")
+        session.execute(create_waitlist_table)
+        session.commit()
+
+        print("🔧 Creando tabla 'analytics_events'...")
+        session.execute(create_analytics_table)
+        session.commit()
+
         print("🔧 Creando índices...")
         session.execute(create_indexes)
         session.commit()
-        
+
+        print("🔧 Creando índices de waitlist...")
+        session.execute(create_waitlist_indexes)
+        session.commit()
+
+        print("🔧 Creando índices de analytics...")
+        session.execute(create_analytics_indexes)
+        session.commit()
+
         print("✅ Base de datos inicializada correctamente")
         return True
         

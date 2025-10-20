@@ -42,12 +42,15 @@ setup_logging(level=LOG_LEVEL, use_json=USE_JSON_LOGS)
 logger = get_logger(__name__)
 
 try:
-    from middleware import CorrelationIdMiddleware
+    from middleware import CorrelationIdMiddleware, limiter
     from routes.auth import router as auth_router
     from routes.documents import router as documents_router
     from routes.health import router as health_router
     from routes.ingest import router as ingest_router
     from routes.query import router as query_router
+    from routes.waitlist import router as waitlist_router
+    from slowapi import _rate_limit_exceeded_handler
+    from slowapi.errors import RateLimitExceeded
 
     # from routes.batch import router as batch_router  # Temporarily disabled
 except ImportError as e:
@@ -65,6 +68,10 @@ app = FastAPI(
     description="RAG (Retrieval-Augmented Generation) API for document processing and querying",
     version="1.0.0",
 )
+
+# Add rate limiter state to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add correlation ID middleware (must be added FIRST for proper request tracking)
 app.add_middleware(CorrelationIdMiddleware)
@@ -86,6 +93,7 @@ app.include_router(documents_router)
 app.include_router(health_router)
 app.include_router(ingest_router)
 app.include_router(query_router)
+app.include_router(waitlist_router)
 # Temporarily disabled batch router due to import errors
 # app.include_router(batch_router)
 
@@ -99,6 +107,7 @@ async def root():
             "health": "/health",
             "ingest": "/ingest",
             "query": "/query",
+            "waitlist": "/api/waitlist",
             "batch": "/batch"
         }
     }

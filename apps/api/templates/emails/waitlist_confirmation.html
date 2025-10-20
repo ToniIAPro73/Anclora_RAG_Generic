@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Bienvenido a la Waitlist de Anclora!</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #667eea;
+            font-size: 22px;
+            margin-top: 0;
+        }
+        .content p {
+            margin: 16px 0;
+            font-size: 16px;
+        }
+        .highlight-box {
+            background-color: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+        .highlight-box p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        .highlight-box strong {
+            color: #667eea;
+            font-size: 18px;
+        }
+        .features {
+            margin: 24px 0;
+        }
+        .feature {
+            display: flex;
+            align-items: start;
+            margin: 16px 0;
+        }
+        .feature-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        .feature-text {
+            font-size: 15px;
+            color: #555;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 24px 0;
+            text-align: center;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .social-links {
+            margin: 16px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 8px;
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎉 ¡Bienvenido a Anclora!</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <h2>¡Genial, {{email}}!</h2>
+
+            <p>Has sido añadido exitosamente a nuestra lista de espera para el acceso beta de Anclora RAG.</p>
+
+            <div class="highlight-box">
+                <p><strong>Tu posición en la waitlist:</strong></p>
+                <p style="font-size: 32px; font-weight: bold; color: #667eea; margin: 8px 0;">{{position}}</p>
+                <p style="font-size: 14px; color: #666;">{{total_pending}} personas en lista de espera</p>
+            </div>
+
+            <p><strong>¿Qué es Anclora?</strong></p>
+            <p>Anclora transforma tus documentos en un asistente inteligente que responde al instante, con fuentes verificadas y sin alucinaciones.</p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⏱️</div>
+                    <div class="feature-text">
+                        <strong>Ahorra 10+ horas semanales</strong><br>
+                        Encuentra respuestas en segundos, no horas
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">✅</div>
+                    <div class="feature-text">
+                        <strong>100% verificable</strong><br>
+                        Cada respuesta con citas exactas del documento fuente
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-text">
+                        <strong>Privacidad total</strong><br>
+                        Tus datos nunca salen de tu infraestructura
+                    </div>
+                </div>
+            </div>
+
+            <p><strong>¿Qué sigue?</strong></p>
+            <p>Te enviaremos un email con tus credenciales de acceso cuando sea tu turno. Estamos invitando usuarios progresivamente para garantizar la mejor experiencia.</p>
+
+            <p>Mientras tanto, síguenos en redes sociales para estar al día con las novedades:</p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="https://www.anclora.com" class="cta-button">Visita nuestra web</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Anclora</strong> - Tu conocimiento empresarial, al instante</p>
+
+            <div class="social-links">
+                <a href="https://linkedin.com/company/anclora">LinkedIn</a> |
+                <a href="https://twitter.com/anclora">Twitter</a> |
+                <a href="mailto:hola@anclora.com">Contacto</a>
+            </div>
+
+            <p style="font-size: 12px; color: #999; margin-top: 20px;">
+                Recibiste este email porque te registraste en la waitlist de Anclora.<br>
+                <a href="mailto:hola@anclora.com">Contacta con nosotros</a> si tienes alguna pregunta.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
