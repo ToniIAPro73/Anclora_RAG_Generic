@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: anclora_user
       POSTGRES_PASSWORD: anclora_secure_pass_2025
     ports:
-      - "5462:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,8 +18,8 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.7.4
     ports:
-      - "6363:6333"
-      - "6364:6334"
+      - "6333:6333"
+      - "6334:6334"
     environment:
       - QDRANT__SERVICE__GRPC_PORT=6334
     volumes:
@@ -29,7 +29,7 @@ services:
     image: redis:7.2-alpine
     command: redis-server --appendonly yes
     ports:
-      - "6389:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
 
