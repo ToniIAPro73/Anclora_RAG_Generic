@@ -111,6 +111,9 @@ const COPY = {
 
 const ITEMS_PER_PAGE = 5;
 
+type SortField = "filename" | "uploaded_at" | null;
+type SortDirection = "asc" | "desc";
+
 export default function DocumentosPage() {
   const router = useRouter();
   const { language } = useUISettings();
@@ -124,6 +127,8 @@ export default function DocumentosPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [viewerDocumentId, setViewerDocumentId] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const loadHistory = async () => {
     setIsLoading(true);
@@ -223,15 +228,48 @@ export default function DocumentosPage() {
     }
   };
 
-  // Filter and paginate documents
-  const filteredDocuments = useMemo(() => {
-    if (!searchQuery.trim()) return documents;
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Toggle direction if clicking the same field
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // Set new field and default to ascending
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
 
-    const query = searchQuery.toLowerCase();
-    return documents.filter((doc) =>
-      doc.filename.toLowerCase().includes(query)
-    );
-  }, [documents, searchQuery]);
+  // Filter, sort and paginate documents
+  const filteredDocuments = useMemo(() => {
+    let result = documents;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((doc) =>
+        doc.filename.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply sorting
+    if (sortField) {
+      result = [...result].sort((a, b) => {
+        let comparison = 0;
+
+        if (sortField === "filename") {
+          comparison = a.filename.localeCompare(b.filename);
+        } else if (sortField === "uploaded_at") {
+          const dateA = a.uploaded_at ? new Date(a.uploaded_at).getTime() : 0;
+          const dateB = b.uploaded_at ? new Date(b.uploaded_at).getTime() : 0;
+          comparison = dateA - dateB;
+        }
+
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+    }
+
+    return result;
+  }, [documents, searchQuery, sortField, sortDirection]);
 
   const paginatedDocuments = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -251,15 +289,28 @@ export default function DocumentosPage() {
     const rows = filteredDocuments.map((doc) => [
       doc.filename,
       doc.chunks.toString(),
-      doc.uploaded_at || "N/A",
+      doc.uploaded_at ? formatDate(doc.uploaded_at) : "N/A",
     ]);
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
-    ].join("\n");
+    // Use semicolon separator for Excel in Spanish locale
+    const separator = ";";
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    // Escape cells that contain separator, quotes, or newlines
+    const escapeCsvCell = (cell: string) => {
+      if (cell.includes(separator) || cell.includes('"') || cell.includes("\n")) {
+        return `"${cell.replace(/"/g, '""')}"`;
+      }
+      return cell;
+    };
+
+    const csvContent = [
+      headers.map(escapeCsvCell).join(separator),
+      ...rows.map((row) => row.map(escapeCsvCell).join(separator)),
+    ].join("\r\n");
+
+    // Add UTF-8 BOM for proper encoding in Excel
+    const BOM = "\uFEFF";
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
 
@@ -423,13 +474,37 @@ export default function DocumentosPage() {
                   <thead className="sticky top-0 bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
-                        {COPY.filename[language]}
+                        <button
+                          onClick={() => handleSort("filename")}
+                          className="flex items-center gap-1.5 hover:text-anclora-primary transition-colors"
+                        >
+                          {COPY.filename[language]}
+                          <span className="text-sm">
+                            {sortField === "filename" ? (
+                              sortDirection === "asc" ? "▲" : "▼"
+                            ) : (
+                              <span className="opacity-50 dark:opacity-70">⇅</span>
+                            )}
+                          </span>
+                        </button>
                       </th>
                       <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.chunks[language]}
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
-                        {COPY.uploadedAt[language]}
+                        <button
+                          onClick={() => handleSort("uploaded_at")}
+                          className="flex items-center gap-1.5 hover:text-anclora-primary transition-colors"
+                        >
+                          {COPY.uploadedAt[language]}
+                          <span className="text-sm">
+                            {sortField === "uploaded_at" ? (
+                              sortDirection === "asc" ? "▲" : "▼"
+                            ) : (
+                              <span className="opacity-50 dark:opacity-70">⇅</span>
+                            )}
+                          </span>
+                        </button>
                       </th>
                       <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.actions[language]}
@@ -449,7 +524,7 @@ export default function DocumentosPage() {
                           </div>
                         </td>
                         <td className="px-4 py-2.5 text-center text-sm">
-                          <span className="inline-flex items-center rounded-full bg-anclora-primary/10 px-2.5 py-0.5 text-xs font-medium text-anclora-primary">
+                          <span className="inline-flex items-center rounded-full bg-anclora-primary/10 px-3 py-1 text-sm font-semibold text-anclora-primary dark:bg-anclora-primary/20 dark:text-blue-400">
                             {doc.chunks}
                           </span>
                         </td>
