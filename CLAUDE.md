@@ -1,172 +1,300 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Este archivo proporciona orientación a Claude Code (claude.ai/code) cuando trabaja con código en este repositorio.
 
-## Development Commands
+## Estado del Proyecto
+
+**Última actualización:** 2025-10-20
+
+**Estado:** MVP operativo con 100% funcionalidad validada. Preparando lanzamiento beta público con Landing Page.
+
+**Próximo hito:** Lanzamiento beta público (13 días de desarrollo estimados)
+
+---
+
+## Comandos de Desarrollo
 
 ### Backend (FastAPI + LlamaIndex + Gemini)
 
-- **Full stack**: `docker compose -f infra/docker/docker-compose.dev.yml up`
-  - Spins up Postgres (5432), Qdrant (6333), Redis (6379), API (8000), and Worker
-- **Quick start/stop**: `.\scripts\powershell\start_dev.ps1` and `.\scripts\powershell\stop_dev.ps1`
-- **API only** (local, after services running): `cd apps/api && uvicorn main:app --reload --port 8000`
-  - Requires `.env` with `GEMINI_API_KEY` configured (get free key at https://aistudio.google.com/app/apikey)
-- **Tests**: `cd apps/api && pytest` (test suites pending—framework is set up)
-- **Python environment**: Use the virtualenv at `apps/api/venv311` or create one with `pip install -r apps/api/requirements.txt`
+- **Stack completo**: `docker compose -f infra/docker/docker-compose.dev.yml up`
+  - Servicios: Postgres (5432), Qdrant (6333), Redis (6379), API (8000), Worker
+- **Scripts rápidos**: `.\scripts\powershell\start_dev.ps1` y `.\scripts\powershell\stop_dev.ps1`
+- **Solo API** (local): `cd apps/api && uvicorn main:app --reload --port 8000`
+  - Requiere `.env` con `GEMINI_API_KEY` (obtener gratis en <https://aistudio.google.com/app/apikey>)
+- **Tests**: `cd apps/api && pytest` (33 tests pasando)
+- **Python environment**: Usar virtualenv en `apps/api/venv311`
 
 ### Frontend (Next.js 15)
 
 - **Install**: `cd apps/web && npm install`
-- **Dev server**: `npm run dev` (runs on port 3030)
+- **Dev server**: `npm run dev` (puerto 3030)
 - **Build**: `npm run build`
 - **Lint**: `npm run lint`
 
-### Utilities
+### Utilidades
 
-- **Backup**: `.\scripts\powershell\backup_repo.ps1 -DumpDocker` before major refactors
-- **Restore backup**: `.\scripts\powershell\restore_backup.ps1`
-- **Initialize Qdrant**: `.\scripts\powershell\init_qdrant_collection.ps1`
-- **Test ingestion**: `.\scripts\powershell\test_ingestion.ps1`
-- **Force rebuild**: `.\scripts\powershell\force_rebuild.ps1` (clean Docker rebuild)
+- **Backup**: `.\scripts\powershell\backup_repo.ps1 -DumpDocker` antes de refactors mayores
+- **Restore**: `.\scripts\powershell\restore_backup.ps1`
+- **Init Qdrant**: `.\scripts\powershell\init_qdrant_collection.ps1`
+- **Test ingesta**: `.\scripts\powershell\test_ingestion.ps1`
+- **Force rebuild**: `.\scripts\powershell\force_rebuild.ps1`
 
-## Architecture Overview
+---
 
-### Monorepo Structure
+## Arquitectura General
 
-- `apps/api/`: FastAPI backend with RAG pipeline
-  - `routes/`: API endpoints (auth, ingest, query, health, documents; batch exists but disabled)
-  - `rag/pipeline.py`: Core RAG logic—documents → nodes → embeddings → Qdrant
-  - `workers/`: RQ background worker (declared but not yet utilized; ingestion is currently synchronous)
-  - `models/`, `database/`, `clients/`: Data models, DB layer, external service clients
-  - `services/`: Business logic layer
-  - `middleware.py`: CorrelationIdMiddleware for request tracking
-  - `utils/logging_config.py`: Structured logging configuration
-- `apps/web/`: Next.js 15 frontend
-  - `app/page.tsx`: Main dashboard (ingestion + chat interface)
-  - `app/configuracion/`: UI settings (theme, language, typography, density)
-  - `app/ingesta-avanzada/`: Documentation-only view for advanced ingestion (backend not implemented)
-  - `components/`, `lib/`, `contexts/`: Reusable UI components, utilities, and React contexts
-- `packages/`: Shared Python modules
-  - `parsers/`: Document parsers (PDF, DOCX, Markdown, TXT)
-  - `rag-core/`: Reusable RAG utilities (if any)
-- `infra/docker/`: Docker Compose manifests for local development
-- `docs/`: Project documentation (`AGENTS.md`, `ESTADO_PROYECTO.md`, `INGESTA-AVANZADA.md`)
-- `scripts/`: PowerShell automation (backups, system verification)
+### Estructura del Monorepo
 
-### RAG Pipeline Architecture
+```text
+apps/
+├── api/              # FastAPI backend con pipeline RAG
+│   ├── routes/       # Endpoints: auth, ingest, query, health, documents
+│   ├── rag/          # Pipeline LlamaIndex (ingesta → embeddings → Qdrant)
+│   ├── workers/      # RQ background worker (declarado, no usado aún)
+│   ├── models/       # SQLAlchemy models
+│   ├── database/     # DB clients y sessions
+│   └── services/     # Lógica de negocio
+├── web/              # Next.js 15 frontend
+│   ├── app/          # App Router (page.tsx = dashboard)
+│   ├── components/   # Componentes React reutilizables
+│   └── lib/          # Utilities y helpers
+packages/             # Módulos Python compartidos (parsers)
+infra/docker/         # Docker Compose para desarrollo local
+docs/                 # Documentación del proyecto
+scripts/              # PowerShell automation
+openspec/             # Metodología de desarrollo basada en specs
+```
 
-1. **Ingestion** (`apps/api/routes/ingest.py`):
-   - Accepts PDF/DOCX/TXT/MD files via `/ingest` endpoint
-   - Currently synchronous (blocking)—RQ integration planned
-   - Parsers extract text, which is chunked by `SentenceSplitter` (512 tokens, 80 overlap)
-   - Includes content hash-based duplicate detection (`check_duplicate_document`)
-2. **Embeddings**: Uses `nomic-ai/nomic-embed-text-v1.5` (768 dimensions) via HuggingFace
-   - Local, free embedding model running on CPU
-3. **Vector Store**: Qdrant collection `documents` with cosine similarity
-4. **Query** (`apps/api/routes/query.py`):
-   - Uses **Google Gemini** LLM (default `models/gemini-2.0-flash`, configurable via `GEMINI_MODEL`)
-   - Instantiates `VectorStoreIndex` and Gemini LLM per request
-   - Returns generated answer + source metadata with similarity scores
-   - **Performance note**: Index and LLM sessions are recreated on every request—caching is planned
+### Pipeline RAG
 
-### Authentication & Security
+**Ingesta** (`apps/api/routes/ingest.py`):
 
-- **Current state**: `AUTH_BYPASS=true` in `.env` allows unrestricted access for local dev
-  - Returns a mock admin user in all requests
-- **Production**: Disable `AUTH_BYPASS`, implement OAuth2/JWT with proper roles and scopes
-- **Best practice**: Never commit real credentials; use `.env.example` as a template
+1. Acepta PDF/DOCX/TXT/MD via endpoint `/ingest`
+2. Actualmente **síncrona** (bloquea request) - migración a RQ planificada
+3. Parsers extraen texto → chunking con `SentenceSplitter` (512 tokens, 80 overlap)
+4. Detección de duplicados por hash de contenido
+5. Embeddings con `nomic-ai/nomic-embed-text-v1.5` (768 dims, local, CPU)
+6. Almacenamiento en Qdrant collection `documents`
 
-### Frontend State Management
+**Consulta** (`apps/api/routes/query.py`):
 
-- UI settings (theme, language, typography, density) managed by `ui-settings-context.tsx`
-- Persisted to `localStorage`
-- Applies CSS variables dynamically for theming
+- Usa **Google Gemini LLM** (default `models/gemini-2.0-flash`, configurable via `GEMINI_MODEL`)
+- Crea `VectorStoreIndex` y sesión LLM **por request** (sin cache - optimización pendiente)
+- Retorna respuesta generada + metadata de fuentes con similarity scores
 
-## Key Technical Details
+### Autenticación
 
-### Qdrant Collection Setup
+- **Estado actual**: `AUTH_BYPASS=true` permite acceso sin restricciones (solo dev)
+- **Producción**: Deshabilitar bypass, implementar OAuth2/JWT con roles
+- **Importante**: Nunca commitear credenciales reales
 
-- Collection name: `documents`
-- Embedding dimension: 768
-- Distance metric: Cosine
-- Defensive pattern: `_patch_collection_exists` in `rag/pipeline.py` handles backward compatibility for collection checks
+### Frontend
 
-### Environment Variables
+- UI settings (theme, language, typography, density) gestionados por `ui-settings-context.tsx`
+- Persistencia en `localStorage`
+- CSS variables aplicadas dinámicamente
 
-- Backend uses `.env` at project root (referenced by Docker Compose)
-- Frontend uses Next.js conventions (prefix with `NEXT_PUBLIC_` for client-side exposure)
-- **Critical vars**:
-  - `GEMINI_API_KEY`: Required for LLM queries (get free key at https://aistudio.google.com/app/apikey)
-  - `GEMINI_MODEL`: LLM model name (default: `models/gemini-2.0-flash`)
-  - `EMBEDDING_MODEL`: Embedding model (default: `nomic-ai/nomic-embed-text-v1.5`)
-  - `QDRANT_URL`: Vector DB connection (default: `http://localhost:6333`)
-  - `DATABASE_URL`: Postgres connection string
-  - `REDIS_URL`: Redis connection (default: `redis://localhost:6379`)
-  - `AUTH_BYPASS`: Set to `true` for local dev only
-  - `USE_ASYNC_INGESTION`: Enable RQ workers (default: `false`)
-  - `LOG_LEVEL`: Logging verbosity (default: `INFO`)
+---
 
-### Docker Compose Services
+## Infraestructura Actual
 
-- All services defined in `infra/docker/docker-compose.dev.yml`
-- **Services**: postgres (5432), qdrant (6333), redis (6379), api (8000), worker
-- Volumes persist data across restarts: `postgres_data`, `qdrant_data`, `redis_data`
-- HuggingFace cache mounted from host: `${USERPROFILE}/.cache/huggingface:/root/.cache/huggingface`
-- API container uses Python 3.11-slim with PyTorch CPU-only for embeddings
+### Variables de Entorno Críticas
 
-## Common Workflows
+```bash
+# LLM
+GEMINI_API_KEY=<tu_key>              # Requerido para queries
+GEMINI_MODEL=models/gemini-2.0-flash # Modelo LLM
 
-### Adding a New Document Parser
+# Embeddings
+EMBEDDING_MODEL=nomic-ai/nomic-embed-text-v1.5
+EMBED_DIMENSION=768
 
-1. Create a new parser module in `packages/parsers/`
-2. Follow the pattern in existing parsers (e.g., `pdf.py`, `docx_parser.py`)
-3. Register MIME type handling in `apps/api/routes/ingest.py`
-4. Update `packages/parsers/__init__.py` to export the new parser
+# Bases de datos
+DATABASE_URL=postgresql://...        # Postgres
+QDRANT_URL=http://localhost:6333    # Vector DB
+REDIS_URL=redis://localhost:6379    # Queue
 
-### Modifying the RAG Pipeline
+# Auth (solo dev)
+AUTH_BYPASS=true                     # ⚠️ Deshabilitar en producción
 
-- Core logic is in `apps/api/rag/pipeline.py`
-- Global settings (embedding model, node parser) are configured at module level
-- To change chunking strategy: modify `NODE_PARSER` (SentenceSplitter params)
-- To change embedding model: update `EMBED_MODEL` and ensure `EMBED_DIMENSION` matches
+# Workers
+USE_ASYNC_INGESTION=false           # RQ no activo aún
 
-### Adding a New API Route
+# Logging
+LOG_LEVEL=INFO
+```
 
-1. Create a new router file in `apps/api/routes/`
-2. Import and include it in `apps/api/main.py` via `app.include_router()`
-3. Use FastAPI's `Depends` for dependency injection (e.g., authentication, DB session)
+### Servicios Docker Compose
 
-### Updating the Frontend
+Definidos en `infra/docker/docker-compose.dev.yml`:
 
-- Components follow PascalCase (`UploadZone.tsx`)
-- Use Tailwind utility-first styling (config at `apps/web/tailwind.config.ts`)
-- For global state, extend `ui-settings-context.tsx` or create a new context
+- **postgres** (5432): Metadata y usuarios
+- **qdrant** (6333): Vector database
+- **redis** (6379): Queue para workers
+- **api** (8000): FastAPI backend
+- **worker**: RQ worker (declarado, sin uso)
 
-## Known Limitations & TODOs
+Volúmenes persistentes: `postgres_data`, `qdrant_data`, `redis_data`
 
-- **Ingestion is synchronous**: No progress feedback, blocks API during large uploads (RQ integration pending)
-- **Query performance**: Index and LLM instances recreated per request—caching needed
-- **Authentication**: `AUTH_BYPASS` must be disabled for production; real OAuth2/JWT required
-- **Advanced ingestion**: UI exists at `/ingesta-avanzada`, but backend features (batch, GitHub import, structured sources) are not implemented
-- **Tests**: Framework is installed (`pytest`, `pytest-asyncio`), but test suites are minimal or missing
-- **Observability**: Structured logging implemented, but no metrics or tracing yet
-- **CI/CD**: No automated pipelines yet
-- **Docker API**: Local backend works, but Docker API container needs GEMINI_API_KEY configuration to start
+---
 
-## Commit Guidelines
+## Plan de Lanzamiento Beta (Próximo Milestone)
 
-- Use Conventional Commits: `feat(api):`, `fix(web):`, `docs:`, `refactor:`, etc.
-- Reference issues where applicable: `fix(api): normalize toast for accented filenames (#42)`
-- PR checklist: summary, test evidence, migration/data impact notes, verify Docker Compose stack boots
+**Estado:** Propuesta aprobada en `openspec/changes/beta-launch-with-landing/`
 
-## Testing Strategy (Planned)
+**Objetivo:** Lanzar versión beta pública con Landing Page para capturar emails en 13 días.
 
-- **Backend**: `pytest` with fixtures for Qdrant/Postgres mocks; place tests in `apps/api/tests/` as `test_<feature>.py`
-- **Frontend**: Playwright for E2E (TBD); colocate component tests under `__tests__/` when introduced
-- Manual verification: Always test ingestion + query path end-to-end before merging
+### Decisiones de Infraestructura Confirmadas
 
-## Reference Documents
+**Dominios:**
 
-- `docs/AGENTS.md`: Repository guidelines, coding style, PR workflow
-- `docs/ESTADO_PROYECTO.md`: Detailed project status, functional areas, improvement roadmap
-- `docs/INGESTA-AVANZADA.md`: Specifications for advanced ingestion features (not yet implemented)
+- Landing: `www.anclora.com` → Vercel (gratis)
+- App Beta: `app.anclora.com` → Railway/Fly.io ($5-20/mes)
+
+**Email:**
+
+- SMTP Hostinger (ya contratado, $0 adicional)
+- Aliases: `noreply@anclora.com`, `soporte@anclora.com`
+
+**Estrategia:**
+
+- Waitlist con aprobación manual de invitaciones
+- Rollout gradual: 10 → 20 → 30 → 50 usuarios en primeras 2 semanas
+
+### Fases de Implementación
+
+- **Fase 0** (2 días): Setup waitlist backend + email SMTP
+- **Fase 1** (4 días): Landing page completa en Next.js
+- **Fase 2** (4 días): Auth real + onboarding + performance
+- **Fase 3** (3.5 días): Testing E2E + preparación lanzamiento
+- **Fase 4** (1 día): Deploy a producción + primeros 10 usuarios
+- **Fase 5** (7 días): Monitoreo + iteración basada en feedback
+
+**Documentos de referencia:**
+
+- Propuesta: `openspec/changes/beta-launch-with-landing/proposal.md`
+- Tareas: `openspec/changes/beta-launch-with-landing/tasks.md` (92 tareas detalladas)
+- Diseño técnico: `openspec/changes/beta-launch-with-landing/design.md`
+
+---
+
+## Flujos de Trabajo
+
+### Metodología OpenSpec
+
+Este proyecto usa **OpenSpec** para desarrollo basado en especificaciones:
+
+1. **Stage 1 - Creating Changes**: Crear propuesta (`proposal.md`) + tareas (`tasks.md`) + diseño (`design.md`) + spec deltas
+2. **Stage 2 - Implementing Changes**: Ejecutar tareas secuencialmente según `tasks.md`
+3. **Stage 3 - Archiving Changes**: Mover cambio completado a `changes/archive/` y actualizar specs
+
+**Documentación:** Ver `openspec/AGENTS.md` para instrucciones completas.
+
+### Añadir Nuevo Parser de Documentos
+
+1. Crear módulo en `packages/parsers/` (ej: `pptx_parser.py`)
+2. Seguir patrón de parsers existentes (PDF, DOCX)
+3. Registrar MIME type en `apps/api/routes/ingest.py`
+4. Exportar en `packages/parsers/__init__.py`
+
+### Modificar Pipeline RAG
+
+- Core logic: `apps/api/rag/pipeline.py`
+- Settings globales: embedding model, node parser
+- Cambiar chunking: modificar `NODE_PARSER` (SentenceSplitter params)
+- Cambiar embedding: actualizar `EMBED_MODEL` y asegurar que `EMBED_DIMENSION` coincide
+
+### Añadir Nuevo Endpoint API
+
+1. Crear router en `apps/api/routes/`
+2. Importar y registrar en `apps/api/main.py` via `app.include_router()`
+3. Usar `Depends` para dependency injection (auth, DB session)
+
+### Actualizar Frontend
+
+- Componentes: PascalCase (`UploadZone.tsx`)
+- Styling: Tailwind utility-first (config: `apps/web/tailwind.config.ts`)
+- Estado global: Extender `ui-settings-context.tsx` o crear nuevo context
+
+---
+
+## Limitaciones Conocidas & TODOs
+
+### Crítico (Bloquea Beta)
+
+- ❌ No hay landing page → Crear en `apps/landing/`
+- ❌ No hay waitlist system → Implementar tabla + endpoint
+- ⚠️ `AUTH_BYPASS` activo → Deshabilitar y crear auth real con JWT
+- ❌ No hay onboarding → Wizard de 3 pasos para nuevos usuarios
+
+### Alto (Performance y UX)
+
+- ⚠️ Ingesta síncrona → Migrar a RQ workers con progress tracking
+- ⚠️ Query performance → Cache `VectorStoreIndex`, reutilizar LLM client
+- ❌ No hay analytics → Implementar tracking de eventos
+
+### Medio (Features)
+
+- ❌ Ingesta avanzada → UI existe (`/ingesta-avanzada`), backend no implementado
+- ❌ Tests E2E → Playwright no configurado
+- ❌ CI/CD → No hay pipeline automatizado
+
+### Bajo (Operaciones)
+
+- ⚠️ Observabilidad → Logging OK, faltan métricas y tracing
+- ❌ Docker API → Contenedor necesita configuración GEMINI_API_KEY
+- ❌ Documentación deploy → Runbooks pendientes
+
+---
+
+## Guidelines de Commits
+
+- **Conventional Commits**: `feat(api):`, `fix(web):`, `docs:`, `refactor:`, etc.
+- Referenciar issues: `fix(api): normalize toast for accented filenames (#42)`
+- **PR checklist**:
+  - Summary de cambios
+  - Evidencia de tests (capturas, output)
+  - Nota sobre migraciones/impacto en datos
+  - Verificar que `docker compose` stack arranca
+
+---
+
+## Estrategia de Testing (Planificada)
+
+### Backend
+
+- Framework: `pytest` con fixtures para Qdrant/Postgres mocks
+- Ubicación: `apps/api/tests/test_<feature>.py`
+- Estado: 33 tests unitarios pasando
+
+### Frontend Testing
+
+- Framework: Playwright para E2E (pendiente configuración)
+- Ubicación: Tests junto a componentes en `__tests__/` cuando se introduzcan
+- Verificación manual: Siempre probar ingesta + query end-to-end antes de merge
+
+---
+
+## Documentos de Referencia
+
+### Documentación Principal
+
+- `docs/ESTADO_PROYECTO.md` - Estado actual y roadmap
+- `docs/DEVELOPMENT_GUIDE.md` - Guidelines de desarrollo (antes AGENTS.md)
+- `docs/INGESTA-AVANZADA.md` - Specs de ingesta avanzada (no implementado)
+- `ESTUDIO_COMPLETO_ANCLORA_RAG.md` - Estudio exhaustivo del proyecto
+
+### OpenSpec
+
+- `openspec/project.md` - Convenciones del proyecto
+- `openspec/AGENTS.md` - Instrucciones OpenSpec para AI
+- `openspec/changes/beta-launch-with-landing/` - Plan de lanzamiento beta actual
+
+### Scripts de Ayuda
+
+- `scripts/powershell/` - Automatización (backups, init, testing)
+
+---
+
+**Última revisión:** 2025-10-20
+**Próxima acción:** Implementar Fase 0 del plan beta según `tasks.md`

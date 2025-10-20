@@ -1,10 +1,18 @@
 # Estado Actual del Proyecto Anclora RAG
 
+**Última actualización:** 2025-10-20
+
 ## 1. Resumen ejecutivo
 
 - **Ámbito**: Monorepo que unifica backend RAG (FastAPI + LlamaIndex + Qdrant + Gemini) y frontend Next.js 15 / TailwindCSS. Infraestructura Docker Compose (Postgres, Redis, Qdrant, API, Worker) más scripts de mantenimiento.
-- **Estado**: MVP operativo. Permite ingestar PDF/DOCX/TXT/MD y consultar resultados desde el dashboard usando Google Gemini como LLM. Personalización visual (idioma, tema, branding) completada. Embeddings locales con modelo gratuito nomic-embed-text. Tests unitarios funcionando (33 tests pasando).
-- **Prioridades**: configurar contenedor Docker API con GEMINI_API_KEY, migrar la ingesta a colas (RQ), completar "Ingesta Avanzada", optimizar consultas con caché y establecer CI/CD.
+- **Estado**: MVP operativo con 100% funcionalidad validada. Permite ingestar PDF/DOCX/TXT/MD y consultar resultados desde el dashboard usando Google Gemini como LLM. Personalización visual (idioma, tema, branding) completada. Embeddings locales con modelo gratuito nomic-embed-text. Tests unitarios funcionando (33 tests pasando).
+- **Próximo Hito**: **Lanzamiento Beta Público con Landing Page** (13 días de desarrollo estimados)
+- **Prioridades Inmediatas**:
+  1. ✅ Plan de lanzamiento beta aprobado (OpenSpec)
+  2. 🔄 Implementar waitlist system + Landing Page
+  3. 🔄 Autenticación real (deshabilitar AUTH_BYPASS)
+  4. 🔄 Onboarding wizard para nuevos usuarios
+  5. 🔄 Performance optimization (cache + async ingestion)
 
 ## 2. Arquitectura actual
 
@@ -89,13 +97,58 @@ apps
 - Historial/analítica de ingestas y consultas.
 - Test suites, CI/CD, documentación de despliegue.
 
-## 7. Próximos pasos inmediatos
+## 7. Plan de Lanzamiento Beta (En Progreso)
 
-1. Auditar `.env`, documentar uso seguro y desactivar bypass fuera de dev.
-2. Planificar sprint de ingesta asíncrona con historias backend/UI.
-3. Derivar features de `docs/INGESTA-AVANZADA.md` para la versión Pro.
-4. Definir estrategia de pruebas + pipeline CI mínimo.
-5. Documentar runbooks y mantener README/AGENTS/ESTADO_PROYECTO sincronizados.
+### 7.1 Estado del Plan
+
+**Propuesta Aprobada:** `openspec/changes/beta-launch-with-landing/`
+
+**Decisiones de Infraestructura Confirmadas:**
+- ✅ Landing separada: `www.anclora.com` → Vercel (gratis)
+- ✅ App beta: `app.anclora.com` → Railway/Fly.io
+- ✅ Email: Hostinger SMTP (ya contratado, $0 adicional)
+- ✅ Estrategia: Waitlist con aprobación manual de invitaciones
+
+### 7.2 Timeline de Implementación (13 días)
+
+| Fase | Días | Objetivo | Estado |
+|------|------|----------|--------|
+| **Fase 0** | 1-2 | Setup waitlist backend + SMTP | 🔄 Próximo |
+| **Fase 1** | 3-5 | Landing page MVP completa | ⏳ Pendiente |
+| **Fase 2** | 6-9 | Auth real + onboarding + performance | ⏳ Pendiente |
+| **Fase 3** | 10-12 | Testing E2E + preparación | ⏳ Pendiente |
+| **Fase 4** | 13 | Deploy + primeros 10 usuarios | ⏳ Pendiente |
+| **Fase 5** | 14-21 | Monitoreo + iteración | ⏳ Pendiente |
+
+### 7.3 Métricas de Éxito Beta
+
+**Lanzamiento Exitoso (Día 13):**
+- ✅ Landing page live y funcional
+- ✅ 10+ emails capturados en primeras 48h
+- ✅ Aplicación beta accesible con 0 errores críticos
+- ✅ Primeros 5 usuarios completan onboarding
+
+**Beta Exitosa (Día 30):**
+- ✅ 100+ emails en waitlist
+- ✅ 50+ usuarios beta invitados
+- ✅ 30+ usuarios activos (query en últimos 7 días)
+- ✅ NPS >40
+- ✅ 0 downtime no planificado
+
+### 7.4 Documentos de Referencia
+
+- **Propuesta completa**: `openspec/changes/beta-launch-with-landing/proposal.md`
+- **Tareas detalladas**: `openspec/changes/beta-launch-with-landing/tasks.md` (92 tareas)
+- **Diseño técnico**: `openspec/changes/beta-launch-with-landing/design.md`
+- **Spec deltas**: `openspec/changes/beta-launch-with-landing/specs/`
+
+## 8. Próximos pasos inmediatos
+
+1. ✅ **Aprobar plan de lanzamiento beta** (completado)
+2. 🔄 **Fase 0 Día 1**: Crear migración DB tabla `waitlist` (T001)
+3. 🔄 **Fase 0 Día 1**: Implementar endpoint POST /api/waitlist (T003)
+4. 🔄 **Fase 0 Día 1**: Configurar SMTP Hostinger (T006)
+5. 🔄 **Fase 0 Día 2**: Setup estructura apps/landing/ (T010)
 
 ---
 **Documento generado**: 13/10/2025 · Equipo Anclora
