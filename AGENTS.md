@@ -33,13 +33,19 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 ### Core Application Modules
 
 - **`apps/api`**: FastAPI RAG service
-  - Endpoints in `routes/`
+  - Endpoints in `routes/` (auth, ingest, query, health, documents, **waitlist** ✅)
   - RAG flows in `rag/`
   - Background worker jobs in `workers/`
-- **`apps/web`**: Next.js 15 application
+  - Email client (`clients/email_client.py`) ✅
+  - Rate limiting middleware (`middleware/rate_limit.py`) ✅
+- **`apps/web`**: Next.js 15 dashboard application
   - UI components in `app/`
   - Shared components under `components/`
   - Tailwind configuration in `tailwind.config.ts`
+- **`apps/landing`**: ✅ **NUEVO** - Next.js 15 landing page (beta launch)
+  - Landing page components: Hero, Features, FAQ, EmailCapture, ProblemSolution
+  - API route proxy to backend (`/api/waitlist`)
+  - Score técnico: 84/100 (ver `docs/REVISION_LANDING_PAGE.md`)
 
 ### Shared Libraries
 
@@ -75,9 +81,16 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 ### Frontend Development
 
+**Dashboard App (apps/web):**
 - `cd apps/web && npm install && npm run dev`: Start client on port 3030
 - `cd apps/web && npm run build`: Production smoke tests
 - `cd apps/web && npm run lint`: Enforce ESLint, Tailwind, and TypeScript rules
+
+**Landing Page (apps/landing):** ✅ NUEVO
+- `cd apps/landing && npm install && npm run dev`: Start landing page on port 3000
+- `cd apps/landing && npm run build`: Production build
+- `cd apps/landing && npm run lint`: Enforce ESLint rules
+- **Requires:** `.env` with `BACKEND_API_URL` (e.g., `http://localhost:8000`)
 
 ### System Validation
 

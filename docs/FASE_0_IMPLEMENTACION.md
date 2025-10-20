@@ -202,7 +202,7 @@ docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag -f /ruta/creat
 
 ## 📁 Estructura de Archivos Creados/Modificados
 
-```
+```text
 apps/api/
 ├── models/
 │   └── waitlist.py                    [NUEVO]
@@ -283,12 +283,12 @@ docker exec docker-postgres-1 psql -U anclora_user -d anclora_rag `
 - [x] Logging estructurado
 - [x] Manejo de errores robusto
 
-### ⏳ Pendiente (Fase 0 - Frontend)
+### ✅ Completado (Fase 0 - Frontend)
 
-- [ ] T009: Landing page en Next.js
-- [ ] T010: Formulario de waitlist
-- [ ] T011: Integración con API
-- [ ] T012: Validación y feedback de UI
+- [x] T009: Landing page en Next.js
+- [x] T010: Formulario de waitlist
+- [x] T011: Integración con API
+- [x] T012: Validación y feedback de UI
 
 ### 🔍 Para Probar Cuando Docker Esté Activo
 
@@ -358,17 +358,163 @@ Para verificar que emails se envían correctamente:
 2. Verificar bandeja de entrada del email de prueba
 3. Revisar spam/junk si no aparece en inbox
 
-### Next Steps (Frontend)
+## 🎨 Implementación Frontend (T009-T012) ✅
 
-La siguiente fase (T009-T012) requiere:
+**Carpeta:** `apps/landing/`
+**Framework:** Next.js 15.5.6 con React 19.1.0 y Tailwind CSS 4
 
-- Landing page en Next.js con diseño responsive
-- Formulario con validación client-side
-- Integración con endpoint `/api/waitlist`
-- Toast notifications para feedback
+### T009: Landing Page en Next.js ✅
+
+**Estructura creada:**
+
+```text
+apps/landing/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx              # Página principal
+│   │   ├── layout.tsx            # Layout con metadata y GA
+│   │   └── api/
+│   │       └── waitlist/
+│   │           └── route.ts      # Proxy API hacia backend
+│   ├── components/
+│   │   ├── Hero.tsx              # Sección hero
+│   │   ├── ProblemSolution.tsx   # Problema/Solución
+│   │   ├── Features.tsx          # Características
+│   │   ├── EmailCapture.tsx      # Formulario waitlist
+│   │   └── FAQ.tsx               # Preguntas frecuentes
+│   └── lib/
+│       └── design-tokens.ts      # Tokens de diseño
+├── package.json
+├── next.config.ts
+├── tailwind.config.ts
+└── .env.example
+```
+
+**Secciones implementadas:**
+
+1. **Hero** - Título, descripción, CTAs
+2. **ProblemSolution** - Comparativa problema vs solución
+3. **Features** - 4 características principales
+4. **EmailCapture** - Formulario con integración a API
+5. **FAQ** - 10 preguntas frecuentes con acordeón
+
+### T010: Formulario de Waitlist ✅
+
+**Componente:** `EmailCapture.tsx`
+
+**Características:**
+
+- Validación client-side de email
+- Estados de loading, success, error
+- UI responsive (mobile-first)
+- Feedback visual inmediato
+- Muestra posición en waitlist tras registro
+- Deshabilita formulario tras éxito
+
+### T011: Integración con API ✅
+
+**Endpoint proxy:** `apps/landing/src/app/api/waitlist/route.ts`
+
+**Funcionamiento:**
+
+- Recibe POST desde frontend
+- Valida email con regex
+- Forwarding a backend API (`http://localhost:8000/api/waitlist`)
+- Manejo de errores 400, 409, 429, 500
+- Variable de entorno: `BACKEND_API_URL`
+**Flujo completo:**
+
+```text
+Usuario → EmailCapture.tsx → /api/waitlist (Next.js) → Backend FastAPI → PostgreSQL
+                                                              ↓
+                                                      Email SMTP (Hostinger)
+```
+
+### T012: Validación y Feedback de UI ✅
+
+**Validaciones implementadas:**
+
+- Regex de email en frontend y backend
+- Campo requerido (HTML5 required)
+- Estado de loading durante request
+- Mensajes claros según error type
+
+**Feedback visual:**
+
+- Loading state: "Procesando..."
+- Success: Tarjeta verde con checkmark + posición
+- Error: Texto en rojo con mensaje descriptivo
+- Disabled state post-éxito
+
+## 🎯 Tecnologías Landing
+
+- **Framework:** Next.js 15.5.6 (App Router)
+- **React:** 19.1.0
+- **Styling:** Tailwind CSS 4
+- **Typescript:** TypeScript 5
+- **Fonts:** Geist Sans & Geist Mono (Google Fonts)
+- **Analytics:** Google Analytics 4 (opcional via env var)
+
+## 📊 Métricas Finales Fase 0
+
+**Total archivos creados:** 18
+
+- Backend: 8 archivos
+- Frontend: 10 archivos
+
+**Total archivos modificados:** 6
+
+- `apps/api/main.py`
+- `apps/api/requirements.txt`
+- `.env`, `.env.example`
+- `apps/api/routes/waitlist.py`
+- `apps/api/database/waitlist_repository.py`
+
+**Líneas de código:**
+
+- Backend: ~650 líneas
+- Frontend: ~450 líneas
+- **Total:** ~1,100 líneas
+
+**Dependencias añadidas:**
+
+- Backend: slowapi, fastapi-mail
+- Frontend: Next.js 15, Tailwind CSS 4
+
+## ⚠️ Issues Resueltos Post-Reboot
+
+### Issue 1: Imports Absolutos en Docker
+
+**Problema:** Módulos usaban `from apps.api.X` que no funcionan en contenedor Docker
+
+**Archivos corregidos:**
+
+- `apps/api/routes/waitlist.py:8-13` - Cambiado a imports relativos
+- `apps/api/database/waitlist_repository.py:11-12` - Cambiado a imports relativos
+
+**Solución:** Cambiar a imports relativos (`from database.X`, `from models.X`)
+
+### Issue 2: Dependencias No Instaladas en Container
+
+**Problema:** `slowapi` y `fastapi-mail` en requirements.txt pero no en imagen Docker
+
+**Solución:** Rebuild completo del contenedor API
+
+## 🚀 Next Steps
+
+**Fase 0 completada al 100%** ✅
+
+**Próximas fases según plan beta:**
+
+- **Fase 1** (4 días): Mejoras landing + SEO + Analytics
+- **Fase 2** (4 días): Auth real + Onboarding + Performance
+- **Fase 3** (3.5 días): Testing E2E + Preparación lanzamiento
+- **Fase 4** (1 día): Deploy producción + Primeros 10 usuarios
 
 ---
 
 **Generado:** 2025-01-20
-**Versión:** 1.0
+**Última actualización:** 2025-10-20
+**Versión:** 2.0
 **Autor:** Claude Code + Antonio (Anclora)
+**Estado:** ✅ FASE 0 COMPLETADA (Backend + Frontend)

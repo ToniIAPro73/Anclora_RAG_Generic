@@ -6,9 +6,9 @@ Este archivo proporciona orientación a Claude Code (claude.ai/code) cuando trab
 
 **Última actualización:** 2025-10-20
 
-**Estado:** MVP operativo con 100% funcionalidad validada. Preparando lanzamiento beta público con Landing Page.
+**Estado:** ✅ Fase 0 completada (Backend Waitlist + Landing Page). MVP operativo con funcionalidad validada.
 
-**Próximo hito:** Lanzamiento beta público (13 días de desarrollo estimados)
+**Próximo hito:** Deploy a staging y lanzamiento beta público (Fases 1-4 del plan beta)
 
 ---
 
@@ -24,12 +24,20 @@ Este archivo proporciona orientación a Claude Code (claude.ai/code) cuando trab
 - **Tests**: `cd apps/api && pytest` (33 tests pasando)
 - **Python environment**: Usar virtualenv en `apps/api/venv311`
 
-### Frontend (Next.js 15)
+### Frontend
 
+**Dashboard App (Next.js 15):**
 - **Install**: `cd apps/web && npm install`
 - **Dev server**: `npm run dev` (puerto 3030)
 - **Build**: `npm run build`
 - **Lint**: `npm run lint`
+
+**Landing Page (Next.js 15):**
+- **Install**: `cd apps/landing && npm install`
+- **Dev server**: `npm run dev` (puerto 3000 por defecto)
+- **Build**: `npm run build`
+- **Lint**: `npm run lint`
+- **Configuración:** Requiere `.env` con `BACKEND_API_URL` (ej: `http://localhost:8000`)
 
 ### Utilidades
 
@@ -48,16 +56,26 @@ Este archivo proporciona orientación a Claude Code (claude.ai/code) cuando trab
 ```text
 apps/
 ├── api/              # FastAPI backend con pipeline RAG
-│   ├── routes/       # Endpoints: auth, ingest, query, health, documents
+│   ├── routes/       # Endpoints: auth, ingest, query, health, documents, waitlist
 │   ├── rag/          # Pipeline LlamaIndex (ingesta → embeddings → Qdrant)
 │   ├── workers/      # RQ background worker (declarado, no usado aún)
-│   ├── models/       # SQLAlchemy models
-│   ├── database/     # DB clients y sessions
+│   ├── models/       # SQLAlchemy models + Pydantic (waitlist)
+│   ├── database/     # DB clients, sessions, repositories (waitlist)
+│   ├── clients/      # Email client (SMTP Hostinger)
+│   ├── middleware/   # Rate limiting (slowapi)
+│   ├── templates/    # Email templates HTML
 │   └── services/     # Lógica de negocio
-├── web/              # Next.js 15 frontend
+├── web/              # Next.js 15 dashboard app
 │   ├── app/          # App Router (page.tsx = dashboard)
 │   ├── components/   # Componentes React reutilizables
 │   └── lib/          # Utilities y helpers
+├── landing/          # Next.js 15 landing page (beta launch) ✅ NUEVO
+│   ├── src/
+│   │   ├── app/      # Page + Layout + API routes
+│   │   │   └── api/waitlist/route.ts  # Proxy a backend
+│   │   └── components/  # Hero, Features, FAQ, EmailCapture
+│   ├── package.json
+│   └── .env.example
 packages/             # Módulos Python compartidos (parsers)
 infra/docker/         # Docker Compose para desarrollo local
 docs/                 # Documentación del proyecto
@@ -163,7 +181,7 @@ Volúmenes persistentes: `postgres_data`, `qdrant_data`, `redis_data`
 
 ### Fases de Implementación
 
-- **Fase 0** (2 días): Setup waitlist backend + email SMTP
+- **Fase 0** (2 días): ✅ **COMPLETADA** - Setup waitlist backend + email SMTP + Landing Page
 - **Fase 1** (4 días): Landing page completa en Next.js
 - **Fase 2** (4 días): Auth real + onboarding + performance
 - **Fase 3** (3.5 días): Testing E2E + preparación lanzamiento
@@ -222,10 +240,10 @@ Este proyecto usa **OpenSpec** para desarrollo basado en especificaciones:
 
 ### Crítico (Bloquea Beta)
 
-- ❌ No hay landing page → Crear en `apps/landing/`
-- ❌ No hay waitlist system → Implementar tabla + endpoint
-- ⚠️ `AUTH_BYPASS` activo → Deshabilitar y crear auth real con JWT
-- ❌ No hay onboarding → Wizard de 3 pasos para nuevos usuarios
+- ✅ ~~No hay landing page~~ → **COMPLETADO** en `apps/landing/`
+- ✅ ~~No hay waitlist system~~ → **COMPLETADO** tabla + endpoint + email SMTP
+- ⚠️ `AUTH_BYPASS` activo → Deshabilitar y crear auth real con JWT (Fase 2)
+- ❌ No hay onboarding → Wizard de 3 pasos para nuevos usuarios (Fase 2)
 
 ### Alto (Performance y UX)
 
@@ -281,6 +299,8 @@ Este proyecto usa **OpenSpec** para desarrollo basado en especificaciones:
 
 - `docs/ESTADO_PROYECTO.md` - Estado actual y roadmap
 - `docs/DEVELOPMENT_GUIDE.md` - Guidelines de desarrollo (antes AGENTS.md)
+- `docs/FASE_0_IMPLEMENTACION.md` - ✅ Documentación completa Fase 0 (Backend + Frontend waitlist)
+- `docs/REVISION_LANDING_PAGE.md` - ✅ Revisión técnica de la landing page (scoring 84%)
 - `docs/INGESTA-AVANZADA.md` - Specs de ingesta avanzada (no implementado)
 - `ESTUDIO_COMPLETO_ANCLORA_RAG.md` - Estudio exhaustivo del proyecto
 
@@ -297,4 +317,4 @@ Este proyecto usa **OpenSpec** para desarrollo basado en especificaciones:
 ---
 
 **Última revisión:** 2025-10-20
-**Próxima acción:** Implementar Fase 0 del plan beta según `tasks.md`
+**Próxima acción:** Deploy a staging de landing page + backend waitlist (Fase 1-4 del plan beta)

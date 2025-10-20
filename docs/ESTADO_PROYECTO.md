@@ -4,48 +4,61 @@
 
 ## 1. Resumen ejecutivo
 
-- **Ámbito**: Monorepo que unifica backend RAG (FastAPI + LlamaIndex + Qdrant + Gemini) y frontend Next.js 15 / TailwindCSS. Infraestructura Docker Compose (Postgres, Redis, Qdrant, API, Worker) más scripts de mantenimiento.
-- **Estado**: MVP operativo con 100% funcionalidad validada. Permite ingestar PDF/DOCX/TXT/MD y consultar resultados desde el dashboard usando Google Gemini como LLM. Personalización visual (idioma, tema, branding) completada. Embeddings locales con modelo gratuito nomic-embed-text. Tests unitarios funcionando (33 tests pasando).
-- **Próximo Hito**: **Lanzamiento Beta Público con Landing Page** (13 días de desarrollo estimados)
+- **Ámbito**: Monorepo que unifica backend RAG (FastAPI + LlamaIndex + Qdrant + Gemini), frontend dashboard (Next.js 15), y landing page beta. Infraestructura Docker Compose (Postgres, Redis, Qdrant, API, Worker) más scripts de mantenimiento.
+- **Estado**: ✅ **Fase 0 completada** - MVP operativo + Waitlist Backend + Landing Page. Sistema permite ingestar PDF/DOCX/TXT/MD y consultar usando Google Gemini. Sistema de waitlist con email SMTP (Hostinger) operativo. Tests unitarios funcionando (33 tests pasando).
+- **Próximo Hito**: **Deploy a Staging y Lanzamiento Beta Público** (Fases 1-4 del plan)
 - **Prioridades Inmediatas**:
-  1. ✅ Plan de lanzamiento beta aprobado (OpenSpec)
-  2. 🔄 Implementar waitlist system + Landing Page
-  3. 🔄 Autenticación real (deshabilitar AUTH_BYPASS)
-  4. 🔄 Onboarding wizard para nuevos usuarios
-  5. 🔄 Performance optimization (cache + async ingestion)
+  1. ✅ ~~Plan de lanzamiento beta aprobado (OpenSpec)~~
+  2. ✅ ~~Implementar waitlist system + Landing Page~~ **COMPLETADO**
+  3. 🔄 Deploy a staging (Vercel landing + Railway/Fly.io backend)
+  4. 🔄 Autenticación real (deshabilitar AUTH_BYPASS)
+  5. 🔄 Onboarding wizard para nuevos usuarios
+  6. 🔄 Performance optimization (cache + async ingestion)
 
 ## 2. Arquitectura actual
 
 ### 2.1 Organización del repositorio
 
-apps
-/
-├── apps/
-│   ├── api/        # FastAPI, routers, pipeline RAG, worker RQ
-│   └── web/        # Next.js 15 (App Router), TailwindCSS, componentes UI
-├── infra/docker/  # docker-compose.dev.yml, volúmenes persistentes
-├── packages/      # Parsers y librerías compartidas
-├── scripts/       # Powershell (respaldos, verificación entorno)
-├── docs/          # Documentación clave (INGESTA-AVANZADA, AGENTS)
-└── tests/         # Recursos base para pruebas (sin suites)
-
 ```text
+apps/
+├── api/           # FastAPI, routers (waitlist ✅), pipeline RAG, worker RQ
+├── web/           # Next.js 15 (App Router), Dashboard principal
+├── landing/       # ✅ NUEVO - Next.js 15, Landing page beta launch
+infra/docker/      # docker-compose.dev.yml, volúmenes persistentes
+packages/          # Parsers y librerías compartidas
+scripts/           # Powershell (respaldos, verificación entorno)
+docs/              # Documentación clave (FASE_0_IMPLEMENTACION ✅, REVISION_LANDING_PAGE ✅)
+openspec/          # Metodología spec-driven, plan beta launch
+tests/             # Recursos base para pruebas (sin suites)
+```
 
 ### 2.2 Backend (apps/api)
 
-- Routers activos: `auth`, `ingest`, `query`, `health`, `documents`. `batch.py` existe pero está deshabilitado temporalmente.
+- Routers activos: `auth`, `ingest`, `query`, `health`, `documents`, `waitlist` ✅. `batch.py` existe pero está deshabilitado temporalmente.
 - Pipeline RAG (`rag/pipeline.py`): documentos → nodos → embeddings `nomic-ai/nomic-embed-text-v1.5` (768 dims, local/gratuito) → colección Qdrant. Patrón defensivo para creación de colección y soporte MIME `application/octet-stream`. Detección de duplicados por hash de contenido.
 - Consultas (`routes/query.py`): Usa **Google Gemini** (`GEMINI_MODEL`, por defecto `models/gemini-2.0-flash`) y `VectorStoreIndex` en cada request; `AUTH_BYPASS` suministra usuario admin ficticio.
-- Middleware: `CorrelationIdMiddleware` para tracking de requests, logging estructurado configurado.
+- Middleware: `CorrelationIdMiddleware` para tracking, `slowapi` para rate limiting ✅, logging estructurado configurado.
+- Email SMTP ✅: Cliente configurado con Hostinger (`clients/email_client.py`), templates HTML profesionales.
+- Database ✅: Tablas waitlist + analytics_events en PostgreSQL con índices optimizados.
 - Worker RQ declarado en Docker pero sin uso (ingesta actual síncrona).
 - Tests: 33 tests unitarios pasando (pytest).
 
-### 2.3 Frontend (apps/web)
+### 2.3 Frontend
 
+**Dashboard App (apps/web):**
 - Dashboard principal (`app/page.tsx`) con tarjetas de ingesta/consulta, chat interactivo y dropzone.
-- Configuración (`app/configuracion/page.tsx`): idioma, tema, acentos validados, tipografía, densidad, byline “by Anclora”.
+- Configuración (`app/configuracion/page.tsx`): idioma, tema, acentos validados, tipografía, densidad, byline "by Anclora".
 - Vista "Ingesta Avanzada" (`app/ingesta-avanzada/page.tsx`): documentación guiada de capacidades Pro (sin backend).
 - Contexto global (`ui-settings-context.tsx`): persistencia de preferencias (localStorage) y control CSS variable.
+
+**Landing Page (apps/landing) ✅ NUEVO:**
+- Framework: Next.js 15.5.6, React 19.1.0, Tailwind CSS 4
+- Componentes: Hero, ProblemSolution, Features (4), EmailCapture, FAQ (10 preguntas)
+- Integración: API route proxy (`/api/waitlist`) hacia backend FastAPI
+- Validación: Email regex + HTML5 + manejo de errores 400/409/429/500
+- UX: Estados loading/success/error, muestra posición en waitlist
+- SEO: Metadata completa, Google Analytics 4 condicional
+- Score técnico: 84/100 (ver `docs/REVISION_LANDING_PAGE.md`)
 
 ### 2.4 Infraestructura
 
@@ -59,6 +72,8 @@ apps
 |------|--------|------------|
 | Ingesta básica | ✅ | `/ingest` procesa PDF/DOCX/TXT/MD; detección de duplicados; mensajes normalizados. |
 | Consulta | ✅ | Chat activo con Gemini, muestra fuentes con scores; latencia por instancias LLM/Index ad hoc. |
+| Waitlist System | ✅ | Backend + Landing Page completos; email SMTP; rate limiting; PostgreSQL. |
+| Landing Page | ✅ | Next.js 15 con 5 secciones; integración completa backend; score 84/100. |
 | Autenticación | ⚠️ | `AUTH_BYPASS` habilitado; sin roles reales. |
 | Ingesta avanzada | ❌ | Sólo maquetada. |
 | Worker RQ | ⚠️ | Contenedor en marcha sin jobs. |
@@ -138,8 +153,8 @@ apps
 
 | Fase | Días | Objetivo | Estado |
 |------|------|----------|--------|
-| **Fase 0** | 1-2 | Setup waitlist backend + SMTP | 🔄 Próximo |
-| **Fase 1** | 3-5 | Landing page MVP completa | ⏳ Pendiente |
+| **Fase 0** | 1-2 | Setup waitlist backend + SMTP + Landing | ✅ **COMPLETADA** |
+| **Fase 1** | 3-5 | Mejoras landing + SEO + Analytics | 🔄 Próximo |
 | **Fase 2** | 6-9 | Auth real + onboarding + performance | ⏳ Pendiente |
 | **Fase 3** | 10-12 | Testing E2E + preparación | ⏳ Pendiente |
 | **Fase 4** | 13 | Deploy + primeros 10 usuarios | ⏳ Pendiente |
