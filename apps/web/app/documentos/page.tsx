@@ -109,7 +109,7 @@ const COPY = {
   },
 };
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 5;
 
 export default function DocumentosPage() {
   const router = useRouter();
@@ -148,9 +148,10 @@ export default function DocumentosPage() {
     }
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       // URL encode the document ID to handle special characters
       const encodedId = encodeURIComponent(String(docId));
-      const response = await fetch(`http://localhost:8030/documents/${encodedId}`, {
+      const response = await fetch(`${apiUrl}/documents/${encodedId}`, {
         method: "DELETE",
       });
 
@@ -193,7 +194,8 @@ export default function DocumentosPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:8030/documents", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/documents`, {
         method: "DELETE",
       });
 
@@ -280,43 +282,43 @@ export default function DocumentosPage() {
   };
 
   return (
-    <div className="container-app space-y-6 py-6">
+    <div className="container-app flex flex-col space-y-3 py-4" style={{ minHeight: 'calc(100vh - 100px)' }}>
       {notification && (
         <div
-          className={`rounded-xl border-2 p-4 shadow-lg ${
+          className={`rounded-lg border p-3 text-sm shadow-md ${
             notification.type === "success"
-              ? "border-green-300 bg-green-50 text-green-800"
-              : "border-red-300 bg-red-50 text-red-800"
+              ? "border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400"
+              : "border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400"
           }`}
         >
           {notification.message}
         </div>
       )}
 
-      <div className="panel panel-primary">
-        <div className="border-b border-gray-100 pb-4 dark:border-slate-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="card-header">
-                <span className="text-2xl" role="img" aria-hidden>
+      <div className="panel panel-primary flex flex-col flex-1">
+        <div className="border-b border-gray-100 pb-3 dark:border-slate-700">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="card-header flex items-center gap-2 text-xl">
+                <span className="text-xl" role="img" aria-hidden>
                   📚
-                </span>{" "}
+                </span>
                 {COPY.title[language]}
               </h1>
-              <p className="mt-2 text-sm">
+              <p className="mt-1 text-xs text-gray-600 dark:text-slate-400">
                 {COPY.subtitle[language]}
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2 flex-shrink-0">
               <button
                 onClick={() => router.push("/")}
-                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 hover:border-anclora-primary/30 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 hover:border-anclora-primary/30 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 {COPY.back[language]}
               </button>
               <button
                 onClick={loadHistory}
-                className="rounded-lg bg-anclora-secondary px-4 py-2 text-sm text-white transition-opacity hover:opacity-90"
+                className="rounded-lg bg-anclora-secondary px-3 py-1.5 text-sm text-white transition-opacity hover:opacity-90"
               >
                 {COPY.refresh[language]}
               </button>
@@ -326,17 +328,17 @@ export default function DocumentosPage() {
 
         {/* Search and Export */}
         {!isLoading && !error && documents.length > 0 && (
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={COPY.search[language]}
-                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 pl-10 text-gray-900 placeholder-gray-500 focus:border-anclora-primary focus:outline-none focus:ring-2 focus:ring-anclora-primary/50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-400"
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:border-anclora-primary focus:outline-none focus:ring-2 focus:ring-anclora-primary/50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-400"
               />
               <svg
-                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+                className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -352,10 +354,10 @@ export default function DocumentosPage() {
             <div className="flex gap-2">
               <button
                 onClick={handleExportCSV}
-                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 <svg
-                  className="h-4 w-4"
+                  className="h-3.5 w-3.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -371,10 +373,10 @@ export default function DocumentosPage() {
               </button>
               <button
                 onClick={handleDeleteAll}
-                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 <svg
-                  className="h-4 w-4"
+                  className="h-3.5 w-3.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -392,27 +394,27 @@ export default function DocumentosPage() {
           </div>
         )}
 
-        <div className="mt-6">
+        <div className="mt-3">
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
-              <span className="ml-3 text-gray-600 dark:text-slate-300">
+            <div className="flex items-center justify-center py-12">
+              <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
+              <span className="ml-3 text-sm text-gray-600 dark:text-slate-300">
                 {COPY.loading[language]}
               </span>
             </div>
           ) : error ? (
-            <div className="rounded-lg border-2 border-red-300 bg-red-50 p-4 text-red-800">
+            <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400">
               {error}
             </div>
           ) : documents.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-16 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
-              <span className="mb-4 block text-4xl">📄</span>
-              {COPY.empty[language]}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+              <span className="mb-3 block text-3xl">📄</span>
+              <p className="text-sm">{COPY.empty[language]}</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-16 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
-              <span className="mb-4 block text-4xl">🔍</span>
-              {COPY.noResults[language]}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+              <span className="mb-3 block text-3xl">🔍</span>
+              <p className="text-sm">{COPY.noResults[language]}</p>
             </div>
           ) : (
             <>
@@ -420,16 +422,16 @@ export default function DocumentosPage() {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
                   <thead className="sticky top-0 bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.filename[language]}
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.chunks[language]}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.uploadedAt[language]}
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.actions[language]}
                       </th>
                     </tr>
@@ -440,31 +442,31 @@ export default function DocumentosPage() {
                         key={doc.id}
                         className="transition-colors hover:bg-purple-50/30 dark:hover:bg-slate-800"
                       >
-                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-slate-200">
+                        <td className="px-4 py-2.5 text-sm text-gray-900 dark:text-slate-200">
                           <div className="flex items-center">
-                            <span className="mr-2 text-lg">📄</span>
+                            <span className="mr-2 text-base">📄</span>
                             <span className="font-medium">{doc.filename}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center text-sm">
-                          <span className="inline-flex items-center rounded-full bg-anclora-primary/10 px-3 py-1 text-xs font-medium text-anclora-primary">
+                        <td className="px-4 py-2.5 text-center text-sm">
+                          <span className="inline-flex items-center rounded-full bg-anclora-primary/10 px-2.5 py-0.5 text-xs font-medium text-anclora-primary">
                             {doc.chunks}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-slate-400">
+                        <td className="whitespace-nowrap px-4 py-2.5 text-sm text-gray-600 dark:text-slate-400">
                           {doc.uploaded_at ? formatDate(doc.uploaded_at) : "-"}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-center text-sm">
-                          <div className="flex items-center justify-center gap-2">
+                        <td className="whitespace-nowrap px-4 py-2.5 text-center text-sm">
+                          <div className="flex items-center justify-center gap-1.5">
                             <button
                               onClick={() => setViewerDocumentId(String(doc.id))}
-                              className="rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                              className="rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
                             >
                               {COPY.view[language]}
                             </button>
                             <button
                               onClick={() => handleDelete(doc.id, doc.filename)}
-                              className="rounded-lg border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                              className="rounded-lg border border-red-300 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
                             >
                               {COPY.delete[language]}
                             </button>

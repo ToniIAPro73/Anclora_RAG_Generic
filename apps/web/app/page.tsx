@@ -80,8 +80,8 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
-        <section className="panel panel-primary flex flex-col">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-stretch">
+        <section className="panel panel-primary flex flex-col lg:h-[calc(100vh-140px)]">
           <div className="space-y-1">
             <h2 className="text-lg font-bold">
               <span className="text-xl" role="img" aria-hidden>
@@ -93,7 +93,7 @@ export default function Home() {
               {COPY.helper[language]}
             </p>
           </div>
-          <div className="mt-3 flex flex-col space-y-3">
+          <div className="mt-3 flex flex-1 flex-col space-y-3 overflow-hidden">
             <UploadZone
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}
@@ -102,7 +102,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="panel panel-secondary flex flex-col lg:min-h-[440px]">
+        <section className="panel panel-secondary flex flex-col lg:h-[calc(100vh-140px)]">
           <div className="border-b border-gray-100 px-6 pb-2 dark:border-slate-700">
             <h2 className="text-lg font-bold">
               <span className="text-xl" role="img" aria-hidden>

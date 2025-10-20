@@ -67,19 +67,46 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <header className="bg-gradient-anclora text-white shadow-lg">
-        <div className="container-app space-y-4 py-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className={`text-3xl md:text-4xl ${headlineClass}`}>{resolvedTitle}</h1>
-              <p className="mt-1 text-sm opacity-90 md:text-base">{resolvedTagline}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
-                by Anclora
-              </p>
+        <div className="container-app py-3">
+          <div className="flex items-center justify-between gap-4">
+            {/* Título + Navegación en una sola fila */}
+            <div className="flex items-center gap-6 flex-1 min-w-0">
+              <div className="flex-shrink-0">
+                <h1 className={`text-2xl ${headlineClass}`}>{resolvedTitle}</h1>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70">
+                  by Anclora
+                </p>
+              </div>
+              <nav className="flex flex-wrap gap-2">
+                {NAV_LINKS.map(({ href, label, pro }) => {
+                  const isActive = pathname === href;
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+                        isActive
+                          ? 'bg-white text-anclora-primary shadow-lg'
+                          : 'bg-white/10 hover:bg-white/20'
+                      }`}
+                    >
+                      <span>{label[language]}</span>
+                      {pro ? (
+                        <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                          Pro
+                        </span>
+                      ) : null}
+                    </Link>
+                  );
+                })}
+              </nav>
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* Botones de tema e idioma */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={cycleTheme}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 text-lg backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-base backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
                 title={`Tema: ${theme === 'light' ? 'Claro' : theme === 'dark' ? 'Oscuro' : 'Sistema'}`}
               >
                 <span role="img" aria-label="theme">
@@ -88,7 +115,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </button>
               <button
                 onClick={toggleLanguage}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 text-sm font-bold backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-xs font-bold backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
                 title={language === 'es' ? 'Español' : 'English'}
               >
                 <span aria-label="language">
@@ -97,29 +124,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           </div>
-          <nav className="flex flex-wrap gap-2">
-            {NAV_LINKS.map(({ href, label, pro }) => {
-              const isActive = pathname === href;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                    isActive
-                      ? 'bg-white text-anclora-primary shadow-lg'
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  <span>{label[language]}</span>
-                  {pro ? (
-                    <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold">
-                      Pro
-                    </span>
-                  ) : null}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
       </header>
       <main>{children}</main>

@@ -85,8 +85,9 @@ export default function DocumentViewerModal({
       setError(null);
 
       try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         const encodedId = encodeURIComponent(documentId);
-        const response = await fetch(`http://localhost:8030/documents/${encodedId}`);
+        const response = await fetch(`${apiUrl}/documents/${encodedId}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch document");
@@ -120,21 +121,22 @@ export default function DocumentViewerModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-slate-900">
         {/* Header */}
-        <div className="border-b border-gray-200 bg-gradient-anclora px-6 py-4 dark:border-slate-700">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="border-b border-gray-200 bg-gradient-anclora px-6 py-5 dark:border-slate-700">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
               <h2 className="text-xl font-semibold text-white">
                 {COPY.title[language]}
               </h2>
               {document && (
-                <p className="mt-1 text-sm text-white/80">
+                <p className="mt-1 text-sm text-white/80 truncate">
                   {document.filename} • {document.chunk_count} {COPY.chunks[language]}
                 </p>
               )}
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex-shrink-0 rounded-lg p-2 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              aria-label={COPY.close[language]}
             >
               <svg
                 className="h-6 w-6"

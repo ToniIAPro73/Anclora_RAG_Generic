@@ -39,7 +39,9 @@ export function useWebSocket(jobId: string | null, options: UseWebSocketOptions 
   const connect = useCallback(() => {
     if (!jobId) return;
 
-    const wsUrl = `ws://localhost:8030/ws/jobs/${jobId}`;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const wsBaseUrl = baseUrl.replace('http://', 'ws://').replace('https://', 'wss://');
+    const wsUrl = `${wsBaseUrl}/ws/jobs/${jobId}`;
 
     try {
       const ws = new WebSocket(wsUrl);
