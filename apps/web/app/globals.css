@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #05060a;
+  --foreground: #e5e7eb;
   --anclora-primary: #d946ef;
   --anclora-secondary: #06b6d4;
   --anclora-ring: #f0abfc;
@@ -14,18 +14,50 @@
 }
 
 body {
-  background-color: var(--background);
+  background: linear-gradient(135deg, #05060a 0%, #1a1a2e 50%, #16213e 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-body);
   transition: background-color 0.3s ease, color 0.3s ease, font-family 0.3s ease;
+  min-height: 100vh;
+  position: relative;
 }
 
-/* Light theme (default) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(217, 70, 239, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(6, 182, 212, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(217, 70, 239, 0.1) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Modern glass-morphism cards */
 .card,
 .panel {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(209, 70, 239, 0.1);
-  box-shadow: 0 20px 35px -10px rgba(209, 70, 239, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(217, 70, 239, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 40px rgba(217, 70, 239, 0.1);
 }
 
 .panel .card-header,
@@ -41,22 +73,15 @@ body {
   color: #374151;
 }
 
-/* Dark theme overrides */
-:root[data-theme="dark"] {
-  --background: #05060a;
-  --foreground: #e5e7eb;
-}
-
-:root[data-theme="dark"] body {
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-:root[data-theme="dark"] .card,
-:root[data-theme="dark"] .panel {
-  background-color: rgba(17, 24, 39, 0.92);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 28px 45px -18px rgba(15, 23, 42, 0.65);
+/* Modern dark theme - now default */
+.card,
+.panel {
+  background: rgba(17, 24, 39, 0.3);
+  border: 1px solid rgba(217, 70, 239, 0.3);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 60px rgba(217, 70, 239, 0.15);
 }
 
 :root[data-theme="dark"] .panel .card-header,
@@ -135,27 +160,66 @@ body[data-density="compact"] .card {
 }
 
 .card {
-  @apply rounded-2xl border border-gray-100 bg-white shadow-xl;
+  @apply rounded-3xl border backdrop-blur-xl;
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(217, 70, 239, 0.1);
 }
 
 .card-header {
-  @apply flex items-center gap-2 text-xl font-semibold text-gray-900;
+  @apply flex items-center gap-3 text-xl font-semibold;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .badge {
-  @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium;
+  @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium;
+  background: rgba(217, 70, 239, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(217, 70, 239, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-anclora-primary px-4 py-2 font-semibold text-white transition-colors hover:bg-anclora-secondary;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-white transition-all duration-300;
+  background: linear-gradient(
+    135deg,
+    var(--anclora-primary) 0%,
+    var(--anclora-secondary) 100%
+  );
+  box-shadow: 0 4px 16px rgba(217, 70, 239, 0.3),
+    0 0 20px rgba(217, 70, 239, 0.2);
+}
+
+.button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(217, 70, 239, 0.4),
+    0 0 30px rgba(217, 70, 239, 0.3);
 }
 
 .input-control {
-  @apply w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 shadow-sm focus:border-anclora-primary focus:ring-2 focus:ring-anclora-secondary/60 dark:bg-slate-900/70 dark:text-slate-100 dark:border-slate-600 dark:placeholder-slate-400 dark:focus:border-anclora-secondary;
+  @apply w-full rounded-xl px-4 py-3 text-white shadow-sm;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(217, 70, 239, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.input-control:focus {
+  outline: none;
+  border-color: var(--anclora-primary);
+  box-shadow: 0 0 20px rgba(217, 70, 239, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.input-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .panel {
   @apply card border-t-4 p-6;
+  border-image: linear-gradient(
+      90deg,
+      var(--anclora-primary),
+      var(--anclora-secondary)
+    )
+    1;
 }
 
 .panel-primary {
