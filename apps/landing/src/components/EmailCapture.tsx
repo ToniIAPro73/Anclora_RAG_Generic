@@ -1,20 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 type Feedback = {
   text: string;
   tone: 'success' | 'error';
 };
 
+const REFERRAL_SOURCE = 'landing_page';
+
 export function EmailCapture() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const referralId = useId();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isLoading) return;
+
+    const trimmedEmail = email.trim().toLowerCase();
     setIsLoading(true);
     setFeedback(null);
 
@@ -25,8 +31,8 @@ export function EmailCapture() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,
-          referral_source: 'landing_page',
+          email: trimmedEmail,
+          referral_source: REFERRAL_SOURCE,
         }),
       });
 
@@ -35,13 +41,13 @@ export function EmailCapture() {
       if (response.ok) {
         setIsSuccess(true);
         setFeedback({
-          text: `¡Listo! Te hemos añadido a la beta. Posición actual: ${data.position}`,
+          text: `¡Listo! Te hemos añadido a la beta. Posición actual: ${data.position ?? '—'}`,
           tone: 'success',
         });
       } else {
         setIsSuccess(false);
         setFeedback({
-          text: data.message || 'No pudimos procesar tu solicitud. Inténtalo nuevamente.',
+          text: data.message ?? 'No pudimos procesar tu solicitud. Inténtalo nuevamente.',
           tone: 'error',
         });
       }
@@ -97,8 +103,10 @@ export function EmailCapture() {
                 required
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="tu@empresa.com"
-                className="w-full rounded-full border border-white/10 bg-[#0C1020]/70 px-5 py-3 text-base text-white outline-none ring-0 transition hover:border-[#06B6D4]/40 focus:border-[#06B6D4] focus:ring-4 focus:ring-[#06B6D4]/20 sm:border-none sm:bg-transparent sm:px-6 sm:py-3"
+                disabled={isLoading}
+                className="w-full rounded-full border border-white/10 bg-[#0C1020]/70 px-5 py-3 text-base text-white outline-none ring-0 transition hover:border-[#06B6D4]/40 focus:border-[#06B6D4] focus:ring-4 focus:ring-[#06B6D4]/20 disabled:cursor-not-allowed disabled:opacity-60 sm:border-none sm:bg-transparent sm:px-6 sm:py-3"
               />
+              <input type="hidden" id={referralId} name="referral_source" value={REFERRAL_SOURCE} />
               <button
                 type="submit"
                 disabled={isLoading}
@@ -121,16 +129,13 @@ export function EmailCapture() {
             </div>
           )}
 
-          {feedback && !isSuccess && (
-            <p
-              role="status"
-              className={`text-sm ${
-                feedback.tone === 'success' ? 'text-[#34D399]' : 'text-[#F87171]'
-              }`}
-            >
-              {feedback.text}
-            </p>
-          )}
+          <div aria-live="polite" className="min-h-[1.5rem] text-sm">
+            {feedback && !isSuccess && (
+              <p className={feedback.tone === 'success' ? 'text-[#34D399]' : 'text-[#F87171]'}>
+                {feedback.text}
+              </p>
+            )}
+          </div>
 
           <div className="grid gap-4 text-left text-sm text-slate-300 sm:grid-cols-3 sm:text-center">
             <div>

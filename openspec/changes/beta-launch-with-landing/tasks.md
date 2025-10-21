@@ -148,7 +148,7 @@
   - **Estimación:** 3h
   - **Dependencias:** T013
 
-- [ ] **T018:** Componente FAQ
+- [x] **T018:** Componente FAQ
   - Archivo: `apps/landing/components/FAQ.tsx`
   - UI: Accordion expandible
   - Preguntas: 10 (ver propuesta sección FAQ)
@@ -156,7 +156,7 @@
   - **Estimación:** 2h
   - **Dependencias:** T013
 
-- [ ] **T019:** Componente Formulario Email
+- [x] **T019:** Componente Formulario Email
   - Archivo: `apps/landing/components/EmailCapture.tsx`
   - Fields: email, referral_source (hidden/optional)
   - Validación: frontend (email format) + backend
@@ -166,7 +166,7 @@
 
 ### Contenido y Assets
 
-- [ ] **T020:** Escribir copy completo de landing
+- [x] **T020:** Escribir copy completo de landing
   - Archivo: `apps/landing/content/copy.ts`
   - Secciones: Hero, Problema, Solución, Features, FAQ
   - Tono: Profesional, directo, orientado a beneficios
