@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -18,13 +18,13 @@ const NAV_LINKS = [
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const {
     appTitle,
-    tagline,
     language,
     headlineStyle,
     setLanguage,
     theme,
     setTheme,
     isPro,
+    isHydrated,
   } = useUISettings();
   const pathname = usePathname();
 
@@ -46,7 +46,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       case 'dark':
         return '🌙';
       case 'system':
-        return '💻';
+        return '🖥️';
       default:
         return '☀️';
     }
@@ -58,87 +58,97 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       : 'font-semibold tracking-tight';
 
   const resolvedTitle = appTitle && appTitle.trim().length > 0 ? appTitle : 'Anclora RAG';
-  const resolvedTagline =
-    tagline && tagline.trim().length > 0
-      ? tagline
-      : language === 'es'
-      ? 'Ollama + HuggingFace + Qdrant'
-      : 'Ollama + HuggingFace + Qdrant';
 
   return (
-    <>
-      <header className="bg-gradient-anclora text-white shadow-lg">
-        <div className="container-app py-3">
-          <div className="flex items-center justify-between gap-4">
-            {/* Título (izquierda) */}
-            <div className="flex-shrink-0" style={{ minWidth: '150px', maxWidth: '280px' }}>
-              <h1 className={`text-2xl truncate ${headlineClass}`} title={resolvedTitle}>
-                {resolvedTitle}
-              </h1>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70">
-                by Anclora
-              </p>
-            </div>
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors">
+      {isHydrated ? (
+        <>
+          <header className="shadow-lg">
+            <div className="container-app py-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-shrink-0" style={{ minWidth: '150px', maxWidth: '280px' }}>
+                  <h1 className={`text-2xl truncate ${headlineClass}`} title={resolvedTitle}>
+                    {resolvedTitle}
+                  </h1>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70 dark:text-white/60">
+                    by Anclora
+                  </p>
+                </div>
 
-            {/* Navegación (centro) */}
-            <nav className="flex flex-wrap justify-center gap-2 flex-1">
-              {NAV_LINKS.map(({ href, label, pro }) => {
-                const isActive = pathname === href;
-                const isDisabled = pro && !isPro;
-                return (
-                  <Link
-                    key={href}
-                    href={isDisabled ? '#' : href}
-                    onClick={(e) => {
-                      if (isDisabled) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
-                      isActive
-                        ? 'bg-white text-anclora-primary shadow-lg'
-                        : isDisabled
-                        ? 'bg-white/5 text-white/40 cursor-not-allowed'
-                        : 'bg-white/10 hover:bg-white/20'
-                    }`}
+                <nav className="flex flex-wrap justify-center gap-2 flex-1">
+                  {NAV_LINKS.map(({ href, label, pro }) => {
+                    const isActive = pathname === href;
+                    const isDisabled = pro && !isPro;
+                    return (
+                      <Link
+                        key={href}
+                        href={isDisabled ? '#' : href}
+                        onClick={(e) => {
+                          if (isDisabled) {
+                            e.preventDefault();
+                          }
+                        }}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+                          isActive
+                            ? 'bg-white text-anclora-primary shadow-lg'
+                            : isDisabled
+                            ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                            : 'bg-white/10 text-white hover:bg-white/20'
+                        }`}
+                      >
+                        <span>{label[language]}</span>
+                        {pro ? (
+                          <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                            Pro
+                          </span>
+                        ) : null}
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={cycleTheme}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-base backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
+                    title={`Tema: ${theme === 'light' ? 'Claro' : theme === 'dark' ? 'Oscuro' : 'Sistema'}`}
                   >
-                    <span>{label[language]}</span>
-                    {pro ? (
-                      <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold">
-                        Pro
-                      </span>
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Usuario + Tema + Idioma (derecha) */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {/* TODO: Añadir botón de usuario aquí */}
-              <button
-                onClick={cycleTheme}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-base backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
-                title={`Tema: ${theme === 'light' ? 'Claro' : theme === 'dark' ? 'Oscuro' : 'Sistema'}`}
-              >
-                <span role="img" aria-label="theme">
-                  {getThemeIcon()}
-                </span>
-              </button>
-              <button
-                onClick={toggleLanguage}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-xs font-bold backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
-                title={language === 'es' ? 'Español' : 'English'}
-              >
-                <span aria-label="language">
-                  {language === 'es' ? 'ES' : 'EN'}
-                </span>
-              </button>
+                    <span role="img" aria-label="theme">
+                      {getThemeIcon()}
+                    </span>
+                  </button>
+                  <button
+                    onClick={toggleLanguage}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-xs font-bold backdrop-blur transition-all hover:bg-white/20 hover:scale-110"
+                    title={language === 'es' ? 'Español' : 'English'}
+                  >
+                    <span aria-label="language">{language === 'es' ? 'ES' : 'EN'}</span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </header>
-      <main>{children}</main>
-    </>
+          </header>
+          <main>{children}</main>
+        </>
+      ) : (
+        <>
+          <header className="shadow-lg">
+            <div className="container-app py-3">
+              <div className="flex animate-pulse items-center justify-between gap-4">
+                <div className="h-9 w-40 rounded-full bg-white/40" />
+                <div className="hidden h-8 w-[55%] rounded-full bg-white/20 sm:block" />
+                <div className="flex h-9 gap-2">
+                  <div className="h-9 w-9 rounded-full bg-white/20" />
+                  <div className="h-9 w-9 rounded-full bg-white/20" />
+                </div>
+              </div>
+            </div>
+          </header>
+          <main className="container-app py-16">
+            <div className="mx-auto h-64 max-w-3xl animate-pulse rounded-3xl bg-white/10" />
+          </main>
+        </>
+      )}
+    </div>
   );
 }

@@ -46,6 +46,7 @@ type AccentValidationIssue =
   | 'invalid_format';
 
 interface UISettingsContext extends UISettingsState {
+  isHydrated: boolean;
   setLanguage: (language: LanguageCode) => void;
   setTheme: (theme: ThemeMode) => void;
   setAccent: (accent: AccentId) => void;
@@ -244,7 +245,7 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isHydrated) return;
     applyAccent(state);
-  }, [state.accent, state.customAccent, isHydrated]);
+  }, [state, isHydrated]);
 
   useEffect(() => {
     if (!isHydrated || state.theme !== 'system') return;
@@ -357,6 +358,7 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
   const value = useMemo<UISettingsContext>(
     () => ({
       ...state,
+      isHydrated,
       setLanguage,
       setTheme,
       setAccent,
@@ -371,6 +373,7 @@ export function UISettingsProvider({ children }: { children: ReactNode }) {
     }),
     [
       state,
+      isHydrated,
       setLanguage,
       setTheme,
       setAccent,
