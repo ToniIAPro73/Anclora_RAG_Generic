@@ -22,36 +22,33 @@ export default function AdvancedIngestionPage() {
 
   return (
     <div className="relative min-h-[calc(100vh-200px)] overflow-hidden py-16">
-      <div className="absolute inset-0 bg-black/10 backdrop-blur-sm dark:bg-black/40" />
+      <div className="absolute inset-0 bg-linear-to-br from-[#4926FF] via-[#9123FF] to-[#02B8FF]" />
+      <div className="absolute inset-0 bg-linear-to-b from-transparent via-black/40 to-black/75" />
       <div className="container-app relative flex min-h-[calc(100vh-200px)] items-center justify-center">
-        <div className="flex max-w-3xl flex-col items-center gap-8 text-center">
+        <div className="flex max-w-3xl flex-col items-center gap-8 text-center text-white">
           <div className="flex justify-center">
-            <div className="rounded-full bg-anclora-primary/15 p-6 text-anclora-primary dark:bg-anclora-primary/25 dark:text-anclora-secondary">
+            <div className="rounded-full bg-white/15 p-6 text-white backdrop-blur-sm">
               <span className="block text-5xl">⚗️</span>
             </div>
           </div>
 
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-anclora-primary shadow-sm dark:bg-white/10 dark:text-white">
-              <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-anclora-primary dark:bg-white/20 dark:text-white">
+            <div className="inline-flex items-center gap-2 rounded-full bg-black/30 px-4 py-2 text-sm font-semibold backdrop-blur">
+              <span className="rounded-full bg-white/30 px-2 py-0.5 text-xs font-semibold text-white">
                 PRO
               </span>
-              <span className="text-sm font-semibold">
-                {language === 'es' ? 'Funcionalidad Premium' : 'Premium Feature'}
-              </span>
+              <span>{language === 'es' ? 'Funcionalidad Premium' : 'Premium Feature'}</span>
             </div>
 
-            <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-              {language === 'es' ? 'Ingesta Avanzada' : 'Advanced Ingestion'}
-            </h1>
+            <h1 className="text-4xl font-semibold">{language === 'es' ? 'Ingesta Avanzada' : 'Advanced Ingestion'}</h1>
 
-            <p className="text-lg text-slate-600 dark:text-slate-300">
+            <p className="text-lg text-white/80">
               {language === 'es' ? 'En desarrollo' : 'Under development'}
             </p>
           </div>
 
-          <div className="w-full rounded-3xl border border-white/40 bg-white/90 p-10 text-left shadow-[0_35px_90px_-60px_rgba(15,23,42,0.55)] dark:border-white/10 dark:bg-[#0B1424]/90 dark:text-slate-100">
-            <p className="mb-6 text-lg text-slate-800 dark:text-slate-200">
+          <div className="w-full rounded-3xl border border-white/15 bg-white/12 p-10 text-left shadow-[0_45px_110px_-60px_rgba(4,0,48,0.65)] backdrop-blur-xl">
+            <p className="mb-6 text-lg text-white/85">
               {language === 'es'
                 ? 'Estamos trabajando en esta funcionalidad avanzada que permitirá:'
                 : 'We are working on this advanced feature that will allow:'}
@@ -59,16 +56,16 @@ export default function AdvancedIngestionPage() {
 
             <ul className="space-y-3">
               {features.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-slate-800 dark:text-slate-100">
-                  <span className="mt-1 text-green-500">✓</span>
+                <li key={item} className="flex items-start gap-3 text-white/85">
+                  <span className="mt-1 text-lime-300">✓</span>
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="w-full rounded-2xl border border-blue-200 bg-blue-50/90 p-4 text-blue-900 shadow-sm dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-200">
-            <p className="text-sm">
+          <div className="w-full rounded-2xl border border-white/15 bg-black/30 p-4 text-sm text-white/80 backdrop-blur">
+            <p>
               💡{' '}
               {language === 'es'
                 ? 'Esta página estará disponible próximamente con todas las funcionalidades de ingesta avanzada.'
