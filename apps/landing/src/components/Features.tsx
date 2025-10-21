@@ -1,55 +1,37 @@
-const valuePillars = [
+const features = [
   {
-    title: 'Decisiones 4× más rápidas',
-    description: 'Automatizamos la extracción y validación de evidencia crítica.',
-    metric: '85% menos tiempo de búsqueda',
-  },
-  {
-    title: 'Control de costes',
-    description: 'Flujos optimizados y coordinación multi-equipo sin licencias extra.',
-    metric: 'Hasta 60% de ahorro operacional',
-  },
-  {
-    title: 'Confianza total',
-    description: 'Trazabilidad automática con citas auditables en cada respuesta.',
-    metric: '100% de respuestas con evidencia',
-  },
-];
-
-const featureCards = [
-  {
-    badge: 'Colaboración',
-    icon: '🤝',
-    title: 'Sesiones multirol en tiempo real',
+    title: 'Ingesta avanzada sin límites (Pro)',
     description:
-      'Comparte tableros con Legal, Compliance y Operaciones. Comentarios anclados y control de versiones automático.',
-    detail: 'Roles y permisos granulares · Hilos contextuales',
+      'Carga lotes masivos de documentos o conecta repositorios completos (GitHub, Notion, Bases de datos y almacenamiento cloud) para mantener tu conocimiento siempre sincronizado.',
+    points: [
+      'Procesa ficheros ofimáticos, código (py, js, ts…), registros de BD y colecciones enteras',
+      'Importa sitios web, enlaces de YouTube, podcasts, transcripts y PDF complejos con OCR (escaneados, tablas e imágenes) con normalización semántica',
+      'Jobs programados y deduplicación inteligente con versionado por lote',
+    ],
+    mediaGradient: 'from-[#D946EF]/70 via-[#F472B6]/40 to-transparent',
   },
   {
-    badge: 'Inteligencia multimodal',
-    icon: '🧠',
-    title: 'Texto, imágenes y tablas en conjunto',
+    title: 'Chat con citas verificadas',
     description:
-      'Procesamos anexos, diagramas y documentación técnica manteniendo estructura y relaciones clave.',
-    detail: 'Embeddings híbridos · Normalización semántica',
+      'Recibe respuestas con citas jerarquizadas, score de similitud y enlaces directos al fragmento relevante para auditar en segundos.',
+    points: ['Citas accionables y exportables', 'Panel lateral con contexto vivo', 'Modo dual: análisis corto o informe extenso'],
+    mediaGradient: 'from-[#06B6D4]/70 via-[#38BDF8]/40 to-transparent',
   },
   {
-    badge: 'Automatización',
-    icon: '⚙️',
-    title: 'Flujos que aprenden de tu equipo',
+    title: 'Multilenguaje listo para producción',
     description:
-      'Automatiza preguntas frecuentes, crea resúmenes recurrentes y activa alertas cuando cambia la normativa.',
-    detail: 'Workflows adaptativos · Integraciones con Slack/Teams',
+      'Procesa y consulta en español e inglés sin cambiar de interfaz. El motor detecta el idioma y responde respetando tono y terminología.',
+    points: ['Detección automática', 'Glosarios personalizados', 'Soporte roadmap: francés, italiano, alemán'],
+    mediaGradient: 'from-[#A3E635]/70 via-[#4ADE80]/35 to-transparent',
   },
   {
-    badge: 'Memoria contextual',
-    icon: '🧾',
-    title: 'Conocimiento colectivo persistente',
+    title: 'Búsqueda inteligente y orquestación',
     description:
-      'Cada sesión alimenta una memoria compartida que se mantiene actualizada y libre de duplicados.',
-    detail: 'Deduplicación inteligente · Historias auditables',
+      'Combina búsqueda semántica, filtros estructurados y orquestación de flujos para localizar la evidencia precisa en menos pasos.',
+    points: ['Filtros facetados en tiempo real', 'Workflows reutilizables con aprobación', 'KPIs operativos integrados'],
+    mediaGradient: 'from-[#FDE047]/70 via-[#FACC15]/35 to-transparent',
   },
-];
+] as const;
 
 export function Features() {
   return (
@@ -75,44 +57,57 @@ export function Features() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {valuePillars.map((pillar) => (
-            <div
-              key={pillar.title}
-              className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1A2239] via-[#131B33] to-[#0F172A] p-6 text-left shadow-[0_30px_80px_-50px_rgba(217,70,239,0.8)]"
-            >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-              <h3 className="text-xl font-semibold text-white">{pillar.title}</h3>
-              <p className="mt-3 text-sm text-slate-300">{pillar.description}</p>
-              <p className="mt-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#A3E635]">
-                {pillar.metric}
-              </p>
-            </div>
-          ))}
-        </div>
+        <div className="space-y-14">
+          {features.map((feature, index) => {
+            const textOrder = index % 2 === 0 ? 'order-2 lg:order-1' : 'order-2 lg:order-2';
+            const mediaOrder = index % 2 === 0 ? 'order-1 lg:order-2' : 'order-1 lg:order-1';
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {featureCards.map((feature) => (
-            <article
-              key={feature.title}
-              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 transition duration-300 hover:border-transparent hover:bg-gradient-to-br hover:from-[#1D1F3C]/95 hover:via-[#141A33]/95 hover:to-[#10152B]/95"
-            >
-              <div className="absolute inset-0 -z-10 opacity-0 transition duration-300 group-hover:opacity-100">
-                <div className="absolute -right-10 top-10 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(6,182,212,0.35),transparent_70%)] blur-2xl" />
+            return (
+              <div
+                key={feature.title}
+                className="relative grid gap-10 rounded-[36px] border border-white/10 bg-white/5 px-6 py-8 text-left shadow-[0_40px_100px_-60px_rgba(217,70,239,0.65)] backdrop-blur md:px-10 lg:grid-cols-2 lg:items-center"
+              >
+                <div
+                  className={`${mediaOrder} relative h-full overflow-hidden rounded-3xl border border-white/10 bg-[#0F172A]/80 p-6`}
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${feature.mediaGradient} `}
+                  />
+                  <div className="relative flex h-full flex-col justify-between gap-6 text-slate-100">
+                    <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/70">
+                      Vista previa
+                    </p>
+                    <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-sm leading-relaxed text-white/90">
+                      {feature.description}
+                    </div>
+                    <div className="rounded-2xl border border-white/15 bg-black/20 p-4 text-xs uppercase tracking-wide text-white/80">
+                      {feature.points[0]}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`${textOrder} space-y-5`}>
+                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[#06B6D4]/80">
+                    Feature
+                  </span>
+                  <h3 className="text-2xl font-semibold text-white">{feature.title}</h3>
+                  <p className="text-sm text-slate-200">{feature.description}</p>
+                  <ul className="space-y-3 text-sm text-slate-200">
+                    {feature.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2">
+                        <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-gradient-to-r from-[#D946EF] to-[#06B6D4]" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.28em] text-slate-300">
-                <span className="text-lg">{feature.icon}</span>
-                {feature.badge}
-              </div>
-              <h3 className="mt-4 text-2xl font-semibold text-white">{feature.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">{feature.description}</p>
-              <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-[#06B6D4]">
-                {feature.detail}
-              </p>
-            </article>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
+
+

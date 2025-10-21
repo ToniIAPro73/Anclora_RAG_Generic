@@ -118,7 +118,7 @@
 
 ## 🚀 Cómo Retomar el Trabajo
 
-### Cuando enciendas el ordenador:
+### Cuando enciendas el ordenador
 
 **Opción A - Script Automático (Recomendado):**
 
@@ -161,7 +161,7 @@ curl http://localhost:8030/health
 ```
 
 **Frontend:**
-Abre http://localhost:3030 en el navegador
+Abre <http://localhost:3030> en el navegador
 
 ### 2. Abrir DevTools
 
@@ -311,10 +311,10 @@ Si el testing manual es exitoso:
 
 ## 🔗 URLs Importantes
 
-- **Frontend**: http://localhost:3030
-- **API**: http://localhost:8030
-- **API Docs**: http://localhost:8030/docs
-- **Qdrant Dashboard**: http://localhost:6363/dashboard
+- **Frontend**: <http://localhost:3030>
+- **API**: <http://localhost:8030>
+- **API Docs**: <http://localhost:8030/docs>
+- **Qdrant Dashboard**: <http://localhost:6363/dashboard>
 - **WebSocket**: ws://localhost:8030/ws/jobs/{job_id}
 
 ---

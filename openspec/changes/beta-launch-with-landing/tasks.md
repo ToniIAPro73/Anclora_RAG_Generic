@@ -112,14 +112,14 @@
 
 ### Diseño y Componentes
 
-- [ ] **T013:** Crear sistema de diseño base
+- [x] **T013:** Crear sistema de diseño base
   - Archivo: `apps/landing/lib/design-tokens.ts`
   - Definir: colores, tipografías, espaciados, breakpoints
   - Tailwind config: extend theme con tokens
   - **Estimación:** 1.5h
   - **Dependencias:** T010
 
-- [ ] **T014:** Componente Hero Section
+- [x] **T014:** Componente Hero Section
   - Archivo: `apps/landing/components/Hero.tsx`
   - Elementos: Headline, Subheadline, CTA primario, video/GIF demo
   - Responsive: mobile-first
@@ -127,21 +127,21 @@
   - **Estimación:** 3h
   - **Dependencias:** T013
 
-- [ ] **T015:** Componente Problema/Solución
+- [x] **T015:** Componente Problema/Solución
   - Archivo: `apps/landing/components/ProblemSolution.tsx`
   - Layout: 2 columnas (problema | solución)
   - Iconos: pain points vs benefits
   - **Estimación:** 2h
   - **Dependencias:** T013
 
-- [ ] **T016:** Componente Casos de Uso
+- [x] **T016:** Componente Casos de Uso
   - Archivo: `apps/landing/components/UseCases.tsx`
   - Layout: Grid 2x2 en desktop, stack en mobile
   - Casos: Soporte, Legal, Onboarding, Técnico
   - **Estimación:** 2h
   - **Dependencias:** T013
 
-- [ ] **T017:** Componente Características
+- [x] **T017:** Componente Características
   - Archivo: `apps/landing/components/Features.tsx`
   - Layout: Alternating (imagen izq/der)
   - Features: Ingesta drag&drop, Chat con citas, Multilenguaje, Búsqueda

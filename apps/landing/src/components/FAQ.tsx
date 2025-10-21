@@ -6,6 +6,7 @@ import { faqItems } from '@/content/faq';
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+
   return (
     <section id="faq" className="relative px-6 pb-28 pt-24 sm:px-10 lg:px-16">
       <div className="pointer-events-none absolute inset-0">
@@ -37,6 +38,8 @@ export function FAQ() {
         <div className="rounded-[32px] border border-white/10 bg-[#0C1020]/80 p-6 shadow-[0_40px_120px_-60px_rgba(217,70,239,0.65)] backdrop-blur lg:p-10">
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index;
+            const panelId = `faq-panel-${index}`;
+            const buttonId = `faq-trigger-${index}`;
 
             return (
               <div key={item.question} className="border-b border-white/5 last:border-none">
@@ -44,6 +47,9 @@ export function FAQ() {
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="flex w-full items-center justify-between gap-6 py-5 text-left transition hover:text-white"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  id={buttonId}
                 >
                   <span className="text-lg font-semibold text-slate-100">{item.question}</span>
                   <span
@@ -56,7 +62,12 @@ export function FAQ() {
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="pb-5 text-base leading-relaxed text-slate-300">
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={buttonId}
+                    className="pb-5 text-base leading-relaxed text-slate-300"
+                  >
                     {item.answer}
                   </div>
                 )}
@@ -65,7 +76,6 @@ export function FAQ() {
           })}
         </div>
       </div>
-
     </section>
   );
 }

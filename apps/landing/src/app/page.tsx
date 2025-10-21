@@ -3,6 +3,7 @@ import { FAQ } from '@/components/FAQ';
 import { Features } from '@/components/Features';
 import { Hero } from '@/components/Hero';
 import { ProblemSolution } from '@/components/ProblemSolution';
+import { UseCases } from '@/components/UseCases';
 import { faqItems } from '@/content/faq';
 
 export default function Home() {
@@ -29,6 +30,7 @@ export default function Home() {
       <Hero />
       <ProblemSolution />
       <Features />
+      <UseCases />
       <EmailCapture />
       <FAQ />
       <footer className="border-t border-white/10 px-6 py-10 text-center text-sm text-slate-400 sm:px-10 lg:px-16">
