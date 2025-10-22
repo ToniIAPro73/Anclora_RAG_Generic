@@ -14,5 +14,6 @@
   },
   "terminal.integrated.defaultProfile.windows": "Anclora Backend PS",
   "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
-  "python.terminal.activateEnvironment": false
+  "python.terminal.activateEnvironment": false,
+  "css.validate": false
 }
