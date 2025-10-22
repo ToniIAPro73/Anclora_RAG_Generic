@@ -21,7 +21,7 @@ export default function AdvancedIngestionPage() {
   ];
 
   return (
-    <div className="fixed inset-0 w-full h-full flex flex-col overflow-hidden">
+    <div className="container-app space-y-6 py-6">
       {/* Background gradient and decorative elements */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[var(--anclora-primary)]/20 via-transparent to-[var(--anclora-secondary)]/20 dark:from-[var(--anclora-primary)]/30 dark:to-[var(--anclora-secondary)]/30" />
       <div className="pointer-events-none absolute inset-x-10 -bottom-24 h-48 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.6),transparent)] opacity-60 blur-3xl dark:bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.18),transparent)]" />
@@ -29,10 +29,10 @@ export default function AdvancedIngestionPage() {
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-24 w-24 rounded-full bg-gradient-to-tr from-[var(--anclora-secondary)]/25 to-[var(--anclora-primary)]/15 blur-xl" />
       <div className="pointer-events-none absolute top-1/2 -left-12 h-16 w-16 rounded-full bg-gradient-to-r from-[var(--anclora-primary)]/20 to-transparent blur-lg" />
 
-      {/* Main content container */}
-      <div className="relative flex-1 flex flex-col justify-start items-center gap-4 md:gap-6 lg:gap-8 px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 h-full">
-        {/* First Card: Title and Description */}
-        <div className="w-full max-w-6xl mx-auto card rounded-3xl border border-white/40 bg-white/90 p-6 md:p-8 lg:p-10 text-center shadow-[0_40px_90px_-70px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/80">
+      {/* Main content sections */}
+      <section className="w-full max-w-6xl mx-auto card relative overflow-hidden bg-white/90 dark:bg-slate-900/80 p-6 md:p-8 lg:p-10 shadow-xl">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent dark:from-white/5" />
+        <div className="relative text-center">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent mb-4 md:mb-6">
             {language === "es" ? "Ingesta Avanzada" : "Advanced Ingestion"}
           </h1>
@@ -42,9 +42,11 @@ export default function AdvancedIngestionPage() {
               : "Advanced feature for massive document ingestion and large-scale processing. Currently under development."}
           </p>
         </div>
+      </section>
 
-        {/* Second Card: Features List */}
-        <div className="w-full max-w-6xl mx-auto card rounded-3xl border border-white/40 bg-white/90 p-6 md:p-8 lg:p-10 text-center shadow-[0_40px_90px_-70px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/80 flex-1 flex flex-col justify-center min-h-0">
+      <section className="w-full max-w-6xl mx-auto card relative overflow-hidden bg-white/90 dark:bg-slate-900/80 p-6 md:p-8 lg:p-10 shadow-xl flex-1 flex flex-col justify-center min-h-0">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent dark:from-white/5" />
+        <div className="relative text-center">
           <p className="mb-6 md:mb-8 text-xl md:text-2xl lg:text-3xl text-white/90 font-medium">
             {language === "es"
               ? "Estamos trabajando en esta funcionalidad avanzada que permitirá:"
@@ -64,9 +66,11 @@ export default function AdvancedIngestionPage() {
             ))}
           </ul>
         </div>
+      </section>
 
-        {/* Third Card: Notice */}
-        <div className="w-full max-w-6xl mx-auto card rounded-2xl border border-white/40 bg-gradient-to-r from-[var(--anclora-primary)]/15 to-[var(--anclora-secondary)]/10 p-4 md:p-6 lg:p-8 text-center backdrop-blur-md dark:border-slate-700 dark:from-slate-800/70 dark:to-slate-900/70">
+      <section className="w-full max-w-6xl mx-auto card relative overflow-hidden bg-gradient-to-r from-[var(--anclora-primary)]/15 to-[var(--anclora-secondary)]/10 dark:from-slate-800/70 dark:to-slate-900/70 p-4 md:p-6 lg:p-8 shadow-xl backdrop-blur-md">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent dark:from-white/5" />
+        <div className="relative text-center">
           <p className="flex items-center justify-center gap-3 md:gap-4 text-lg md:text-xl lg:text-2xl text-white">
             <span className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full bg-gradient-to-r from-[var(--anclora-primary)] to-[var(--anclora-secondary)] text-base md:text-lg font-bold text-white">
               i
@@ -76,7 +80,7 @@ export default function AdvancedIngestionPage() {
               : "This page will be available soon with all advanced ingestion features."}
           </p>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
