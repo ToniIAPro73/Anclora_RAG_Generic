@@ -188,6 +188,7 @@ export default function DocumentosPage() {
 
       setTimeout(() => setNotification(null), 3000);
     } catch (err) {
+      console.error("Error deleting document:", err);
       setNotification({
         type: "error",
         message: COPY.deleteError[language],
@@ -235,6 +236,7 @@ export default function DocumentosPage() {
 
       setTimeout(() => setNotification(null), 5000);
     } catch (err) {
+      console.error("Error deleting all documents:", err);
       setNotification({
         type: "error",
         message: COPY.deleteAllError[language],
