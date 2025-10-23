@@ -123,7 +123,7 @@ const COPY = {
   },
 };
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 type SortField = "filename" | "uploaded_at" | null;
 type SortDirection = "asc" | "desc";
@@ -363,12 +363,12 @@ export default function DocumentosPage() {
 
   return (
     <div
-      className="container-app flex flex-col space-y-2 py-2"
+      className="container-app flex flex-col space-y-0.5 py-0.5"
       style={{ minHeight: "calc(100vh - 80px)" }}
     >
       {notification && (
         <div
-          className={`rounded-lg border p-3 text-sm shadow-md ${
+          className={`rounded-lg border p-2 text-sm shadow-md ${
             notification.type === "success"
               ? "border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400"
               : "border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400"
@@ -379,16 +379,16 @@ export default function DocumentosPage() {
       )}
 
       <div className="panel panel-primary flex flex-col flex-1">
-        <div className="border-b border-gray-100 pb-2 dark:border-slate-700">
+        <div className="border-b border-gray-100 pb-0.5 dark:border-slate-700">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h1 className="card-header flex items-center gap-2 text-lg">
-                <span className="text-lg" role="img" aria-hidden>
+              <h1 className="card-header flex items-center gap-2 text-base">
+                <span className="text-base" role="img" aria-hidden>
                   📚
                 </span>
                 {COPY.title[language]}
               </h1>
-              <p className="mt-0.5 text-xs text-gray-600 dark:text-slate-400">
+              <p className="mt-0 text-xs text-gray-600 dark:text-slate-400">
                 {COPY.subtitle[language]}
               </p>
             </div>
@@ -411,14 +411,14 @@ export default function DocumentosPage() {
 
         {/* Search and Export */}
         {!isLoading && !error && documents.length > 0 && (
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-0.5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={COPY.search[language]}
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:border-anclora-primary focus:outline-none focus:ring-2 focus:ring-anclora-primary/50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-400"
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-1 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:border-anclora-primary focus:outline-none focus:ring-2 focus:ring-anclora-primary/50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-400"
               />
               <svg
                 className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
@@ -437,7 +437,7 @@ export default function DocumentosPage() {
             <div className="flex gap-2">
               <button
                 onClick={handleExportCSV}
-                className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 <svg
                   className="h-3.5 w-3.5"
@@ -456,7 +456,7 @@ export default function DocumentosPage() {
               </button>
               <button
                 onClick={handleDeleteAll}
-                className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 <svg
                   className="h-3.5 w-3.5"
@@ -477,25 +477,25 @@ export default function DocumentosPage() {
           </div>
         )}
 
-        <div className="mt-2">
+        <div className="mt-0.5">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
+            <div className="flex items-center justify-center py-4">
               <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
               <span className="ml-3 text-sm text-gray-600 dark:text-slate-300">
                 {COPY.loading[language]}
               </span>
             </div>
           ) : error ? (
-            <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400">
+            <div className="rounded-lg border border-red-300 bg-red-50 p-2 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400">
               {error}
             </div>
           ) : documents.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
               <span className="mb-2 block text-2xl">📄</span>
               <p className="text-sm">{COPY.empty[language]}</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
               <span className="mb-2 block text-2xl">🔍</span>
               <p className="text-sm">{COPY.noResults[language]}</p>
             </div>
@@ -505,13 +505,13 @@ export default function DocumentosPage() {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
                   <thead className="sticky top-0 bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700">
                     <tr>
-                      <th className="px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-2 py-0.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         <button
                           onClick={() => handleSort("filename")}
-                          className="flex items-center gap-1.5 hover:text-anclora-primary transition-colors"
+                          className="flex items-center gap-1 hover:text-anclora-primary transition-colors"
                         >
                           {COPY.filename[language]}
-                          <span className="text-sm">
+                          <span className="text-xs">
                             {sortField === "filename" ? (
                               sortDirection === "asc" ? (
                                 "▲"
@@ -526,16 +526,16 @@ export default function DocumentosPage() {
                           </span>
                         </button>
                       </th>
-                      <th className="px-3 py-1.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-2 py-0.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.chunks[language]}
                       </th>
-                      <th className="px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-2 py-0.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         <button
                           onClick={() => handleSort("uploaded_at")}
-                          className="flex items-center gap-1.5 hover:text-anclora-primary transition-colors"
+                          className="flex items-center gap-1 hover:text-anclora-primary transition-colors"
                         >
                           {COPY.uploadedAt[language]}
-                          <span className="text-sm">
+                          <span className="text-xs">
                             {sortField === "uploaded_at" ? (
                               sortDirection === "asc" ? (
                                 "▲"
@@ -550,7 +550,7 @@ export default function DocumentosPage() {
                           </span>
                         </button>
                       </th>
-                      <th className="px-3 py-1.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-2 py-0.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.actions[language]}
                       </th>
                     </tr>
@@ -561,21 +561,23 @@ export default function DocumentosPage() {
                         key={doc.id}
                         className="transition-colors hover:bg-purple-50/30 dark:hover:bg-slate-800"
                       >
-                        <td className="px-3 py-1.5 text-sm text-gray-900 dark:text-slate-200">
+                        <td className="px-2 py-0.5 text-sm text-gray-900 dark:text-slate-200">
                           <div className="flex items-center">
-                            <span className="mr-2 text-base">📄</span>
-                            <span className="font-medium">{doc.filename}</span>
+                            <span className="mr-2 text-sm">📄</span>
+                            <span className="font-medium text-xs">
+                              {doc.filename}
+                            </span>
                           </div>
                         </td>
-                        <td className="px-3 py-1.5 text-center text-sm">
+                        <td className="px-2 py-0.5 text-center text-sm">
                           <span className="inline-flex items-center rounded-full bg-anclora-primary/10 px-2 py-0.5 text-xs font-semibold text-anclora-primary dark:bg-anclora-primary/20 dark:text-blue-400">
                             {doc.chunks}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-1.5 text-sm text-gray-600 dark:text-slate-400">
+                        <td className="whitespace-nowrap px-2 py-0.5 text-xs text-gray-600 dark:text-slate-400">
                           {doc.uploaded_at ? formatDate(doc.uploaded_at) : "-"}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-1.5 text-center text-sm">
+                        <td className="whitespace-nowrap px-2 py-0.5 text-center text-sm">
                           <div className="flex items-center justify-center gap-1">
                             <button
                               onClick={() =>
@@ -601,8 +603,8 @@ export default function DocumentosPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-slate-700">
-                  <div className="text-sm text-gray-500 dark:text-slate-400">
+                <div className="mt-1 flex items-center justify-between border-t border-gray-200 pt-1 dark:border-slate-700">
+                  <div className="text-xs text-gray-500 dark:text-slate-400">
                     {COPY.showing[language](
                       (currentPage - 1) * ITEMS_PER_PAGE + 1,
                       Math.min(
@@ -612,11 +614,11 @@ export default function DocumentosPage() {
                       filteredDocuments.length
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                      className="rounded-lg border border-gray-300 px-2 py-0.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                       {COPY.previous[language]}
                     </button>
@@ -637,11 +639,13 @@ export default function DocumentosPage() {
                           return (
                             <div key={page} className="flex items-center gap-1">
                               {showEllipsis && (
-                                <span className="px-2 text-gray-400">...</span>
+                                <span className="px-1 text-gray-400 text-xs">
+                                  ...
+                                </span>
                               )}
                               <button
                                 onClick={() => setCurrentPage(page)}
-                                className={`h-10 w-10 rounded-lg text-sm font-medium transition-colors ${
+                                className={`h-6 w-6 rounded-lg text-xs font-medium transition-colors ${
                                   currentPage === page
                                     ? "bg-anclora-primary text-white"
                                     : "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -658,7 +662,7 @@ export default function DocumentosPage() {
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
                       disabled={currentPage === totalPages}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                      className="rounded-lg border border-gray-300 px-2 py-0.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                       {COPY.next[language]}
                     </button>
