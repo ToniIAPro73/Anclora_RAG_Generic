@@ -603,7 +603,7 @@ export default function DocumentosPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="mt-1 flex items-center justify-between border-t border-gray-200 pt-1 dark:border-slate-700">
+                <div className="mt-0.5 flex items-center justify-between border-t border-gray-200 pt-0.5 dark:border-slate-700">
                   <div className="text-xs text-gray-500 dark:text-slate-400">
                     {COPY.showing[language](
                       (currentPage - 1) * ITEMS_PER_PAGE + 1,
