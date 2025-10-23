@@ -24,7 +24,7 @@ export default function AdvancedIngestionPage() {
     <div className="container-app space-y-6 py-6">
       {/* Header section */}
       <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
-        <div className="text-center space-y-3">
+        <div className="text-left space-y-3">
           <h1 className="text-3xl font-semibold text-gray-900 dark:text-slate-100">
             {language === "es" ? "Ingesta Avanzada" : "Advanced Ingestion"}
           </h1>
@@ -38,7 +38,7 @@ export default function AdvancedIngestionPage() {
 
       {/* Features section */}
       <section className="card bg-white dark:bg-slate-800 p-6 shadow-md">
-        <div className="text-center space-y-6">
+        <div className="text-left space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
             {language === "es"
               ? "Estamos trabajando en esta funcionalidad avanzada que permitirá:"
@@ -62,8 +62,8 @@ export default function AdvancedIngestionPage() {
 
       {/* Coming soon section */}
       <section className="card bg-anclora-primary/10 dark:bg-slate-800/50 p-6 shadow-md border-2 border-anclora-primary/20">
-        <div className="text-center">
-          <p className="flex items-center justify-center gap-3 text-anclora-primary dark:text-anclora-secondary">
+        <div className="text-left">
+          <p className="flex items-center gap-3 text-anclora-primary dark:text-anclora-secondary">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-anclora-primary text-white text-sm font-bold">
               i
             </span>
