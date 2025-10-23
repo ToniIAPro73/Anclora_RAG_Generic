@@ -7,9 +7,12 @@ import { getDocumentHistory, DocumentHistoryItem } from "@/lib/api";
 import { useUISettings } from "@/components/ui-settings-context";
 
 // Lazy load the DocumentViewerModal since it's only used on demand
-const DocumentViewerModal = dynamic(() => import("@/components/DocumentViewerModal"), {
-  ssr: false,
-});
+const DocumentViewerModal = dynamic(
+  () => import("@/components/DocumentViewerModal"),
+  {
+    ssr: false,
+  }
+);
 
 const COPY = {
   title: {
@@ -61,8 +64,10 @@ const COPY = {
     en: "Loading documents...",
   },
   confirmDelete: {
-    es: (filename: string) => `¿Estás seguro de eliminar "${filename}"? Esta acción no se puede deshacer.`,
-    en: (filename: string) => `Are you sure you want to delete "${filename}"? This action cannot be undone.`,
+    es: (filename: string) =>
+      `¿Estás seguro de eliminar "${filename}"? Esta acción no se puede deshacer.`,
+    en: (filename: string) =>
+      `Are you sure you want to delete "${filename}"? This action cannot be undone.`,
   },
   deleteSuccess: {
     es: "Documento eliminado correctamente",
@@ -89,16 +94,20 @@ const COPY = {
     en: "Are you ABSOLUTELY sure you want to delete ALL documents from the RAG? This action CANNOT BE UNDONE and will permanently erase your entire knowledge base.",
   },
   deleteAllSuccess: {
-    es: (count: number) => `Se eliminaron exitosamente ${count} chunks de la base de conocimiento`,
-    en: (count: number) => `Successfully deleted ${count} chunks from the knowledge base`,
+    es: (count: number) =>
+      `Se eliminaron exitosamente ${count} chunks de la base de conocimiento`,
+    en: (count: number) =>
+      `Successfully deleted ${count} chunks from the knowledge base`,
   },
   deleteAllError: {
     es: "Error al eliminar todos los documentos",
     en: "Error deleting all documents",
   },
   showing: {
-    es: (start: number, end: number, total: number) => `Mostrando ${start}-${end} de ${total}`,
-    en: (start: number, end: number, total: number) => `Showing ${start}-${end} of ${total}`,
+    es: (start: number, end: number, total: number) =>
+      `Mostrando ${start}-${end} de ${total}`,
+    en: (start: number, end: number, total: number) =>
+      `Showing ${start}-${end} of ${total}`,
   },
   previous: {
     es: "Anterior",
@@ -158,7 +167,7 @@ export default function DocumentosPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       // URL encode the document ID to handle special characters
       const encodedId = encodeURIComponent(String(docId));
       const response = await fetch(`${apiUrl}/documents/${encodedId}`, {
@@ -193,9 +202,10 @@ export default function DocumentosPage() {
     }
 
     // Double confirmation for safety
-    const secondConfirm = language === "es"
-      ? "Escribe 'ELIMINAR TODO' para confirmar:"
-      : "Type 'DELETE ALL' to confirm:";
+    const secondConfirm =
+      language === "es"
+        ? "Escribe 'ELIMINAR TODO' para confirmar:"
+        : "Type 'DELETE ALL' to confirm:";
     const confirmText = language === "es" ? "ELIMINAR TODO" : "DELETE ALL";
 
     const userInput = prompt(secondConfirm);
@@ -204,7 +214,7 @@ export default function DocumentosPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const response = await fetch(`${apiUrl}/documents`, {
         method: "DELETE",
       });
@@ -302,7 +312,11 @@ export default function DocumentosPage() {
 
     // Escape cells that contain separator, quotes, or newlines
     const escapeCsvCell = (cell: string) => {
-      if (cell.includes(separator) || cell.includes('"') || cell.includes("\n")) {
+      if (
+        cell.includes(separator) ||
+        cell.includes('"') ||
+        cell.includes("\n")
+      ) {
         return `"${cell.replace(/"/g, '""')}"`;
       }
       return cell;
@@ -315,12 +329,17 @@ export default function DocumentosPage() {
 
     // Add UTF-8 BOM for proper encoding in Excel
     const BOM = "\uFEFF";
-    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([BOM + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", `documents_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute(
+      "download",
+      `documents_${new Date().toISOString().split("T")[0]}.csv`
+    );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -328,17 +347,23 @@ export default function DocumentosPage() {
   };
 
   const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString(language === "es" ? "es-ES" : "en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return new Date(timestamp).toLocaleString(
+      language === "es" ? "es-ES" : "en-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    );
   };
 
   return (
-    <div className="container-app flex flex-col space-y-3 py-4" style={{ minHeight: 'calc(100vh - 100px)' }}>
+    <div
+      className="container-app flex flex-col space-y-2 py-2"
+      style={{ minHeight: "calc(100vh - 80px)" }}
+    >
       {notification && (
         <div
           className={`rounded-lg border p-3 text-sm shadow-md ${
@@ -352,29 +377,29 @@ export default function DocumentosPage() {
       )}
 
       <div className="panel panel-primary flex flex-col flex-1">
-        <div className="border-b border-gray-100 pb-3 dark:border-slate-700">
+        <div className="border-b border-gray-100 pb-2 dark:border-slate-700">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h1 className="card-header flex items-center gap-2 text-xl">
-                <span className="text-xl" role="img" aria-hidden>
+              <h1 className="card-header flex items-center gap-2 text-lg">
+                <span className="text-lg" role="img" aria-hidden>
                   📚
                 </span>
                 {COPY.title[language]}
               </h1>
-              <p className="mt-1 text-xs text-gray-600 dark:text-slate-400">
+              <p className="mt-0.5 text-xs text-gray-600 dark:text-slate-400">
                 {COPY.subtitle[language]}
               </p>
             </div>
             <div className="flex gap-2 flex-shrink-0">
               <button
                 onClick={() => router.push("/")}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 hover:border-anclora-primary/30 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 hover:border-anclora-primary/30 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 {COPY.back[language]}
               </button>
               <button
                 onClick={loadHistory}
-                className="rounded-lg bg-anclora-secondary px-3 py-1.5 text-sm text-white transition-opacity hover:opacity-90"
+                className="rounded-lg bg-anclora-secondary px-3 py-1 text-sm text-white transition-opacity hover:opacity-90"
               >
                 {COPY.refresh[language]}
               </button>
@@ -384,7 +409,7 @@ export default function DocumentosPage() {
 
         {/* Search and Export */}
         {!isLoading && !error && documents.length > 0 && (
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1">
               <input
                 type="text"
@@ -450,9 +475,9 @@ export default function DocumentosPage() {
           </div>
         )}
 
-        <div className="mt-3">
+        <div className="mt-2">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-8">
               <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-anclora-primary"></div>
               <span className="ml-3 text-sm text-gray-600 dark:text-slate-300">
                 {COPY.loading[language]}
@@ -463,13 +488,13 @@ export default function DocumentosPage() {
               {error}
             </div>
           ) : documents.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
-              <span className="mb-3 block text-3xl">📄</span>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+              <span className="mb-2 block text-2xl">📄</span>
               <p className="text-sm">{COPY.empty[language]}</p>
             </div>
           ) : filteredDocuments.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
-              <span className="mb-3 block text-3xl">🔍</span>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+              <span className="mb-2 block text-2xl">🔍</span>
               <p className="text-sm">{COPY.noResults[language]}</p>
             </div>
           ) : (
@@ -478,7 +503,7 @@ export default function DocumentosPage() {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
                   <thead className="sticky top-0 bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         <button
                           onClick={() => handleSort("filename")}
                           className="flex items-center gap-1.5 hover:text-anclora-primary transition-colors"
@@ -486,17 +511,23 @@ export default function DocumentosPage() {
                           {COPY.filename[language]}
                           <span className="text-sm">
                             {sortField === "filename" ? (
-                              sortDirection === "asc" ? "▲" : "▼"
+                              sortDirection === "asc" ? (
+                                "▲"
+                              ) : (
+                                "▼"
+                              )
                             ) : (
-                              <span className="opacity-50 dark:opacity-70">⇅</span>
+                              <span className="opacity-50 dark:opacity-70">
+                                ⇅
+                              </span>
                             )}
                           </span>
                         </button>
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-3 py-1.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.chunks[language]}
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         <button
                           onClick={() => handleSort("uploaded_at")}
                           className="flex items-center gap-1.5 hover:text-anclora-primary transition-colors"
@@ -504,14 +535,20 @@ export default function DocumentosPage() {
                           {COPY.uploadedAt[language]}
                           <span className="text-sm">
                             {sortField === "uploaded_at" ? (
-                              sortDirection === "asc" ? "▲" : "▼"
+                              sortDirection === "asc" ? (
+                                "▲"
+                              ) : (
+                                "▼"
+                              )
                             ) : (
-                              <span className="opacity-50 dark:opacity-70">⇅</span>
+                              <span className="opacity-50 dark:opacity-70">
+                                ⇅
+                              </span>
                             )}
                           </span>
                         </button>
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
+                      <th className="px-3 py-1.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-slate-200">
                         {COPY.actions[language]}
                       </th>
                     </tr>
@@ -522,31 +559,33 @@ export default function DocumentosPage() {
                         key={doc.id}
                         className="transition-colors hover:bg-purple-50/30 dark:hover:bg-slate-800"
                       >
-                        <td className="px-4 py-2.5 text-sm text-gray-900 dark:text-slate-200">
+                        <td className="px-3 py-1.5 text-sm text-gray-900 dark:text-slate-200">
                           <div className="flex items-center">
                             <span className="mr-2 text-base">📄</span>
                             <span className="font-medium">{doc.filename}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-2.5 text-center text-sm">
-                          <span className="inline-flex items-center rounded-full bg-anclora-primary/10 px-3 py-1 text-sm font-semibold text-anclora-primary dark:bg-anclora-primary/20 dark:text-blue-400">
+                        <td className="px-3 py-1.5 text-center text-sm">
+                          <span className="inline-flex items-center rounded-full bg-anclora-primary/10 px-2 py-0.5 text-xs font-semibold text-anclora-primary dark:bg-anclora-primary/20 dark:text-blue-400">
                             {doc.chunks}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-2.5 text-sm text-gray-600 dark:text-slate-400">
+                        <td className="whitespace-nowrap px-3 py-1.5 text-sm text-gray-600 dark:text-slate-400">
                           {doc.uploaded_at ? formatDate(doc.uploaded_at) : "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-2.5 text-center text-sm">
-                          <div className="flex items-center justify-center gap-1.5">
+                        <td className="whitespace-nowrap px-3 py-1.5 text-center text-sm">
+                          <div className="flex items-center justify-center gap-1">
                             <button
-                              onClick={() => setViewerDocumentId(String(doc.id))}
-                              className="rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                              onClick={() =>
+                                setViewerDocumentId(String(doc.id))
+                              }
+                              className="rounded border border-blue-300 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
                             >
                               {COPY.view[language]}
                             </button>
                             <button
                               onClick={() => handleDelete(doc.id, doc.filename)}
-                              className="rounded-lg border border-red-300 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                              className="rounded border border-red-300 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
                             >
                               {COPY.delete[language]}
                             </button>
@@ -558,66 +597,72 @@ export default function DocumentosPage() {
                 </table>
               </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4 dark:border-slate-700">
-                <div className="text-sm text-gray-500 dark:text-slate-400">
-                  {COPY.showing[language](
-                    (currentPage - 1) * ITEMS_PER_PAGE + 1,
-                    Math.min(currentPage * ITEMS_PER_PAGE, filteredDocuments.length),
-                    filteredDocuments.length
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-                  >
-                    {COPY.previous[language]}
-                  </button>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((page) => {
-                        // Show first, last, current, and adjacent pages
-                        return (
-                          page === 1 ||
-                          page === totalPages ||
-                          Math.abs(page - currentPage) <= 1
-                        );
-                      })
-                      .map((page, idx, arr) => {
-                        // Add ellipsis if there's a gap
-                        const showEllipsis = idx > 0 && page - arr[idx - 1] > 1;
-                        return (
-                          <div key={page} className="flex items-center gap-1">
-                            {showEllipsis && (
-                              <span className="px-2 text-gray-400">...</span>
-                            )}
-                            <button
-                              onClick={() => setCurrentPage(page)}
-                              className={`h-10 w-10 rounded-lg text-sm font-medium transition-colors ${
-                                currentPage === page
-                                  ? "bg-anclora-primary text-white"
-                                  : "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          </div>
-                        );
-                      })}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-slate-700">
+                  <div className="text-sm text-gray-500 dark:text-slate-400">
+                    {COPY.showing[language](
+                      (currentPage - 1) * ITEMS_PER_PAGE + 1,
+                      Math.min(
+                        currentPage * ITEMS_PER_PAGE,
+                        filteredDocuments.length
+                      ),
+                      filteredDocuments.length
+                    )}
                   </div>
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-                  >
-                    {COPY.next[language]}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      {COPY.previous[language]}
+                    </button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter((page) => {
+                          // Show first, last, current, and adjacent pages
+                          return (
+                            page === 1 ||
+                            page === totalPages ||
+                            Math.abs(page - currentPage) <= 1
+                          );
+                        })
+                        .map((page, idx, arr) => {
+                          // Add ellipsis if there's a gap
+                          const showEllipsis =
+                            idx > 0 && page - arr[idx - 1] > 1;
+                          return (
+                            <div key={page} className="flex items-center gap-1">
+                              {showEllipsis && (
+                                <span className="px-2 text-gray-400">...</span>
+                              )}
+                              <button
+                                onClick={() => setCurrentPage(page)}
+                                className={`h-10 w-10 rounded-lg text-sm font-medium transition-colors ${
+                                  currentPage === page
+                                    ? "bg-anclora-primary text-white"
+                                    : "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            </div>
+                          );
+                        })}
+                    </div>
+                    <button
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      {COPY.next[language]}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             </>
           )}
         </div>
